@@ -269,7 +269,7 @@ void DofProc(
     static RegistryFloat near_kernel( "dof.near_kernel", 5.0f );
     static RegistryFloat far_kernel( "dof.far_kernel", 15.0f );
     static RegistryFloat focal_plane_start( "dof.focal_plane_start", 40.0f );
-    static RegistryFloat focal_plane_end( "dof.focal_plane_end", 400.0f );
+    static RegistryFloat focal_plane_end( "dof.focal_plane_end", 150.0f );
     static RegistryFloat dof_near_pow( "dof.near_pow", 4.0f );
     static RegistryFloat coc_near_blend( "dof.coc_blend", 0.0f );
 
