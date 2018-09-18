@@ -20,7 +20,7 @@ Finally, as I mentioned this is a big work in progress - you can see the todo li
 Pressing space bar will toggle through different camera shots
 Camera can be translated via W,A,S,D and rotated with Left Click + Mouse
 
-## Console Commands
+## Console Commands - Press tilde (~) to toggle the console
 * dof.enable               1 or 0 (Enables or Disables DOF)
 * dof.near_kernel          Size of the near kernel, 1 to 5 are reasonable values with no artifacts
 * dof.far_kernel           Size of the far kernel, 1 to 21 are reasonable values with no artifacts
