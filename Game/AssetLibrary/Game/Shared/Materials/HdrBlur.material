@@ -1,0 +1,39 @@
+Type=Compute   #global for the full material
+
+#copy to pow2
+Pass=HdrCopy
+Shader=3C2BE49D-55EC-48D1-AF54-EFCFE7679B1E #Float3Copy.shader
+
+inTexture<SrvBuffer>=MainHDRTarget
+outTexture<UavBuffer>=HdrMip0
+
+GroupSizeTarget=MainHDRTarget
+GroupDiv=8,8
+
+
+Pass=HdrCreateMip
+Shader=B2E90924-EE57-4471-BB2E-900ADC5393B4    #Float3Mip.shader
+
+$SOURCE<SrvBuffer>=NULL
+$DEST<UavBuffer>=NULL
+
+$SOURCE<filter>=Bilinear
+$SOURCE<address>=Clamp
+
+GroupSizeTarget=NULL
+GroupDiv=8,8
+
+
+Pass=HdrBlur
+Shader=31EE46D6-8956-4439-B9CF-46D1EA71AED3 #HdrBlur.shader
+
+$SOURCE<SrvBuffer>=NULL
+$DEST<UavBuffer>=NULL
+
+$SOURCE<filter>=Bilinear
+$SOURCE<address>=Clamp
+
+params<float4>=$PARAMS
+
+GroupSizeTarget=NULL
+GroupDiv=8,8

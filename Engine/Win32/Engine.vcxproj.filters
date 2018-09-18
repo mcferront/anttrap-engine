@@ -1,0 +1,1117 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\AudioWorld.cpp">
+      <Filter>Worlds</Filter>
+    </ClCompile>
+    <ClCompile Include="..\AnimationWorld.cpp">
+      <Filter>Worlds</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Animation3dComponent.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Animation2dComponent.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\AnimAsset.cpp">
+      <Filter>Assets</Filter>
+    </ClCompile>
+    <ClCompile Include="..\AnimatedObject.cpp">
+      <Filter>Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\AnimatedTexture.cpp">
+      <Filter>Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Animation2dComposite.cpp">
+      <Filter>Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Animation3d.cpp">
+      <Filter>Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Animation3dComposite.cpp">
+      <Filter>Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Asset.cpp">
+      <Filter>Assets</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Button.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ButtonComponent.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\CharacterProxyComponent.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\CharacterProxy.cpp">
+      <Filter>Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\CollisionComponent.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\CollisionHandler.cpp">
+      <Filter>Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\CollisionObject.cpp">
+      <Filter>Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\CollisionPlane.cpp">
+      <Filter>Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\CollisionSphere.cpp">
+      <Filter>Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Component.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DefaultRenderer.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\AllocSig.cpp">
+      <Filter>Memory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Channel.cpp">
+      <Filter>Channel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ChannelSystem.cpp">
+      <Filter>Channel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\CompressedStreams.cpp">
+      <Filter>IO</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Camera.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Database.cpp">
+      <Filter>IO</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DebugGraphics.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DirectX9\Dx9.cpp">
+      <Filter>Rendering\DX9</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DirectX9\Dx9Material.cpp">
+      <Filter>Rendering\DX9</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DirectX9\Dx9Shader.cpp">
+      <Filter>Rendering\DX9</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DirectX9\Dx9VertexBuffer.cpp">
+      <Filter>Rendering\DX9</Filter>
+    </ClCompile>
+    <ClCompile Include="..\EnginePch.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Debug.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\FileStreams.cpp">
+      <Filter>IO</Filter>
+    </ClCompile>
+    <ClCompile Include="..\GenericMemoryAllocator.cpp">
+      <Filter>Memory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Geometry.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\OpenGL\GlMaterial.cpp">
+      <Filter>Rendering\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\OpenGL\GlVertexBuffer.cpp">
+      <Filter>Rendering\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\OpenGL\GlShader.cpp">
+      <Filter>Rendering\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\InputSystem.cpp">
+      <Filter>Input</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Linux\LinuxThread.cpp">
+      <Filter>Utility\Linux</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Log.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Line.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LuaObject.cpp">
+      <Filter>Scripting</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LuaVM.cpp">
+      <Filter>Scripting</Filter>
+    </ClCompile>
+    <ClCompile Include="..\MemoryAllocation.cpp">
+      <Filter>Memory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\MemoryHeap.cpp">
+      <Filter>Memory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\MemoryManager.cpp">
+      <Filter>Memory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Localization.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\PhysicsWorld.cpp">
+      <Filter>Worlds</Filter>
+    </ClCompile>
+    <ClCompile Include="..\PhysicsObject.cpp">
+      <Filter>Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\RigidBody.cpp">
+      <Filter>Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\RigidBodyComponent.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\RegistryWorld.cpp">
+      <Filter>Worlds</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Proxy.cpp">
+      <Filter>LiveUpdate</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Quad.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\PipeStreams.cpp">
+      <Filter>LiveUpdate</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Raycast.cpp">
+      <Filter>Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\RenderObject.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Renderer.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\RenderTree.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\RenderWorld.cpp">
+      <Filter>Worlds</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Resource.cpp">
+      <Filter>Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ResourceMaps.cpp">
+      <Filter>Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ResourceWorld.cpp">
+      <Filter>Worlds</Filter>
+    </ClCompile>
+    <ClCompile Include="..\RingBuffer.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ISearchable.cpp">
+      <Filter>Interfaces</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TcpIpPipe.cpp">
+      <Filter>LiveUpdate</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TcpIpStream.cpp">
+      <Filter>LiveUpdate</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SpriteComponent.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TouchComponent.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\VideoComponent.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TextArea.cpp">
+      <Filter>UI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Socket.cpp">
+      <Filter>LiveUpdate</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Skeleton.cpp">
+      <Filter>Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Sprite.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\StringPool.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Timer.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Window.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\UtilityClock.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\UtilityMath.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="Win32MemoryAllocator.cpp">
+      <Filter>Memory\Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\WavAsset.cpp">
+      <Filter>Assets</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TouchWorld.cpp">
+      <Filter>Worlds</Filter>
+    </ClCompile>
+    <ClCompile Include="..\VectorController.cpp">
+      <Filter>Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\FloatController.cpp">
+      <Filter>Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="Win32Window.cpp">
+      <Filter>Rendering\Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Viewport.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="Win32VideoPlayer.cpp">
+      <Filter>Video\Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="Win32VideoSurface.cpp">
+      <Filter>Video\Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="Win32Thread.cpp">
+      <Filter>Utility\Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Serializer.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SearchHierarchy.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TouchEvent.cpp">
+      <Filter>Touch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TouchObject.cpp">
+      <Filter>Touch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ScriptComponent.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SystemId.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\MemoryStreams.cpp">
+      <Filter>IO</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LuaMathModule.cxx">
+      <Filter>Scripting</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LuaScriptInstance.cpp">
+      <Filter>Scripting</Filter>
+    </ClCompile>
+    <ClCompile Include="..\IRenderModifier.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ParticleEmitter.cpp">
+      <Filter>Effects</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ParticleWorld.cpp">
+      <Filter>Effects</Filter>
+    </ClCompile>
+    <ClCompile Include="..\CameraComponent.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LightComponent.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SceneAsset.cpp">
+      <Filter>Assets</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SplineAsset.cpp">
+      <Filter>Assets</Filter>
+    </ClCompile>
+    <ClCompile Include="..\SplineComponent.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\CollisionMesh.cpp">
+      <Filter>Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\CollisionTrigger.cpp">
+      <Filter>Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DataAsset.cpp">
+      <Filter>Assets</Filter>
+    </ClCompile>
+    <ClCompile Include="..\FbxAsset.cpp">
+      <Filter>Assets</Filter>
+    </ClCompile>
+    <ClCompile Include="..\FontAsset.cpp">
+      <Filter>Assets</Filter>
+    </ClCompile>
+    <ClCompile Include="..\FontMapAsset.cpp">
+      <Filter>Assets</Filter>
+    </ClCompile>
+    <ClCompile Include="..\FrameMapAsset.cpp">
+      <Filter>Assets</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LuaAsset.cpp">
+      <Filter>Assets</Filter>
+    </ClCompile>
+    <ClCompile Include="..\RegistryAsset.cpp">
+      <Filter>Assets</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TextureAsset.cpp">
+      <Filter>Assets</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ColliderAsset.cpp">
+      <Filter>Assets</Filter>
+    </ClCompile>
+    <ClCompile Include="..\MeshAsset.cpp">
+      <Filter>Assets</Filter>
+    </ClCompile>
+    <ClCompile Include="..\MeshRendererComponent.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ShapeRendererComponent.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Node.cpp">
+      <Filter>Node</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LuaCoreBind.cxx">
+      <Filter>Scripting</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LuaCoreModule.cpp">
+      <Filter>Scripting</Filter>
+    </ClCompile>
+    <ClCompile Include="..\BezierSpline.cpp">
+      <Filter>Splines</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Light.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\RenderableShape.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\RenderableMesh.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LabelComponent.cpp">
+      <Filter>Components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\HashFunctions.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DirectX12\Dx12.cpp">
+      <Filter>Rendering\DX12</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DirectX12\Dx12Shader.cpp">
+      <Filter>Rendering\DX12</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DirectX12\Dx12Material.cpp">
+      <Filter>Rendering\DX12</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DirectX12\Dx12Texture.cpp">
+      <Filter>Rendering\DX12</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DirectX12\Dx12VideoPlayer.cpp">
+      <Filter>Rendering\DX12</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DirectX12\Dx12VertexBuffer.cpp">
+      <Filter>Rendering\DX12</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Threads.cpp">
+      <Filter>Threading</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TaskWorld.cpp">
+      <Filter>Threading</Filter>
+    </ClCompile>
+    <ClCompile Include="..\CopyResourceRenderer.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ConvertToRenderer.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DirectX12\Dx12Contexts.cpp">
+      <Filter>Rendering\DX12</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DirectX12\Dx12MaterialObject.cpp">
+      <Filter>Rendering\DX12</Filter>
+    </ClCompile>
+    <ClCompile Include="..\FrameGrabRenderer.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\TextReader.cpp">
+      <Filter>IO</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ComputeNode.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DirectX12\Dx12ComputeMaterialObject.cpp">
+      <Filter>Rendering\DX12</Filter>
+    </ClCompile>
+    <ClCompile Include="..\MipGenNode.cpp">
+      <Filter>Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DirectX12\Dx12ExecuteIndirect.cpp">
+      <Filter>Rendering\DX12</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DirectX12\Dx12GpuProfiler.cpp">
+      <Filter>Rendering\DX12</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\AudioWorld.h">
+      <Filter>Worlds</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AnimationWorld.h">
+      <Filter>Worlds</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Animation3dComponent.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Animation2dComponent.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AnimAsset.h">
+      <Filter>Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AnimatedObject.h">
+      <Filter>Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AnimatedTexture.h">
+      <Filter>Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Animation3dComposite.h">
+      <Filter>Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Animation2dComposite.h">
+      <Filter>Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Animation3d.h">
+      <Filter>Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Asset.h">
+      <Filter>Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Button.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ButtonComponent.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CharacterProxyComponent.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CharacterProxy.h">
+      <Filter>Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CollisionComponent.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CollisionHandler.h">
+      <Filter>Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CollisionObject.h">
+      <Filter>Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CollisionPlane.h">
+      <Filter>Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CollisionSphere.h">
+      <Filter>Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Component.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ComponentType.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\DefaultRenderer.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\AllocSig.h">
+      <Filter>Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ChannelSystem.h">
+      <Filter>Channel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Channel.h">
+      <Filter>Channel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CompressedStreams.h">
+      <Filter>IO</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Camera.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Database.h">
+      <Filter>IO</Filter>
+    </ClInclude>
+    <ClInclude Include="..\DebugGraphics.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\DirectX9\Dx9VertexBuffer.h">
+      <Filter>Rendering\DX9</Filter>
+    </ClInclude>
+    <ClInclude Include="..\DirectX9\Dx9.h">
+      <Filter>Rendering\DX9</Filter>
+    </ClInclude>
+    <ClInclude Include="..\DirectX9\Dx9Material.h">
+      <Filter>Rendering\DX9</Filter>
+    </ClInclude>
+    <ClInclude Include="..\DirectX9\Dx9Shader.h">
+      <Filter>Rendering\DX9</Filter>
+    </ClInclude>
+    <ClInclude Include="..\EngineGlobal.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\EnginePch.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\EngineLibs.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Debug.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\BuildOptions.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FileStreams.h">
+      <Filter>IO</Filter>
+    </ClInclude>
+    <ClInclude Include="..\GenericMemoryAllocator.h">
+      <Filter>Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Geometry.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\HashTable.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\InputSystem.h">
+      <Filter>Input</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IOStreams.h">
+      <Filter>IO</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Lerp.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\List.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Log.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Line.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LuaObject.h">
+      <Filter>Scripting</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LuaVM.h">
+      <Filter>Scripting</Filter>
+    </ClInclude>
+    <ClInclude Include="..\MemoryAllocation.h">
+      <Filter>Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\MemoryAllocator.h">
+      <Filter>Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\MemoryHeap.h">
+      <Filter>Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\MemoryManager.h">
+      <Filter>Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Localization.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\MemoryPool.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\PhysicsWorld.h">
+      <Filter>Worlds</Filter>
+    </ClInclude>
+    <ClInclude Include="..\PhysicsObject.h">
+      <Filter>Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\RigidBody.h">
+      <Filter>Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\RigidBodyComponent.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\RegistryWorld.h">
+      <Filter>Worlds</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Proxy.h">
+      <Filter>LiveUpdate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Quad.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\PipeStreams.h">
+      <Filter>LiveUpdate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Raycast.h">
+      <Filter>Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\RenderObject.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\RenderTree.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Renderer.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\RenderWorld.h">
+      <Filter>Worlds</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ResourceType.h">
+      <Filter>Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Resource.h">
+      <Filter>Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ResourceMaps.h">
+      <Filter>Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ResourceWorld.h">
+      <Filter>Worlds</Filter>
+    </ClInclude>
+    <ClInclude Include="..\RingBuffer.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ISerializable.h">
+      <Filter>Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ISearchable.h">
+      <Filter>Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Identifiable.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TcpIpStream.h">
+      <Filter>LiveUpdate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TcpIpPipe.h">
+      <Filter>LiveUpdate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SpriteComponent.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TouchComponent.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\VideoComponent.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TextArea.h">
+      <Filter>UI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Socket.h">
+      <Filter>LiveUpdate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Skeleton.h">
+      <Filter>Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Sprite.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SystemId.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\StringPool.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Timer.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Window.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\UtilityString.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\UtilityClock.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\UtilityMath.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Stack.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\VertexBuffer.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Win32MemoryAllocator.h">
+      <Filter>Memory\Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="Win32Messages.h">
+      <Filter>Rendering\Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Types.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\WavAsset.h">
+      <Filter>Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TouchWorld.h">
+      <Filter>Worlds</Filter>
+    </ClInclude>
+    <ClInclude Include="..\VectorController.h">
+      <Filter>Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Filter.h">
+      <Filter>Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FloatController.h">
+      <Filter>Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Win32Window.h">
+      <Filter>Rendering\Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Viewport.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="Win32VideoSurface.h">
+      <Filter>Video\Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="Win32VideoPlayer.h">
+      <Filter>Video\Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="Win32Thread.h">
+      <Filter>Utility\Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Serializer.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SearchHierarchy.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\VideoPlayer.h">
+      <Filter>Video</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TouchObject.h">
+      <Filter>Touch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TouchEvent.h">
+      <Filter>Touch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ScriptComponent.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\MemoryStreams.h">
+      <Filter>IO</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LuaMathModule.h">
+      <Filter>Scripting</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ScriptInstance.h">
+      <Filter>Scripting</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LuaScriptInstance.h">
+      <Filter>Scripting</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IRenderModifier.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ParticleEmitter.h">
+      <Filter>Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ParticleWorld.h">
+      <Filter>Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CameraComponent.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LightComponent.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SceneAsset.h">
+      <Filter>Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SplineAsset.h">
+      <Filter>Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="..\SplineComponent.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CollisionMesh.h">
+      <Filter>Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CollisionTrigger.h">
+      <Filter>Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Node.h">
+      <Filter>Node</Filter>
+    </ClInclude>
+    <ClInclude Include="..\DataAsset.h">
+      <Filter>Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FbxAsset.h">
+      <Filter>Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FontAsset.h">
+      <Filter>Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FontMapAsset.h">
+      <Filter>Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FrameMapAsset.h">
+      <Filter>Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LuaAsset.h">
+      <Filter>Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="..\MaterialAsset.h">
+      <Filter>Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="..\RegistryAsset.h">
+      <Filter>Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ShaderAsset.h">
+      <Filter>Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TextureAsset.h">
+      <Filter>Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ColliderAsset.h">
+      <Filter>Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="..\MeshAsset.h">
+      <Filter>Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="..\MeshRendererComponent.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ShapeRendererComponent.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LuaCoreModule.h">
+      <Filter>Scripting</Filter>
+    </ClInclude>
+    <ClInclude Include="..\BezierSpline.h">
+      <Filter>Splines</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Light.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\RenderableShape.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\RenderableMesh.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LabelComponent.h">
+      <Filter>Components</Filter>
+    </ClInclude>
+    <ClInclude Include="..\HashFunctions.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="..\GraphicsApi.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\DirectX12\Dx12.h">
+      <Filter>Rendering\DX12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\DirectX12\Dx12Material.h">
+      <Filter>Rendering\DX12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\DirectX12\Dx12Shader.h">
+      <Filter>Rendering\DX12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\DirectX12\Dx12Texture.h">
+      <Filter>Rendering\DX12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\DirectX12\Dx12VertexBuffer.h">
+      <Filter>Rendering\DX12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Threads.h">
+      <Filter>Threading</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ThreadLocks.h">
+      <Filter>Threading</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TaskWorld.h">
+      <Filter>Threading</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CopyResourceRenderer.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ConvertToRenderer.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\DirectX12\Dx12Contexts.h">
+      <Filter>Rendering\DX12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\RenderContexts.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\MaterialObject.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\DirectX12\Dx12MaterialObject.h">
+      <Filter>Rendering\DX12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\FrameGrabRenderer.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\TextReader.h">
+      <Filter>IO</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ComputeNode.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\DirectX12\Dx12ComputeMaterialObject.h">
+      <Filter>Rendering\DX12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\MipGenNode.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\DirectX12\Dx12ExecuteIndirect.h">
+      <Filter>Rendering\DX12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ExecuteIndirect.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\GpuProfiler.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\DirectX12\Dx12GpuProfiler.h">
+      <Filter>Rendering\DX12</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\HashTable.inl">
+      <Filter>Utility</Filter>
+    </None>
+    <None Include="..\Lerp.inl">
+      <Filter>Utility</Filter>
+    </None>
+    <None Include="..\List.inl">
+      <Filter>Utility</Filter>
+    </None>
+    <None Include="..\MemoryPool.inl">
+      <Filter>Utility</Filter>
+    </None>
+    <None Include="..\UtilityMath.inl">
+      <Filter>Utility</Filter>
+    </None>
+    <None Include="..\Filter.inl">
+      <Filter>Animation</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Components">
+      <UniqueIdentifier>{eaa59050-3916-4630-a45a-1d35b0a5881f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Assets">
+      <UniqueIdentifier>{25453070-6d66-4b67-8285-ad73f462195c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Worlds">
+      <UniqueIdentifier>{82f85f49-d7ab-4da3-a13d-b09fa999b56c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Animation">
+      <UniqueIdentifier>{1db3a2b3-c7a2-44fc-b06e-0528036d36c3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI">
+      <UniqueIdentifier>{db9c4872-70fa-487c-a4d2-4144f548754f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Physics">
+      <UniqueIdentifier>{1919dcf9-67bd-408c-ba19-5242af3326c0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Memory">
+      <UniqueIdentifier>{8183c276-bcbd-4b59-8f30-0002931e3bc8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Channel">
+      <UniqueIdentifier>{761ab65e-fb72-4cb4-b5cf-70c7aa937b19}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="IO">
+      <UniqueIdentifier>{218ea176-bd8a-4268-a405-5765426b61f1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Rendering">
+      <UniqueIdentifier>{b7db11e7-3721-4312-aadc-eb7cb374d746}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Rendering\DX9">
+      <UniqueIdentifier>{afb4f1fd-b640-47ff-b362-c0e896b73a69}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Rendering\OpenGL">
+      <UniqueIdentifier>{93314f91-dc93-48ba-9df6-30202895b4ff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utility">
+      <UniqueIdentifier>{1a2b57f0-2001-47bc-8cd7-d4d1b8293d03}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="LiveUpdate">
+      <UniqueIdentifier>{58525a30-cf29-4c79-bcc4-5666f0d2014f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utility\iOS">
+      <UniqueIdentifier>{433e8325-9f3f-43da-8a95-d39f246b4c59}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Input">
+      <UniqueIdentifier>{a441934e-11d5-47f6-8e95-b52c2b587917}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Rendering\iOS">
+      <UniqueIdentifier>{9e1c762e-a399-4947-86d9-b203d6d076f2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utility\Linux">
+      <UniqueIdentifier>{4fc8f55a-fe36-42ca-b8c3-81d38f2c9e47}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource">
+      <UniqueIdentifier>{180138b3-92dd-449d-b25f-e39dc8a4cdad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Interfaces">
+      <UniqueIdentifier>{125db8e0-6401-4cac-8c40-4d7690e89da0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core">
+      <UniqueIdentifier>{6f405c11-7235-4ee6-b203-1aabc21a1009}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Rendering\Win32">
+      <UniqueIdentifier>{0b762d28-2dde-4433-a630-17a10d9b6a8e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Memory\Win32">
+      <UniqueIdentifier>{10faac6b-ad1d-4c70-a6c4-bb8f6a198360}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Video">
+      <UniqueIdentifier>{6f9b17aa-0796-446e-b798-54618e7a5aa0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Video\Win32">
+      <UniqueIdentifier>{15441734-2eed-407b-a4d4-742dd4d6aac6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utility\Win32">
+      <UniqueIdentifier>{292d4776-d93d-4bbe-90e2-95b35a3d741f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Touch">
+      <UniqueIdentifier>{7d66dbae-6a9c-45ed-8107-4c00720434a0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scripting">
+      <UniqueIdentifier>{7131fc42-35fa-4c9e-bc75-9599d46172a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Effects">
+      <UniqueIdentifier>{ac1a575f-3f53-4f7a-a203-2195de72736b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Splines">
+      <UniqueIdentifier>{1a55a9db-7788-4c5f-baba-18d778f086d8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Node">
+      <UniqueIdentifier>{b93f6a72-f4a5-4320-a199-afef4bb57845}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Rendering\DX12">
+      <UniqueIdentifier>{660e9468-38bb-49f5-9bda-3495de64aa25}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Threading">
+      <UniqueIdentifier>{fa1f3249-bd26-44a6-b9f5-290e900202e8}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <LUAI Include="..\LuaMathModule.i">
+      <Filter>Scripting</Filter>
+    </LUAI>
+    <LUAI Include="..\LuaCoreBind.i">
+      <Filter>Scripting</Filter>
+    </LUAI>
+  </ItemGroup>
+</Project>

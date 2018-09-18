@@ -1,0 +1,14 @@
+Type=Compute   #global for the full material
+
+Pass=Tonemapping
+Shader=6A889CA3-3181-4D91-BDF6-95206D1EF5F7                 #Luminance.shader
+
+inTexture<SrvBuffer>=MainHDRTarget
+exposure<UavBuffer>=Exposure
+#outTexture<UavBuffer>=LDRTarget
+
+GroupSizeTarget=LDRTarget
+GroupDiv=32,32
+
+#Groups=240,135,1
+

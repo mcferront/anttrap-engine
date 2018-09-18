@@ -1,0 +1,54 @@
+Type=Compute   #global for the full material
+
+Pass=HiZMipCopy
+Shader=1A637155-DA93-481B-9F04-78CCB6764841 #FloatCopyShader.shader
+
+inDepth<SrvBuffer>=DSBuffer
+outTexture<UavBuffer>=HiZMip0
+
+GroupSizeTarget=HiZMip0
+GroupDiv=8,8
+
+
+Pass=HiZMip
+Shader=73DD0285-C776-4415-AE4B-2BB7F8612C7D #HiZ.shader
+
+$SOURCE<SrvBuffer>=NULL
+$DEST<UavBuffer>=NULL
+
+GroupSizeTarget=$DEST
+GroupDiv=8,8
+
+
+Pass=SSR
+Shader=93FB349E-E6C0-4514-9D4D-C3C7EE7CBD01 #SSR.shader
+
+linearDepth<SrvBuffer>=HiZBuffer
+matProperties<SrvBuffer>=PropertiesRT
+normalRt<SrvBuffer>=NormalRT
+outTexture<UavBuffer>=SSRTarget
+
+params<float4>=$PARAMS
+invProj<float4x4>=$INV_PROJ
+proj<float4x4>=$PROJ
+view<float4x4>=$VIEW
+
+GroupSizeTarget=MainHDRTarget
+GroupDiv=8,8
+
+Pass=Composite
+Shader=DC8D5F35-0C56-4062-B8CB-8CA3E1F81228 #SSRComposite.shader
+
+ssrTarget<SrvBuffer>=SSRTarget
+matProperties<SrvBuffer>=PropertiesRT
+hdrTexture<SrvBuffer>=HdrMipBuffer
+linearDepth<SrvBuffer>=HiZBuffer
+outTexture<UavBuffer>=MainHDRTarget
+
+hdrTexture<filter>=Bilinear
+hdrTexture<address>=Clamp
+
+params<float4>=$PARAMS
+
+GroupSizeTarget=MainHDRTarget
+GroupDiv=8,8

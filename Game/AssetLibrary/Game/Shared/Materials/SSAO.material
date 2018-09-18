@@ -1,0 +1,49 @@
+Type=Compute   #global for the full material
+
+Pass=LinearZ
+Shader=19B40E34-17EC-49F1-A2D2-4DEDDB44BEED #SSAOHiZ.shader
+
+depthMapEven<SrvBuffer>=DSBuffer
+depthMapEvenMS<SrvBuffer>=DSBuffer
+outTexture<UavBuffer>=LinearZ
+
+params<float4>=$PARAMS
+
+GroupSizeTarget=DSBuffer
+GroupDiv=8,8
+
+Pass=SSAO
+Shader=5282D043-0FD8-4234-B4B7-C177C5828E82 #SSAO.shader
+
+linearZ<SrvBuffer>=LinearZ
+outTexture<UavBuffer>=SSAOMap
+
+projParams<float4>=$PROJ_PARAMS
+params<float4>=$PARAMS
+params1<float4>=$PARAMS1
+
+GroupSizeTarget=SSAOMap
+GroupDiv=8,8
+
+
+Pass=SSAO_H_Blur
+Shader=3CAA065F-82CE-4EFB-86DC-B446D692A485 #SSAO_Blur.shader
+ssaoMap<SrvBuffer>=SSAOMap
+outTexture<UavBuffer>=SSAOBlur
+
+params<float4>=$PARAMS
+
+GroupSizeTarget=SSAOBlur
+GroupDiv=8,8
+
+
+Pass=SSAO_V_Blur
+Shader=3CAA065F-82CE-4EFB-86DC-B446D692A485 #SSAO_Blur.shader
+ssaoMap<SrvBuffer>=SSAOBlur
+outTexture<UavBuffer>=SSAOFinal
+
+
+params<float4>=$PARAMS
+
+GroupSizeTarget=SSAOFinal
+GroupDiv=8,8

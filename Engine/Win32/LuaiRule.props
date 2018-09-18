@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup
+    Condition="'$(LUAIBeforeTargets)' == '' and '$(LUAIAfterTargets)' == '' and '$(ConfigurationType)' != 'Makefile'">
+    <LUAIBeforeTargets>Midl</LUAIBeforeTargets>
+    <LUAIAfterTargets>CustomBuild</LUAIAfterTargets>
+  </PropertyGroup>
+  <PropertyGroup>
+    <LUAIDependsOn
+      Condition="'$(ConfigurationType)' != 'Makefile'">_SelectedFiles;$(LUAIDependsOn)</LUAIDependsOn>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <LUAI>
+      <CommandLineTemplate>..\..\3rdParty\Swig\1.3.40\swig.exe -Werror -lua -c++ -o %(RootDir)%(Directory)%(Filename).cxx %(FullPath)</CommandLineTemplate>
+      <Outputs>%(Filename).cxx</Outputs>
+      <ExecutionDescription>Generating Lua .cxx file...</ExecutionDescription>
+    </LUAI>
+  </ItemDefinitionGroup>
+</Project>

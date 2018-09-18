@@ -1,0 +1,39 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.16
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Game", "Game.vcxproj", "{B65A8D29-FCB0-45F3-9391-005A2B7D32BC}"
+	ProjectSection(ProjectDependencies) = postProject
+		{7BF1EF46-36E4-48E3-9168-93904CEA863F} = {7BF1EF46-36E4-48E3-9168-93904CEA863F}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Engine", "..\..\..\Engine\Win32\Engine.vcxproj", "{7BF1EF46-36E4-48E3-9168-93904CEA863F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug - DX12|Win32 = Debug - DX12|Win32
+		Distribution - DX12|Win32 = Distribution - DX12|Win32
+		Release - DX12|Win32 = Release - DX12|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B65A8D29-FCB0-45F3-9391-005A2B7D32BC}.Debug - DX12|Win32.ActiveCfg = Debug - DX12|Win32
+		{B65A8D29-FCB0-45F3-9391-005A2B7D32BC}.Debug - DX12|Win32.Build.0 = Debug - DX12|Win32
+		{B65A8D29-FCB0-45F3-9391-005A2B7D32BC}.Distribution - DX12|Win32.ActiveCfg = Distribution - DX12|Win32
+		{B65A8D29-FCB0-45F3-9391-005A2B7D32BC}.Distribution - DX12|Win32.Build.0 = Distribution - DX12|Win32
+		{B65A8D29-FCB0-45F3-9391-005A2B7D32BC}.Release - DX12|Win32.ActiveCfg = Release - DX12|Win32
+		{B65A8D29-FCB0-45F3-9391-005A2B7D32BC}.Release - DX12|Win32.Build.0 = Release - DX12|Win32
+		{7BF1EF46-36E4-48E3-9168-93904CEA863F}.Debug - DX12|Win32.ActiveCfg = Debug - DX12|Win32
+		{7BF1EF46-36E4-48E3-9168-93904CEA863F}.Debug - DX12|Win32.Build.0 = Debug - DX12|Win32
+		{7BF1EF46-36E4-48E3-9168-93904CEA863F}.Distribution - DX12|Win32.ActiveCfg = Distribution - DX12|Win32
+		{7BF1EF46-36E4-48E3-9168-93904CEA863F}.Distribution - DX12|Win32.Build.0 = Distribution - DX12|Win32
+		{7BF1EF46-36E4-48E3-9168-93904CEA863F}.Release - DX12|Win32.ActiveCfg = Release - DX12|Win32
+		{7BF1EF46-36E4-48E3-9168-93904CEA863F}.Release - DX12|Win32.Build.0 = Release - DX12|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B7397046-4ED5-46E2-B8C3-BAB00CB1523A}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,16 @@
+Type=Compute   #global for the full material
+
+Pass=Composite
+Shader=28F369F3-8E66-4F7C-B4C8-5B67E029EF37   #SpecBloomComposite.shader
+
+specBloom<SrvBuffer>=HdrMipBuffer
+hdr_in<SrvBuffer>=MainHDRTarget
+hdr_out<UavBuffer>=MainHDRTarget
+
+specBloom<filter>=Bilinear
+specBloom<address>=Clamp
+
+params<float4>=$PARAMS
+
+GroupSizeTarget=MainHDRTarget
+GroupDiv=8,8

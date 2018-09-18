@@ -1,0 +1,550 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug - DX12|Win32">
+      <Configuration>Debug - DX12</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Distribution - DX12|Win32">
+      <Configuration>Distribution - DX12</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release - DX12|Win32">
+      <Configuration>Release - DX12</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{7BF1EF46-36E4-48E3-9168-93904CEA863F}</ProjectGuid>
+    <RootNamespace>Engine</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccProvider>
+    </SccProvider>
+    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Distribution - DX12|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release - DX12|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug - DX12|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+    <Import Project="LuaiRule.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Distribution - DX12|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release - DX12|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug - DX12|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug - DX12|Win32'">$(SolutionDir)_Output\$(Configuration)\$(ProjectName)\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release - DX12|Win32'">$(SolutionDir)_Output\$(Configuration)\$(ProjectName)\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Distribution - DX12|Win32'">$(SolutionDir)_Output\$(Configuration)\$(ProjectName)\</OutDir>
+    <LUAIBeforeTargets Condition="'$(Configuration)|$(Platform)'=='Debug - DX12|Win32'" />
+    <LUAIAfterTargets Condition="'$(Configuration)|$(Platform)'=='Debug - DX12|Win32'" />
+    <LUAIBeforeTargets Condition="'$(Configuration)|$(Platform)'=='Distribution - DX12|Win32'" />
+    <LUAIAfterTargets Condition="'$(Configuration)|$(Platform)'=='Distribution - DX12|Win32'" />
+    <LUAIBeforeTargets Condition="'$(Configuration)|$(Platform)'=='Release - DX12|Win32'" />
+    <LUAIAfterTargets Condition="'$(Configuration)|$(Platform)'=='Release - DX12|Win32'" />
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug - DX12|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\Win32;..\DirectX12;..\;..\..\3rdParty\Lua\5.1.3\src;..\..\3rdParty\OpenAL\1.1\include;..\..\3rdParty\Ogg\libogg\1.2.0\include;..\..\3rdParty\Ogg\libvorbis\1.3.1\include;..\..\3rdParty\zlib\zlib-1.2.5;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DEBUG;WIN32;_LIB;%(PreprocessorDefinitions);DIRECTX12</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>EnginePch.h</PrecompiledHeaderFile>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release - DX12|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>..\Win32;..\DirectX12;..\;..\..\3rdParty\Lua\5.1.3\src;..\..\3rdParty\OpenAL\1.1\include;..\..\3rdParty\Ogg\libogg\1.2.0\include;..\..\3rdParty\Ogg\libvorbis\1.3.1\include;..\..\3rdParty\zlib\zlib-1.2.5;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_RELEASE;WIN32;_LIB;%(PreprocessorDefinitions);DIRECTX12</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>EnginePch.h</PrecompiledHeaderFile>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Distribution - DX12|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>..\Win32;..\DirectX12;..\;..\..\3rdParty\Lua\5.1.3\src;..\..\3rdParty\OpenAL\1.1\include;..\..\3rdParty\Ogg\libogg\1.2.0\include;..\..\3rdParty\Ogg\libvorbis\1.3.1\include;..\..\3rdParty\zlib\zlib-1.2.5;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DISTRIBUTION;WIN32;_LIB;%(PreprocessorDefinitions);DIRECTX12</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>EnginePch.h</PrecompiledHeaderFile>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <FloatingPointModel>Fast</FloatingPointModel>
+      <ExceptionHandling>false</ExceptionHandling>
+      <StringPooling>false</StringPooling>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\BezierSpline.cpp" />
+    <ClCompile Include="..\CameraComponent.cpp" />
+    <ClCompile Include="..\CharacterProxy.cpp" />
+    <ClCompile Include="..\CharacterProxyComponent.cpp" />
+    <ClCompile Include="..\ColliderAsset.cpp" />
+    <ClCompile Include="..\CollisionComponent.cpp" />
+    <ClCompile Include="..\CollisionMesh.cpp" />
+    <ClCompile Include="..\CollisionPlane.cpp" />
+    <ClCompile Include="..\CollisionSphere.cpp" />
+    <ClCompile Include="..\CollisionTrigger.cpp" />
+    <ClCompile Include="..\CompressedStreams.cpp" />
+    <ClCompile Include="..\ComputeNode.cpp" />
+    <ClCompile Include="..\ConvertToRenderer.cpp" />
+    <ClCompile Include="..\CopyResourceRenderer.cpp" />
+    <ClCompile Include="..\DirectX12\Dx12.cpp" />
+    <ClCompile Include="..\DirectX12\Dx12ComputeMaterialObject.cpp" />
+    <ClCompile Include="..\DirectX12\Dx12Contexts.cpp" />
+    <ClCompile Include="..\DirectX12\Dx12ExecuteIndirect.cpp" />
+    <ClCompile Include="..\DirectX12\Dx12GpuProfiler.cpp" />
+    <ClCompile Include="..\DirectX12\Dx12Material.cpp" />
+    <ClCompile Include="..\DirectX12\Dx12MaterialObject.cpp" />
+    <ClCompile Include="..\DirectX12\Dx12Shader.cpp" />
+    <ClCompile Include="..\DirectX12\Dx12Texture.cpp" />
+    <ClCompile Include="..\DirectX12\Dx12VertexBuffer.cpp" />
+    <ClCompile Include="..\DirectX12\Dx12VideoPlayer.cpp" />
+    <ClCompile Include="..\FileStreams.cpp" />
+    <ClCompile Include="..\FrameGrabRenderer.cpp" />
+    <ClCompile Include="..\HashFunctions.cpp" />
+    <ClCompile Include="..\IRenderModifier.cpp" />
+    <ClCompile Include="..\Light.cpp" />
+    <ClCompile Include="..\LightComponent.cpp" />
+    <ClCompile Include="..\LuaCoreModule.cpp" />
+    <ClCompile Include="..\LuaMathModule.cxx">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug - DX12|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Distribution - DX12|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release - DX12|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\LuaCoreBind.cxx">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug - DX12|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Distribution - DX12|Win32'">NotUsing</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release - DX12|Win32'">NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\LuaAsset.cpp" />
+    <ClCompile Include="..\LuaScriptInstance.cpp" />
+    <ClCompile Include="..\MemoryStreams.cpp" />
+    <ClCompile Include="..\MeshAsset.cpp" />
+    <ClCompile Include="..\MipGenNode.cpp" />
+    <ClCompile Include="..\ParticleEmitter.cpp" />
+    <ClCompile Include="..\ParticleWorld.cpp" />
+    <ClCompile Include="..\RigidBodyComponent.cpp" />
+    <ClCompile Include="..\RingBuffer.cpp" />
+    <ClCompile Include="..\SceneAsset.cpp" />
+    <ClCompile Include="..\ScriptComponent.cpp" />
+    <ClCompile Include="..\ShapeRendererComponent.cpp" />
+    <ClCompile Include="..\RenderableShape.cpp" />
+    <ClCompile Include="..\SplineAsset.cpp" />
+    <ClCompile Include="..\SplineComponent.cpp" />
+    <ClCompile Include="..\StringPool.cpp" />
+    <ClCompile Include="..\SystemId.cpp" />
+    <ClCompile Include="..\TaskWorld.cpp" />
+    <ClCompile Include="..\TextReader.cpp" />
+    <ClCompile Include="..\UtilityClock.cpp" />
+    <ClCompile Include="..\UtilityMath.cpp" />
+    <ClCompile Include="..\AnimatedTexture.cpp" />
+    <ClCompile Include="..\Camera.cpp" />
+    <ClCompile Include="..\DebugGraphics.cpp" />
+    <ClCompile Include="..\DefaultRenderer.cpp" />
+    <ClCompile Include="..\ISearchable.cpp" />
+    <ClCompile Include="..\RenderableMesh.cpp" />
+    <ClCompile Include="..\Renderer.cpp" />
+    <ClCompile Include="..\RenderObject.cpp" />
+    <ClCompile Include="..\RenderTree.cpp" />
+    <ClCompile Include="..\RenderWorld.cpp" />
+    <ClCompile Include="..\SearchHierarchy.cpp" />
+    <ClCompile Include="..\Sprite.cpp" />
+    <ClCompile Include="..\Viewport.cpp" />
+    <ClCompile Include="..\Window.cpp" />
+    <ClCompile Include="Win32Window.cpp" />
+    <ClCompile Include="..\DirectX9\Dx9.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug - DX12|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Distribution - DX12|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release - DX12|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\DirectX9\Dx9Material.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug - DX12|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Distribution - DX12|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release - DX12|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\DirectX9\Dx9Shader.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug - DX12|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Distribution - DX12|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release - DX12|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\DirectX9\Dx9VertexBuffer.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug - DX12|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Distribution - DX12|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release - DX12|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\OpenGL\GlMaterial.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug - DX12|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Distribution - DX12|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release - DX12|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\OpenGL\GlShader.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug - DX12|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Distribution - DX12|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release - DX12|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\OpenGL\GlVertexBuffer.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug - DX12|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Distribution - DX12|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release - DX12|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\Debug.cpp" />
+    <ClCompile Include="..\EnginePch.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug - DX12|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug - DX12|Win32'">EnginePch.h</PrecompiledHeaderFile>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Distribution - DX12|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Distribution - DX12|Win32'">EnginePch.h</PrecompiledHeaderFile>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release - DX12|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release - DX12|Win32'">EnginePch.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <ClCompile Include="..\Log.cpp" />
+    <ClCompile Include="..\Serializer.cpp" />
+    <ClCompile Include="..\Channel.cpp" />
+    <ClCompile Include="..\ChannelSystem.cpp" />
+    <ClCompile Include="..\Component.cpp" />
+    <ClCompile Include="..\Database.cpp" />
+    <ClCompile Include="..\Resource.cpp" />
+    <ClCompile Include="..\ResourceMaps.cpp" />
+    <ClCompile Include="..\ResourceWorld.cpp" />
+    <ClCompile Include="..\Button.cpp" />
+    <ClCompile Include="..\TextArea.cpp" />
+    <ClCompile Include="..\TouchEvent.cpp" />
+    <ClCompile Include="..\TouchObject.cpp" />
+    <ClCompile Include="..\TouchWorld.cpp" />
+    <ClCompile Include="..\AnimAsset.cpp" />
+    <ClCompile Include="..\Asset.cpp" />
+    <ClCompile Include="..\DataAsset.cpp" />
+    <ClCompile Include="..\FbxAsset.cpp" />
+    <ClCompile Include="..\FontAsset.cpp" />
+    <ClCompile Include="..\FontMapAsset.cpp" />
+    <ClCompile Include="..\FrameMapAsset.cpp" />
+    <ClCompile Include="..\RegistryAsset.cpp" />
+    <ClCompile Include="..\TextureAsset.cpp" />
+    <ClCompile Include="..\WavAsset.cpp" />
+    <ClCompile Include="..\PipeStreams.cpp" />
+    <ClCompile Include="..\Socket.cpp" />
+    <ClCompile Include="..\TcpIpPipe.cpp" />
+    <ClCompile Include="..\TcpIpStream.cpp" />
+    <ClCompile Include="..\Threads.cpp" />
+    <ClCompile Include="Win32Thread.cpp" />
+    <ClCompile Include="..\Linux\LinuxThread.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug - DX12|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Distribution - DX12|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release - DX12|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\Proxy.cpp" />
+    <ClCompile Include="..\CollisionHandler.cpp" />
+    <ClCompile Include="..\CollisionObject.cpp" />
+    <ClCompile Include="..\PhysicsObject.cpp" />
+    <ClCompile Include="..\PhysicsWorld.cpp" />
+    <ClCompile Include="..\Raycast.cpp" />
+    <ClCompile Include="..\RigidBody.cpp" />
+    <ClCompile Include="..\Geometry.cpp" />
+    <ClCompile Include="..\Line.cpp" />
+    <ClCompile Include="..\Quad.cpp" />
+    <ClCompile Include="..\RegistryWorld.cpp" />
+    <ClCompile Include="..\LuaObject.cpp" />
+    <ClCompile Include="..\LuaVM.cpp" />
+    <ClCompile Include="..\AnimatedObject.cpp" />
+    <ClCompile Include="..\Animation2dComposite.cpp" />
+    <ClCompile Include="..\Animation3d.cpp" />
+    <ClCompile Include="..\Animation3dComposite.cpp" />
+    <ClCompile Include="..\AnimationWorld.cpp" />
+    <ClCompile Include="..\FloatController.cpp" />
+    <ClCompile Include="..\Skeleton.cpp" />
+    <ClCompile Include="..\Timer.cpp" />
+    <ClCompile Include="..\VectorController.cpp" />
+    <ClCompile Include="..\Node.cpp" />
+    <ClCompile Include="..\AudioWorld.cpp" />
+    <ClCompile Include="Win32VideoPlayer.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug - DX12|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release - DX12|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Distribution - DX12|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="Win32VideoSurface.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug - DX12|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release - DX12|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Distribution - DX12|Win32'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="..\InputSystem.cpp" />
+    <ClCompile Include="..\AllocSig.cpp" />
+    <ClCompile Include="..\GenericMemoryAllocator.cpp" />
+    <ClCompile Include="..\MemoryAllocation.cpp" />
+    <ClCompile Include="..\MemoryHeap.cpp" />
+    <ClCompile Include="..\MemoryManager.cpp" />
+    <ClCompile Include="Win32MemoryAllocator.cpp" />
+    <ClCompile Include="..\Animation2dComponent.cpp" />
+    <ClCompile Include="..\Animation3dComponent.cpp" />
+    <ClCompile Include="..\ButtonComponent.cpp" />
+    <ClCompile Include="..\MeshRendererComponent.cpp" />
+    <ClCompile Include="..\SpriteComponent.cpp" />
+    <ClCompile Include="..\LabelComponent.cpp" />
+    <ClCompile Include="..\TouchComponent.cpp" />
+    <ClCompile Include="..\VideoComponent.cpp" />
+    <ClCompile Include="..\Localization.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\BezierSpline.h" />
+    <ClInclude Include="..\CameraComponent.h" />
+    <ClInclude Include="..\CharacterProxy.h" />
+    <ClInclude Include="..\CharacterProxyComponent.h" />
+    <ClInclude Include="..\ColliderAsset.h" />
+    <ClInclude Include="..\CollisionComponent.h" />
+    <ClInclude Include="..\CollisionMesh.h" />
+    <ClInclude Include="..\CollisionPlane.h" />
+    <ClInclude Include="..\CollisionSphere.h" />
+    <ClInclude Include="..\CollisionTrigger.h" />
+    <ClInclude Include="..\CompressedStreams.h" />
+    <ClInclude Include="..\ComputeNode.h" />
+    <ClInclude Include="..\ConvertToRenderer.h" />
+    <ClInclude Include="..\CopyResourceRenderer.h" />
+    <ClInclude Include="..\DirectX12\Dx12.h" />
+    <ClInclude Include="..\DirectX12\Dx12ComputeMaterialObject.h" />
+    <ClInclude Include="..\DirectX12\Dx12Contexts.h" />
+    <ClInclude Include="..\DirectX12\Dx12ExecuteIndirect.h" />
+    <ClInclude Include="..\DirectX12\Dx12GpuProfiler.h" />
+    <ClInclude Include="..\DirectX12\Dx12Material.h" />
+    <ClInclude Include="..\DirectX12\Dx12MaterialObject.h" />
+    <ClInclude Include="..\DirectX12\Dx12Shader.h" />
+    <ClInclude Include="..\DirectX12\Dx12Texture.h" />
+    <ClInclude Include="..\DirectX12\Dx12VertexBuffer.h" />
+    <ClInclude Include="..\ExecuteIndirect.h" />
+    <ClInclude Include="..\FileStreams.h" />
+    <ClInclude Include="..\Filter.h" />
+    <ClInclude Include="..\FrameGrabRenderer.h" />
+    <ClInclude Include="..\GpuProfiler.h" />
+    <ClInclude Include="..\GraphicsApi.h" />
+    <ClInclude Include="..\HashFunctions.h" />
+    <ClInclude Include="..\HashTable.h" />
+    <ClInclude Include="..\IOStreams.h" />
+    <ClInclude Include="..\IRenderModifier.h" />
+    <ClInclude Include="..\Lerp.h" />
+    <ClInclude Include="..\Light.h" />
+    <ClInclude Include="..\LightComponent.h" />
+    <ClInclude Include="..\List.h" />
+    <ClInclude Include="..\LuaMathModule.h" />
+    <ClInclude Include="..\LuaCoreModule.h" />
+    <ClInclude Include="..\LuaScriptInstance.h" />
+    <ClInclude Include="..\MaterialObject.h" />
+    <ClInclude Include="..\MemoryPool.h" />
+    <ClInclude Include="..\MemoryStreams.h" />
+    <ClInclude Include="..\MeshAsset.h" />
+    <ClInclude Include="..\MipGenNode.h" />
+    <ClInclude Include="..\Node.h" />
+    <ClInclude Include="..\ParticleEmitter.h" />
+    <ClInclude Include="..\ParticleWorld.h" />
+    <ClInclude Include="..\RenderContexts.h" />
+    <ClInclude Include="..\RigidBodyComponent.h" />
+    <ClInclude Include="..\RingBuffer.h" />
+    <ClInclude Include="..\SceneAsset.h" />
+    <ClInclude Include="..\ScriptComponent.h" />
+    <ClInclude Include="..\ScriptInstance.h" />
+    <ClInclude Include="..\ShapeRendererComponent.h" />
+    <ClInclude Include="..\RenderableShape.h" />
+    <ClInclude Include="..\SplineAsset.h" />
+    <ClInclude Include="..\SplineComponent.h" />
+    <ClInclude Include="..\Stack.h" />
+    <ClInclude Include="..\StringPool.h" />
+    <ClInclude Include="..\TaskWorld.h" />
+    <ClInclude Include="..\TextReader.h" />
+    <ClInclude Include="..\Types.h" />
+    <ClInclude Include="..\UtilityClock.h" />
+    <ClInclude Include="..\UtilityMath.h" />
+    <ClInclude Include="..\UtilityString.h" />
+    <ClInclude Include="..\AnimatedTexture.h" />
+    <ClInclude Include="..\Camera.h" />
+    <ClInclude Include="..\DebugGraphics.h" />
+    <ClInclude Include="..\DefaultRenderer.h" />
+    <ClInclude Include="..\ISearchable.h" />
+    <ClInclude Include="..\MaterialAsset.h" />
+    <ClInclude Include="..\RenderableMesh.h" />
+    <ClInclude Include="..\Renderer.h" />
+    <ClInclude Include="..\RenderObject.h" />
+    <ClInclude Include="..\RenderTree.h" />
+    <ClInclude Include="..\RenderWorld.h" />
+    <ClInclude Include="..\SearchHierarchy.h" />
+    <ClInclude Include="..\ShaderAsset.h" />
+    <ClInclude Include="..\Sprite.h" />
+    <ClInclude Include="..\VertexBuffer.h" />
+    <ClInclude Include="..\Viewport.h" />
+    <ClInclude Include="..\Window.h" />
+    <ClInclude Include="Win32Window.h" />
+    <ClInclude Include="..\DirectX9\Dx9.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug - DX12|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="..\DirectX9\Dx9Material.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug - DX12|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="..\DirectX9\Dx9Shader.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug - DX12|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="..\DirectX9\Dx9VertexBuffer.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug - DX12|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
+    <CustomBuildStep Include="..\OpenGL\GlMaterial.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug - DX12|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Distribution - DX12|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release - DX12|Win32'">true</ExcludedFromBuild>
+    </CustomBuildStep>
+    <CustomBuildStep Include="..\OpenGL\GlShader.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug - DX12|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Distribution - DX12|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release - DX12|Win32'">true</ExcludedFromBuild>
+    </CustomBuildStep>
+    <CustomBuildStep Include="..\OpenGL\GlVertexBuffer.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug - DX12|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Distribution - DX12|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release - DX12|Win32'">true</ExcludedFromBuild>
+    </CustomBuildStep>
+    <ClInclude Include="..\BuildOptions.h" />
+    <ClInclude Include="..\Debug.h" />
+    <ClInclude Include="..\EngineGlobal.h" />
+    <ClInclude Include="..\EngineLibs.h" />
+    <ClInclude Include="..\EnginePch.h" />
+    <ClInclude Include="..\ISerializable.h" />
+    <ClInclude Include="..\Log.h" />
+    <ClInclude Include="..\Serializer.h" />
+    <ClInclude Include="Win32Messages.h" />
+    <ClInclude Include="..\Channel.h" />
+    <ClInclude Include="..\ChannelSystem.h" />
+    <ClInclude Include="..\Component.h" />
+    <ClInclude Include="..\ComponentType.h" />
+    <ClInclude Include="..\Database.h" />
+    <ClInclude Include="..\Identifiable.h" />
+    <ClInclude Include="..\Resource.h" />
+    <ClInclude Include="..\ResourceMaps.h" />
+    <ClInclude Include="..\ResourceType.h" />
+    <ClInclude Include="..\ResourceWorld.h" />
+    <ClInclude Include="..\SystemId.h" />
+    <ClInclude Include="..\Button.h" />
+    <ClInclude Include="..\TextArea.h" />
+    <ClInclude Include="..\TouchEvent.h" />
+    <ClInclude Include="..\TouchObject.h" />
+    <ClInclude Include="..\TouchWorld.h" />
+    <ClInclude Include="..\AnimAsset.h" />
+    <ClInclude Include="..\Asset.h" />
+    <ClInclude Include="..\DataAsset.h" />
+    <ClInclude Include="..\FbxAsset.h" />
+    <ClInclude Include="..\FontAsset.h" />
+    <ClInclude Include="..\FontMapAsset.h" />
+    <ClInclude Include="..\FrameMapAsset.h" />
+    <ClInclude Include="..\LuaAsset.h" />
+    <ClInclude Include="..\RegistryAsset.h" />
+    <ClInclude Include="..\TextureAsset.h" />
+    <ClInclude Include="..\WavAsset.h" />
+    <ClInclude Include="..\PipeStreams.h" />
+    <ClInclude Include="..\Socket.h" />
+    <ClInclude Include="..\TcpIpPipe.h" />
+    <ClInclude Include="..\TcpIpStream.h" />
+    <ClInclude Include="..\ThreadLocks.h" />
+    <ClInclude Include="..\Threads.h" />
+    <ClInclude Include="Win32Thread.h" />
+    <CustomBuildStep Include="..\Linux\LinuxThread.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug - DX12|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Distribution - DX12|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release - DX12|Win32'">true</ExcludedFromBuild>
+    </CustomBuildStep>
+    <ClInclude Include="..\Proxy.h" />
+    <ClInclude Include="..\CollisionHandler.h" />
+    <ClInclude Include="..\CollisionObject.h" />
+    <ClInclude Include="..\PhysicsObject.h" />
+    <ClInclude Include="..\PhysicsWorld.h" />
+    <ClInclude Include="..\Raycast.h" />
+    <ClInclude Include="..\RigidBody.h" />
+    <ClInclude Include="..\Geometry.h" />
+    <ClInclude Include="..\Line.h" />
+    <ClInclude Include="..\Quad.h" />
+    <ClInclude Include="..\RegistryWorld.h" />
+    <ClInclude Include="..\LuaObject.h" />
+    <ClInclude Include="..\LuaVM.h" />
+    <ClInclude Include="..\AnimatedObject.h" />
+    <ClInclude Include="..\Animation2dComposite.h" />
+    <ClInclude Include="..\Animation3d.h" />
+    <ClInclude Include="..\Animation3dComposite.h" />
+    <ClInclude Include="..\AnimationWorld.h" />
+    <ClInclude Include="..\FloatController.h" />
+    <ClInclude Include="..\Skeleton.h" />
+    <ClInclude Include="..\Timer.h" />
+    <ClInclude Include="..\VectorController.h" />
+    <ClInclude Include="..\AudioWorld.h" />
+    <ClInclude Include="..\VideoPlayer.h" />
+    <ClInclude Include="Win32VideoPlayer.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug - DX12|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release - DX12|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Distribution - DX12|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="Win32VideoSurface.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug - DX12|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release - DX12|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Distribution - DX12|Win32'">true</ExcludedFromBuild>
+    </ClInclude>
+    <ClInclude Include="..\InputSystem.h" />
+    <ClInclude Include="..\AllocSig.h" />
+    <ClInclude Include="..\GenericMemoryAllocator.h" />
+    <ClInclude Include="..\MemoryAllocation.h" />
+    <ClInclude Include="..\MemoryAllocator.h" />
+    <ClInclude Include="..\MemoryHeap.h" />
+    <ClInclude Include="..\MemoryManager.h" />
+    <ClInclude Include="Win32MemoryAllocator.h" />
+    <ClInclude Include="..\Animation2dComponent.h" />
+    <ClInclude Include="..\Animation3dComponent.h" />
+    <ClInclude Include="..\ButtonComponent.h" />
+    <ClInclude Include="..\MeshRendererComponent.h" />
+    <ClInclude Include="..\SpriteComponent.h" />
+    <ClInclude Include="..\LabelComponent.h" />
+    <ClInclude Include="..\TouchComponent.h" />
+    <ClInclude Include="..\VideoComponent.h" />
+    <ClInclude Include="..\Localization.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Filter.inl" />
+    <None Include="..\HashTable.inl" />
+    <None Include="..\Lerp.inl" />
+    <None Include="..\List.inl" />
+    <None Include="..\MemoryPool.inl" />
+    <None Include="..\UtilityMath.inl" />
+  </ItemGroup>
+  <ItemGroup>
+    <LUAI Include="..\LuaMathModule.i" />
+    <LUAI Include="..\LuaCoreBind.i" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+    <Import Project="LuaiRule.targets" />
+  </ImportGroup>
+</Project>

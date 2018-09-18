@@ -1,0 +1,12 @@
+Type=Compute   #global for the full material
+
+Pass=Tonemapping
+Shader=CCC4CC2D-FE7B-4774-841F-76AF16F14519                 #LuminanceResolve.shader
+
+luminance<SrvBuffer>=Exposure
+whitepoint<UavBuffer>=Whitepoint
+
+tonemap<float4>=$TONEMAP
+dimensions<float4>=$DIMENSIONS
+
+Groups=1,1,1

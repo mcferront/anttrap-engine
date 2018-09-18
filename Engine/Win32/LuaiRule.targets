@@ -1,0 +1,81 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <PropertyPageSchema
+      Include="$(MSBuildThisFileDirectory)$(MSBuildThisFileName).xml" />
+    <AvailableItemName
+      Include="LUAI">
+      <Targets>_LUAI</Targets>
+    </AvailableItemName>
+  </ItemGroup>
+  <UsingTask
+    TaskName="LUAI"
+    TaskFactory="XamlTaskFactory"
+    AssemblyName="Microsoft.Build.Tasks.v4.0">
+    <Task>$(MSBuildThisFileDirectory)$(MSBuildThisFileName).xml</Task>
+  </UsingTask>
+  <Target
+    Name="_LUAI"
+    BeforeTargets="$(LUAIBeforeTargets)"
+    AfterTargets="$(LUAIAfterTargets)"
+    Condition="'@(LUAI)' != ''"
+    DependsOnTargets="$(LUAIDependsOn);ComputeLUAIOutput"
+    Outputs="%(LUAI.Outputs)"
+    Inputs="%(LUAI.Identity);%(LUAI.AdditionalDependencies);$(MSBuildProjectFile)">
+    <ItemGroup
+      Condition="'@(SelectedFiles)' != ''">
+      <LUAI
+        Remove="@(LUAI)"
+        Condition="'%(Identity)' != '@(SelectedFiles)'" />
+    </ItemGroup>
+    <ItemGroup>
+      <LUAI_tlog
+        Include="%(LUAI.Outputs)"
+        Condition="'%(LUAI.Outputs)' != '' and '%(LUAI.ExcludedFromBuild)' != 'true'">
+        <Source>@(LUAI, '|')</Source>
+      </LUAI_tlog>
+    </ItemGroup>
+    <Message
+      Importance="High"
+      Text="%(LUAI.ExecutionDescription)" />
+    <WriteLinesToFile
+      Condition="'@(LUAI_tlog)' != '' and '%(LUAI_tlog.ExcludedFromBuild)' != 'true'"
+      File="$(IntDir)$(ProjectName).write.1.tlog"
+      Lines="^%(LUAI_tlog.Source);@(LUAI_tlog-&gt;'%(Fullpath)')" />
+    <LUAI
+      Condition="'@(LUAI)' != '' and '%(LUAI.ExcludedFromBuild)' != 'true'"
+      CommandLineTemplate="%(LUAI.CommandLineTemplate)"
+      AdditionalOptions="%(LUAI.AdditionalOptions)"
+      Inputs="%(LUAI.Identity)" />
+  </Target>
+  <PropertyGroup>
+    <ComputeLinkInputsTargets>
+            $(ComputeLinkInputsTargets);
+            ComputeLUAIOutput;
+          </ComputeLinkInputsTargets>
+    <ComputeLibInputsTargets>
+            $(ComputeLibInputsTargets);
+            ComputeLUAIOutput;
+          </ComputeLibInputsTargets>
+  </PropertyGroup>
+  <Target
+    Name="ComputeLUAIOutput"
+    Condition="'@(LUAI)' != ''">
+    <ItemGroup>
+      <LUAIDirsToMake
+        Condition="'@(LUAI)' != '' and '%(LUAI.ExcludedFromBuild)' != 'true'"
+        Include="%(LUAI.Outputs)" />
+      <Link
+        Include="%(LUAIDirsToMake.Identity)"
+        Condition="'%(Extension)'=='.obj' or '%(Extension)'=='.res' or '%(Extension)'=='.rsc' or '%(Extension)'=='.lib'" />
+      <Lib
+        Include="%(LUAIDirsToMake.Identity)"
+        Condition="'%(Extension)'=='.obj' or '%(Extension)'=='.res' or '%(Extension)'=='.rsc' or '%(Extension)'=='.lib'" />
+      <ImpLib
+        Include="%(LUAIDirsToMake.Identity)"
+        Condition="'%(Extension)'=='.obj' or '%(Extension)'=='.res' or '%(Extension)'=='.rsc' or '%(Extension)'=='.lib'" />
+    </ItemGroup>
+    <MakeDir
+      Directories="@(LUAIDirsToMake-&gt;'%(RootDir)%(Directory)')" />
+  </Target>
+</Project>

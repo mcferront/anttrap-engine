@@ -1,0 +1,33 @@
+Type=Compute   #global for the full material
+
+Pass=GBufferResolve
+Shader=E1D5550D-462E-417B-AB2B-8AD82DB5AD67                 #GBufferResolve.shader
+
+opaque<SrvBuffer>=OpaqueRT
+normal<SrvBuffer>=NormalRT
+depth<SrvBuffer>=DSBuffer
+shadow<SrvBuffer>=MainShadowMap
+specular<SrvBuffer>=SpecularRT
+properties<SrvBuffer>=PropertiesRT
+lightmask<SrvBuffer>=LightMaskRT
+ssao<SrvBuffer>=SSAOFinal
+outTexture<UavBuffer>=MainHDRTarget
+
+shadow<filter>=BilinearComp
+shadow<address>=Clamp
+
+ssao<filter>=Bilinear
+ssao<address>=Clamp
+
+world_camera_view<float4>=$WORLD_CAMERA_VIEW
+ambient_light<float4>=$LIGHT_AMBIENT
+light_dir<float4,16>=$LIGHT_DIR
+light_pos<float4,16>=$LIGHT_POS_TYPE
+light_color<float4,16>=$LIGHT_COLOR
+light_atten<float4,16>=$LIGHT_ATTEN
+inv_view_proj<float4x4>=$INV_VIEW_PROJ
+shadowViewMatrix<float4x4>=$SHADOW_VIEW_MATRIX
+shadowProjMatrix<float4x4>=$SHADOW_PROJECTION_MATRIX
+
+GroupSizeTarget=MainHDRTarget
+GroupDiv=8,8

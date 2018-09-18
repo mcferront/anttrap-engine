@@ -1,0 +1,14 @@
+Type=Compute   #global for the full material
+
+Pass=Tonemapping
+Shader=5A87DB4F-5DEC-4760-A99A-7ABA4C77516A                 #HDRtoLDR.shader
+
+inTexture<SrvBuffer>=MainHDRTarget
+ssao<SrvBuffer>=SSAOFinal
+whitepoint<SrvBuffer>=Whitepoint
+outTexture<UavBuffer>=LDRTarget
+
+params<float4>=$PARAMS
+
+GroupSizeTarget=LDRTarget
+GroupDiv=8,8

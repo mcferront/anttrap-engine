@@ -1,0 +1,17 @@
+Type=Compute   #global for the full material
+
+Pass=CheckerboardResolve
+Shader=574F85DB-311B-4651-97ED-5015913FFA9D #DynamicResTAA.shader
+
+hdrMapEven<SrvBuffer>=FrameEven
+hdrMapEven<filter>=Bilinear
+hdrMapEven<address>=Clamp
+
+hdrMapOdd<SrvBuffer>=FrameOdd
+hdrMapOdd<filter>=Bilinear
+hdrMapOdd<address>=Clamp
+
+outTexture<UavBuffer>=MainHDRTarget
+
+GroupSizeTarget=MainHDRTarget
+GroupDiv=8,8
