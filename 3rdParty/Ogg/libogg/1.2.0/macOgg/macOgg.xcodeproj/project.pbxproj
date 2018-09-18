@@ -1,0 +1,207 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		1564C00113BBDC8200EF3B70 /* bitwise.c in Sources */ = {isa = PBXBuildFile; fileRef = 1564BFFF13BBDC8200EF3B70 /* bitwise.c */; };
+		1564C00213BBDC8200EF3B70 /* framing.c in Sources */ = {isa = PBXBuildFile; fileRef = 1564C00013BBDC8200EF3B70 /* framing.c */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		1564BFE813BBDC5E00EF3B70 /* libmacOgg.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libmacOgg.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		1564BFFF13BBDC8200EF3B70 /* bitwise.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = bitwise.c; path = ../src/bitwise.c; sourceTree = SOURCE_ROOT; };
+		1564C00013BBDC8200EF3B70 /* framing.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = framing.c; path = ../src/framing.c; sourceTree = SOURCE_ROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		1564BFE513BBDC5E00EF3B70 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		1564BFDD13BBDC5E00EF3B70 = {
+			isa = PBXGroup;
+			children = (
+				1564BFF113BBDC5E00EF3B70 /* macOgg */,
+				1564BFE913BBDC5E00EF3B70 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		1564BFE913BBDC5E00EF3B70 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1564BFE813BBDC5E00EF3B70 /* libmacOgg.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1564BFF113BBDC5E00EF3B70 /* macOgg */ = {
+			isa = PBXGroup;
+			children = (
+				1564BFFF13BBDC8200EF3B70 /* bitwise.c */,
+				1564C00013BBDC8200EF3B70 /* framing.c */,
+			);
+			path = macOgg;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		1564BFE613BBDC5E00EF3B70 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		1564BFE713BBDC5E00EF3B70 /* macOgg */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1564BFF613BBDC5E00EF3B70 /* Build configuration list for PBXNativeTarget "macOgg" */;
+			buildPhases = (
+				1564BFE413BBDC5E00EF3B70 /* Sources */,
+				1564BFE513BBDC5E00EF3B70 /* Frameworks */,
+				1564BFE613BBDC5E00EF3B70 /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = macOgg;
+			productName = macOgg;
+			productReference = 1564BFE813BBDC5E00EF3B70 /* libmacOgg.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		1564BFDF13BBDC5E00EF3B70 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				ORGANIZATIONNAME = None;
+			};
+			buildConfigurationList = 1564BFE213BBDC5E00EF3B70 /* Build configuration list for PBXProject "macOgg" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 1564BFDD13BBDC5E00EF3B70;
+			productRefGroup = 1564BFE913BBDC5E00EF3B70 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				1564BFE713BBDC5E00EF3B70 /* macOgg */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		1564BFE413BBDC5E00EF3B70 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1564C00113BBDC8200EF3B70 /* bitwise.c in Sources */,
+				1564C00213BBDC8200EF3B70 /* framing.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		1564BFF413BBDC5E00EF3B70 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				FRAMEWORK_SEARCH_PATHS = "";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = DEBUG;
+				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = ../include;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				ONLY_ACTIVE_ARCH = NO;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		1564BFF513BBDC5E00EF3B70 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				FRAMEWORK_SEARCH_PATHS = "";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = ../include;
+				MACOSX_DEPLOYMENT_TARGET = 10.6;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		1564BFF713BBDC5E00EF3B70 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		1564BFF813BBDC5E00EF3B70 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1564BFE213BBDC5E00EF3B70 /* Build configuration list for PBXProject "macOgg" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1564BFF413BBDC5E00EF3B70 /* Debug */,
+				1564BFF513BBDC5E00EF3B70 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1564BFF613BBDC5E00EF3B70 /* Build configuration list for PBXNativeTarget "macOgg" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1564BFF713BBDC5E00EF3B70 /* Debug */,
+				1564BFF813BBDC5E00EF3B70 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 1564BFDF13BBDC5E00EF3B70 /* Project object */;
+}

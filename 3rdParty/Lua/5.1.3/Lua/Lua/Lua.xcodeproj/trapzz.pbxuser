@@ -1,0 +1,131 @@
+// !$*UTF8*$!
+{
+	0867D690FE84028FC02AAC07 /* Project object */ = {
+		activeArchitecturePreference = armv7;
+		activeBuildConfigurationName = Distribution;
+		activeSDKPreference = iphoneos4.2;
+		activeTarget = D2AAC07D0554694100DB518D /* Lua */;
+		addToTargets = (
+			D2AAC07D0554694100DB518D /* Lua */,
+		);
+		codeSenseManager = 1546B0F811C08CB10039F2E8 /* Code sense */;
+		perUserDictionary = {
+			PBXConfiguration.PBXFileTableDataSource3.PBXFileTableDataSource = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					20,
+					341,
+					20,
+					48,
+					43,
+					43,
+					20,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXFileDataSource_FiletypeID,
+					PBXFileDataSource_Filename_ColumnID,
+					PBXFileDataSource_Built_ColumnID,
+					PBXFileDataSource_ObjectSize_ColumnID,
+					PBXFileDataSource_Errors_ColumnID,
+					PBXFileDataSource_Warnings_ColumnID,
+					PBXFileDataSource_Target_ColumnID,
+				);
+			};
+			PBXConfiguration.PBXTargetDataSource.PBXTargetDataSource = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					20,
+					1433,
+					60,
+					20,
+					48,
+					43,
+					43,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXFileDataSource_FiletypeID,
+					PBXFileDataSource_Filename_ColumnID,
+					PBXTargetDataSource_PrimaryAttribute,
+					PBXFileDataSource_Built_ColumnID,
+					PBXFileDataSource_ObjectSize_ColumnID,
+					PBXFileDataSource_Errors_ColumnID,
+					PBXFileDataSource_Warnings_ColumnID,
+				);
+			};
+			PBXPerProjectTemplateStateSaveDate = 321987016;
+			PBXWorkspaceStateSaveDate = 321987016;
+		};
+		sourceControlManager = 1546B0F711C08CB10039F2E8 /* Source Control */;
+		userBuildSettings = {
+		};
+	};
+	1546B0F711C08CB10039F2E8 /* Source Control */ = {
+		isa = PBXSourceControlManager;
+		fallbackIsa = XCSourceControlManager;
+		isSCMEnabled = 0;
+		scmConfiguration = {
+			repositoryNamesForRoots = {
+				"" = "";
+			};
+		};
+	};
+	1546B0F811C08CB10039F2E8 /* Code sense */ = {
+		isa = PBXCodeSenseManager;
+		indexTemplatePath = "";
+	};
+	1546B0FD11C08CFA0039F2E8 /* lbaselib.c */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1424, 9170}}";
+			sepNavSelRange = "{161, 0}";
+			sepNavVisRange = "{0, 1186}";
+		};
+	};
+	1546B10B11C08CFA0039F2E8 /* liolib.c */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1424, 7784}}";
+			sepNavSelRange = "{9720, 0}";
+			sepNavVisRange = "{9340, 1064}";
+		};
+	};
+	1546B10C11C08CFA0039F2E8 /* llex.c */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1424, 6678}}";
+			sepNavSelRange = "{387, 0}";
+			sepNavVisRange = "{0, 920}";
+		};
+	};
+	1546B11711C08CFA0039F2E8 /* loslib.c */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1424, 3416}}";
+			sepNavSelRange = "{271, 0}";
+			sepNavVisRange = "{0, 921}";
+		};
+	};
+	1546B12411C08CFA0039F2E8 /* lua.c */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1424, 5572}}";
+			sepNavSelRange = "{0, 0}";
+			sepNavVisRange = "{0, 938}";
+		};
+	};
+	1546B12511C08CFA0039F2E8 /* lua.h */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1424, 6034}}";
+			sepNavSelRange = "{2284, 0}";
+			sepNavVisRange = "{1949, 1508}";
+			sepNavWindowFrame = "{{15, 33}, {1203, 990}}";
+		};
+	};
+	1546B13011C08CFA0039F2E8 /* print.c */ = {
+		uiCtxt = {
+			sepNavIntBoundsRect = "{{0, 0}, {1424, 3248}}";
+			sepNavSelRange = "{303, 0}";
+			sepNavVisRange = "{184, 915}";
+		};
+	};
+	D2AAC07D0554694100DB518D /* Lua */ = {
+		activeExec = 0;
+	};
+}

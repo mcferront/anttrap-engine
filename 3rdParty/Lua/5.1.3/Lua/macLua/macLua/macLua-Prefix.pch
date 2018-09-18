@@ -1,0 +1,7 @@
+//
+// Prefix header for all source files of the 'macLua' target in the 'macLua' project
+//
+
+#ifdef __OBJC__
+   #import <Cocoa/Cocoa.h>
+#endif

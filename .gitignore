@@ -1,1 +1,16 @@
+Engine/Win32/Debug - DX12/
+Game/Code/Win32/Debug - DX12/
+
+*.tlog
+*.obj
+*.pdb
+*.lastbuildstate
+*.log
+*.suo
 *.user
+*.sdf
+*.vs
+*.idb
+*.cache
+
+
