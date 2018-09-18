@@ -1,5 +1,12 @@
 Engine/Win32/Debug - DX12/
+Engine/Win32/Release - DX12/
+Engine/Win32/Distribution - DX12/
+
 Game/Code/Win32/Debug - DX12/
+Game/Code/Win32/Release - DX12/
+Game/Code/Win32/Distribution - DX12/
+
+Game/Code/Win32/_Output/
 
 *.tlog
 *.obj
