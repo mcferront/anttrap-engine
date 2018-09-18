@@ -2,10 +2,6 @@
 
 ## Improvements:
 
-### Features:
-* Add motion blur
-* Clustered lights with forward+ 
-
 ### Game:
 * get rid of upload heap for vert/index buffers, like we do with textures
 * desc tables cleaned up
@@ -43,6 +39,8 @@
 * bind viewport (and set up window?) in lua
 * set up render tree in lua
 * rename database to resources
+* Add motion blur
+* Clustered lights with forward+ 
 
 ### Tools:
 * specify which packages to build
@@ -53,5 +51,3 @@
 * if a new file is added, hub doesn’t pick it up because it’s not yet in the id list
 * Proper linear/srgb support when converting/loading textures
 * Change to premultiplied alpha in converter
-
-
