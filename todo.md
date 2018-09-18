@@ -1,12 +1,12 @@
 # TODOs
 
-##Improvements:
+## Improvements:
 
-###Features:
+### Features:
 * Add motion blur
 * Clustered lights with forward+ 
 
-###Game:
+### Game:
 * get rid of upload heap for vert/index buffers, like we do with textures
 * desc tables cleaned up
 * bindless textures
@@ -44,7 +44,7 @@
 * set up render tree in lua
 * rename database to resources
 
-###Tools:
+### Tools:
 * specify which packages to build
 * Remove material editor from context menu
 * Remove all the object property code

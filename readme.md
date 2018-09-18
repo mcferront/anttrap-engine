@@ -1,6 +1,6 @@
 # Anttrap Engine
 
-This was originally an DX9/OpenGL engine which ran on Win, Mac, Linux, and iOS, I built it with some contributions from friends circa 2010 and it shipped some great indie projects.  Over the past year I've resurrected it and I've upgraded it to DX12 with both a forward and deferred rendering path.  It's not close to shipping quality; there are bugs, performance issues, etc.  However it's usable and improving every day.
+This was originally an DX9/OpenGL engine which ran on Win, Mac, Linux, and iOS, I built it with some important contributions from friends circa 2010 and it shipped some great indie projects.  Over the past year I've resurrected it and I've upgraded it to DX12 with both a forward and deferred rendering path.  It's not close to shipping quality; there are bugs, performance issues, etc.  However it's usable and improving every day.
 
 My main purpose of putting it up on Github is to have branches of different rendering experiments I play around with as I continue to bug fix and improve the core architecture.
 
