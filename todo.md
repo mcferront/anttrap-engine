@@ -1,8 +1,6 @@
 # TODOs
 
-## Improvements:
-
-### Game:
+## Game:
 * get rid of upload heap for vert/index buffers, like we do with textures
 * desc tables cleaned up
 * bindless textures
@@ -42,7 +40,7 @@
 * Add motion blur
 * Clustered lights with forward+ 
 
-### Tools:
+## Tools:
 * specify which packages to build
 * Remove material editor from context menu
 * Remove all the object property code
