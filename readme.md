@@ -16,7 +16,7 @@ In the future I plan on posting the code for the tools and instructions on how t
 ## todos
 Finally, as I mentioned this is a big work in progress - you can see the todo list (which is my random spam of things which need to get done) at todo.md
 
-# Practicle Edge Preserving Depth of Field
+# Practical Edge Preserving Depth of Field
 http://www.trapzz.com/?page_id=295
 
 Pressing space bar will toggle through different camera shots
