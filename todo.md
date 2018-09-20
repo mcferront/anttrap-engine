@@ -8,7 +8,6 @@
 ** use constant buffers to tell shaders how to index into their texture
 * resources which don't need to be mipped but are still downres'd can be standard resolution
 * opt mat properties formats
-* imgui support?
 * all asserts visual
 * double check lighting computations
 * render frustum for shadow lights
@@ -39,7 +38,7 @@
 * rename database to resources
 * Add motion blur
 * Clustered lights with forward+ 
-* clean up all hlsl files now that we have #include support
+
 
 ## Tools:
 * specify which packages to build

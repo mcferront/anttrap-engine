@@ -1,3 +1,5 @@
+#include "Encodings.hlsl"
+
 //#define MOTION_VECTORS
 //#define NDF
 
@@ -139,24 +141,6 @@ struct PS_OUT
 float4 sample( Texture2D tex, SamplerState samplerState, float2 uv, float2 tdx, float2 tdy )
 {
    return tex.SampleGrad( samplerState, uv, tdx, tdy );
-}
-
-float2 normal_encode(float3 n)
-{
-    float f = sqrt( 8 * n.z + 8 );
-    return n.xy / f + 0.5;
-}
-
-float3 normal_decode(float2 enc)
-{
-    float2 fenc = enc * 4 - 2;
-    float f = dot( fenc, fenc );
-    float g = sqrt( 1 - f / 4 );
-    float3 n;
-    n.xy = fenc * g;
-    n.z = 1 - f / 2;
-
-    return n;
 }
 
 PS_OUT ps_main(PS_INPUT input)
