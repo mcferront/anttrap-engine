@@ -130,12 +130,14 @@ public:
       );
 
    static ID3D12PipelineState *RegisterPipelineState(
+      const char *pDebugName,
       const D3D12_GRAPHICS_PIPELINE_STATE_DESC &pipelineDesc,
       ViewportContext viewportContext,
       VertexContext vertexContext
       );
 
    static ID3D12PipelineState *RegisterPipelineState(
+      const char *pDebugName,
       const D3D12_COMPUTE_PIPELINE_STATE_DESC &pipelineDesc
    );
 

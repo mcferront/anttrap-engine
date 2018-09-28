@@ -66,6 +66,7 @@
 #include "SplineComponent.h"
 #include "VertexBuffer.h"
 #include "GpuProfiler.h"
+#include "GpuBuffer.h"
 
 //void PrintHierarchy( int nested, Node *pNode )
 //{
@@ -663,6 +664,8 @@ void App::Create(
     Asset::Register( );
     //Game::Register( );
     Material::Register( );
+    GpuResource::Register( );
+    GpuBuffer::Register( );
     Texture::Register( );
     Data::Register( );
     FontMap::Register( );
@@ -726,7 +729,7 @@ void App::Create(
     RegistryInt app_interval( "App/interval", 1, 0, 3 );
     RegistryMethod value( "App/reg_key_save", App_SaveRegKey );
 
-    RegistryBool deferred( "Render/deferred", false, RebuildRenderer );
+    RegistryBool deferred( "Render/deferred", true, RebuildRenderer );
     RegistryBool depth_prepass( "Render/depth_prepass", true, RebuildRenderer );
     RegistryInt method( "Tonemap/method", 0 );
 
@@ -1422,22 +1425,7 @@ void App::SetupRenderers( void )
 
     ResourceHandle hMainCamera = ResourceHandle::FromAlias( "MainCamera" );
     ResourceHandle hShadowCamera = ResourceHandle::FromAlias( "ShadowCamera" );
-    ResourceHandle hdrTarget = ResourceHandle( Id::Id( "MainHDRTarget" ) );
-    ResourceHandle ldrTarget( "LDRTarget" );
-    ResourceHandle exposure = ResourceHandle( Id::Id( "Exposure" ) );
-    ResourceHandle whitepoint = ResourceHandle( Id::Id( "Whitepoint" ) );
-    ResourceHandle shadowMapTarget( "MainShadowMap" );
-    ResourceHandle shadowMapDepthStencil( "MainShadowMapDS" );
-    ResourceHandle ssr( "SSRTarget" );
-    ResourceHandle linearZ( "LinearZ" );
-    ResourceHandle ssaoMap( "SSAOMap" );
-    ResourceHandle ssaoBlur( "SSAOBlur" );
-    ResourceHandle ssaoFinal( "SSAOFinal" );
-    ResourceHandle hiZBuffer( "HiZBuffer" );
-    ResourceHandle hdrMipBuffer( "HdrMipBuffer" );
-    ResourceHandle dofBuffer( "DofBuffer" );
-    ResourceHandle cocBuffer( "CocBuffer" );
-    ResourceHandle dofBlurredBuffer( "DofBlurredBuffer" );
+    
 
     {
         CameraComponent *pCameraComponent = NULL;
@@ -1482,116 +1470,57 @@ void App::SetupRenderers( void )
         }
     }
 
-
-    {
-        ImageBuffer *pSSAOMap = new ImageBuffer;
-        ImageBuffer *pSSAOFinal = new ImageBuffer;
-        ImageBuffer *pSSAOBlur = new ImageBuffer;
-        ImageBuffer *pLinearZ = new ImageBuffer;
-        ImageBuffer *pSSR = new ImageBuffer;
-        ImageBuffer *pHDRTarget = new ImageBuffer;
-        ImageBuffer *pLDRTarget = new ImageBuffer;
-        ImageBuffer *pExposure = new ImageBuffer;
-        ImageBuffer *pWhitepoint = new ImageBuffer;
-        ImageBuffer *pShadowMap = new ImageBuffer;
-        ImageBuffer *pShadowMapDepthStencil = new ImageBuffer;
-        ImageBuffer *pHiZBuffer = new ImageBuffer;
-        ImageBuffer *pHdrMipBuffer = new ImageBuffer;
-        ImageBuffer *pDofBuffer = new ImageBuffer;
-        ImageBuffer *pCocBuffer = new ImageBuffer;
-        ImageBuffer *pDofBlurredBuffer = new ImageBuffer;
-
         for ( int i = 0; i < HiZMipLevels; i++ )
-        {
-            ResourceHandle hiZMip( g_pHiZMipLevels[ i ] );
-            ImageBuffer *pHiZMip = new ImageBuffer;
-            hiZMip.Bind( NULL, pHiZMip );
-
-            pHiZMip->CreateAsTarget( Texture::Format::LinearZ, Texture::UavResource, ClearColor, HiZMipRes >> i, HiZMipRes >> i, 1 );
-            pHiZMip->AddToScene( );
-            pHiZMip->Bind( );
-        }
+            GpuBuffer::CreateTexture( g_pHiZMipLevels[ i ], GpuBuffer::Format::LinearZ, GpuBuffer::Flags::UnorderedAccess, GpuBuffer::State::UnorderedAccess, HiZMipRes >> i, HiZMipRes >> i);
 
         for ( int i = 0; i < HdrMipLevels; i++ )
-        {
-            ResourceHandle hdrMip( g_pHdrMipLevels[ i ] );
-            ImageBuffer *pHdrMip = new ImageBuffer;
-            hdrMip.Bind( NULL, pHdrMip );
+            GpuBuffer::CreateTexture( g_pHdrMipLevels[ i ], GpuBuffer::Format::HDR, GpuBuffer::Flags::UnorderedAccess, GpuBuffer::State::UnorderedAccess, HdrMipRes >> i, HdrMipRes >> i );
 
-            pHdrMip->CreateAsTarget( Texture::Format::HDR, Texture::UavResource, ClearColor, HdrMipRes >> i, HdrMipRes >> i, 1 );
-            pHdrMip->AddToScene( );
-            pHdrMip->Bind( );
-        }
+        ResourceHandle exposure = GpuBuffer::CreateBuffer( "Exposure", GpuResource::Flags::UnorderedAccess, GpuResource::State::UnorderedAccess, 64 * 1024, sizeof(float) );
 
-        dofBuffer.Bind( NULL, pDofBuffer );
-        cocBuffer.Bind( NULL, pCocBuffer );
-        dofBlurredBuffer.Bind( NULL, pDofBlurredBuffer );
-        ssaoMap.Bind( NULL, pSSAOMap );
-        linearZ.Bind( NULL, pLinearZ );
-        ssr.Bind( NULL, pSSR );
-        ssaoFinal.Bind( NULL, pSSAOFinal );
-        ssaoBlur.Bind( NULL, pSSAOBlur );
-        hdrTarget.Bind( "Main HDR Target", pHDRTarget );
-        ldrTarget.Bind( "LDR Target", pLDRTarget );
-        exposure.Bind( NULL, pExposure );
-        whitepoint.Bind( NULL, pWhitepoint );
-        shadowMapTarget.Bind( "ShadowMap Target", pShadowMap );
-        shadowMapDepthStencil.Bind( "ShadowMap Target DS", pShadowMapDepthStencil );
-        hiZBuffer.Bind( "HiZBuffer", pHiZBuffer );
-        hdrMipBuffer.Bind( "HdrMipBuffer", pHdrMipBuffer );
+        ResourceHandle whitepoint = GpuBuffer::CreateBuffer( "Whitepoint", GpuResource::Flags::UnorderedAccess, GpuResource::State::UnorderedAccess, 4 * sizeof(float), sizeof(float) );
 
-        pHDRTarget->CreateAsTarget( Texture::Format::HDR, Texture::RenderTarget, ClearColor, hdr_width.GetValue( ), hdr_height.GetValue( ), 1 );
-        pLDRTarget->CreateAsTarget( Texture::Format::LDR, Texture::RenderTarget, ClearColor, windowWidth, windowHeight, 1 );
-        pShadowMap->CreateAsTarget( Texture::Format::ShadowMap, Texture::RenderTarget, Color( INT_MAX, INT_MAX, INT_MAX, INT_MAX ), g_shadow_width, g_shadow_height, 1 );
-        pExposure->CreateAsStructuredBuffer( 64 * 1024 );
-        pWhitepoint->CreateAsStructuredBuffer( 4 * sizeof( float ) );
-        pShadowMapDepthStencil->CreateAsDepthStencil( g_shadow_width, g_shadow_height, 1 );
-        pSSAOMap->CreateAsTarget( Texture::Format::SSAO, Texture::UavResource, ClearColor, g_scene_buffer_width, g_scene_buffer_height, 1 );
-        pLinearZ->CreateAsTarget( Texture::Format::LinearZ, Texture::UavResource, ClearColor, g_scene_buffer_width, g_scene_buffer_height, 1 );
-        pSSAOBlur->CreateAsTarget( Texture::Format::SSAO, Texture::UavResource, ClearColor, g_scene_buffer_width, g_scene_buffer_height, 1 );
-        pSSAOFinal->CreateAsTarget( Texture::Format::SSAO, Texture::UavResource, ClearColor, g_scene_buffer_width, g_scene_buffer_height, 1 );
-        pHiZBuffer->CreateAsTarget( Texture::Format::LinearZ, Texture::UavResource, ClearColor, HiZMipRes, HiZMipRes, 1, HiZMipLevels );
-        pHdrMipBuffer->CreateAsTarget( Texture::Format::HDR, Texture::UavResource, ClearColor, HdrMipRes, HdrMipRes, 1, HdrMipLevels );
-        pSSR->CreateAsTarget( Texture::Format::SSR, Texture::UavResource, ClearColor, hdr_width.GetValue( ), hdr_height.GetValue( ), 1 );
+        ResourceHandle ssaoMap = GpuBuffer::CreateTexture( "SSAOMap", GpuResource::Format::SSAO, GpuResource::Flags::UnorderedAccess, 
+                                                                GpuResource::State::UnorderedAccess, g_scene_buffer_width, g_scene_buffer_height );
 
-        pDofBuffer->CreateAsTarget( Texture::Format::TransparentBuffer, Texture::UavResource, ClearColor, hdr_width.GetValue( ), hdr_height.GetValue( ) >> 1, 1 );
-        pDofBlurredBuffer->CreateAsTarget( Texture::Format::TransparentBuffer, Texture::UavResource, ClearColor, hdr_width.GetValue( ), hdr_height.GetValue( ) >> 1, 1 );
-        pCocBuffer->CreateAsTarget( Texture::Format::COC, Texture::UavResource, ClearColor, hdr_width.GetValue( ), hdr_height.GetValue( ), 1 );
+        ResourceHandle ssaoFinal = GpuBuffer::CreateTexture( "SSAOFinal", GpuResource::Format::SSAO, GpuResource::Flags::UnorderedAccess, 
+                                                                GpuResource::State::UnorderedAccess, g_scene_buffer_width, g_scene_buffer_height );
 
-        pShadowMap->AddToScene( );
-        pHDRTarget->AddToScene( );
-        pLDRTarget->AddToScene( );
-        pExposure->AddToScene( );
-        pWhitepoint->AddToScene( );
-        pShadowMapDepthStencil->AddToScene( );
-        pSSAOMap->AddToScene( );
-        pLinearZ->AddToScene( );
-        pSSR->AddToScene( );
-        pSSAOBlur->AddToScene( );
-        pSSAOFinal->AddToScene( );
-        pHiZBuffer->AddToScene( );
-        pHdrMipBuffer->AddToScene( );
-        pDofBuffer->AddToScene( );
-        pCocBuffer->AddToScene( );
-        pDofBlurredBuffer->AddToScene( );
+        ResourceHandle ssaoBlur = GpuBuffer::CreateTexture( "SSAOBlur", GpuResource::Format::SSAO, GpuResource::Flags::UnorderedAccess, 
+                                                                GpuResource::State::UnorderedAccess, g_scene_buffer_width, g_scene_buffer_height );
 
-        pShadowMap->Bind( );
-        pHDRTarget->Bind( );
-        pLDRTarget->Bind( );
-        pExposure->Bind( );
-        pWhitepoint->Bind( );
-        pShadowMapDepthStencil->Bind( );
-        pLinearZ->Bind( );
-        pSSR->Bind( );
-        pSSAOMap->Bind( );
-        pSSAOBlur->Bind( );
-        pSSAOFinal->Bind( );
-        pHiZBuffer->Bind( );
-        pHdrMipBuffer->Bind( );
-        pDofBuffer->Bind( );
-        pCocBuffer->Bind( );
-        pDofBlurredBuffer->Bind( );
-    }
+        ResourceHandle linearZ = GpuBuffer::CreateTexture( "LinearZ", GpuResource::Format::LinearZ, GpuResource::Flags::UnorderedAccess, 
+                                                                GpuResource::State::UnorderedAccess, g_scene_buffer_width, g_scene_buffer_height );
+
+        ResourceHandle dofBuffer = GpuBuffer::CreateTexture( "DofBuffer", GpuResource::Format::TransparentBuffer, GpuResource::Flags::UnorderedAccess, 
+                                                                GpuResource::State::UnorderedAccess, hdr_width.GetValue( ), hdr_height.GetValue( ) >> 1 );
+
+        ResourceHandle cocBuffer = GpuBuffer::CreateTexture( "CocBuffer", GpuResource::Format::COC, GpuResource::Flags::UnorderedAccess, 
+                                                                GpuResource::State::UnorderedAccess, hdr_width.GetValue( ), hdr_height.GetValue( ) );
+        
+        ResourceHandle dofBlurredBuffer = GpuBuffer::CreateTexture( "DofBlurredBuffer", GpuResource::Format::TransparentBuffer, GpuResource::Flags::UnorderedAccess, 
+                                                                GpuResource::State::UnorderedAccess, hdr_width.GetValue( ), hdr_height.GetValue( ) >> 1 );
+
+        ResourceHandle ssr = GpuBuffer::CreateTexture( "SSRTarget", GpuResource::Format::SSR, GpuResource::Flags::UnorderedAccess, 
+                                                                GpuResource::State::UnorderedAccess, hdr_width.GetValue( ), hdr_height.GetValue( ) );
+        
+        ResourceHandle hdrTarget = GpuBuffer::CreateTexture( "MainHDRTarget", GpuResource::Format::HDR, (GpuResource::Flags::Type) (GpuResource::Flags::RenderTarget | GpuResource::Flags::UnorderedAccess), 
+                                                                GpuResource::State::RenderTarget, hdr_width.GetValue( ), hdr_height.GetValue( ), 1, &ClearColor  );
+
+        ResourceHandle ldrTarget = GpuBuffer::CreateTexture( "LDRTarget", GpuResource::Format::LDR, (GpuResource::Flags::Type) (GpuResource::Flags::RenderTarget | GpuResource::Flags::UnorderedAccess), 
+                                                                GpuResource::State::RenderTarget, windowWidth, windowHeight, 1, &ClearColor );
+
+        ResourceHandle shadowMapTarget = GpuBuffer::CreateTexture( "MainShadowMap", GpuResource::Format::ShadowMap, GpuResource::Flags::RenderTarget, 
+                                                                GpuResource::State::RenderTarget, g_shadow_width, g_shadow_height, 1, &Color( INT_MAX, INT_MAX, INT_MAX, INT_MAX ) );
+
+        ResourceHandle shadowMapDepthStencil = GpuBuffer::CreateTexture( "MainShadowMapDS", GpuResource::Format::Depth, GpuResource::Flags::DepthStencil,
+                                                                GpuResource::State::DepthWriteResource, g_shadow_width, g_shadow_height, 1, &Color(0, 0, 0, 0) );
+        
+        ResourceHandle hiZBuffer = GpuBuffer::CreateTexture( "HiZBuffer", GpuResource::Format::LinearZ, GpuResource::Flags::UnorderedAccess, 
+                                                                GpuResource::State::UnorderedAccess, HiZMipRes, HiZMipRes, HiZMipLevels );
+
+        ResourceHandle hdrMipBuffer = GpuBuffer::CreateTexture( "HdrMipBuffer", GpuResource::Format::HDR, GpuResource::Flags::UnorderedAccess, 
+                                                                GpuResource::State::UnorderedAccess, HdrMipRes, HdrMipRes, HdrMipLevels );
 
     if ( deferred.GetValue( ) )
         SetupDeferredRenderer( );
@@ -1622,12 +1551,12 @@ void App::SetupRenderers( void )
 
         m_UIRenderTree.Create( Id("UI Tree") );
 
-        m_UIRenderTree.AddNode( new ConvertToRenderer( ldrTarget, ImageBuffer::UavResource ) );
-        m_UIRenderTree.AddNode( new ConvertToRenderer( hdrTarget, ImageBuffer::ShaderResource ) );
+        m_UIRenderTree.AddNode( new ConvertToRenderer( ldrTarget, GpuBuffer::State::UnorderedAccess ) );
+        m_UIRenderTree.AddNode( new ConvertToRenderer( hdrTarget, GpuBuffer::State::ShaderResource ) );
         m_UIRenderTree.AddNode( pLdrPostProcess );
-        m_UIRenderTree.AddNode( new ConvertToRenderer( exposure, ImageBuffer::ShaderResource ) );
+        m_UIRenderTree.AddNode( new ConvertToRenderer( exposure, GpuBuffer::State::ShaderResource ) );
         m_UIRenderTree.AddNode( pLdrPostProcessResolve );
-        m_UIRenderTree.AddNode( new ConvertToRenderer( ldrTarget, ImageBuffer::RenderTarget ) );
+        m_UIRenderTree.AddNode( new ConvertToRenderer( ldrTarget, GpuBuffer::State::RenderTarget ) );
 
         m_UIRenderTree.AddNode( new DefaultRenderer( "UI_Backers", false, &renderGroup, 1 ) );
         m_UIRenderTree.AddNode( new DefaultRenderer( "UI_Opaque", true, &renderGroup, 1 ) );
@@ -1675,8 +1604,6 @@ void App::SetupRenderers( void )
 void App::SetupDeferredRenderer( void )
 {
     // setup g buffer and g buffer material
-    RegistryInt hdr_width( "Render/hdr_width", 0 );
-    RegistryInt hdr_height( "Render/hdr_height", 0 );
     RegistryBool depth_prepass = RegistryBool( "Render/depth_prepass" );
 
     RegistryBool dof_enable = RegistryBool( "dof.enable" );
@@ -1685,57 +1612,26 @@ void App::SetupDeferredRenderer( void )
     RegistryBool ssao_enable = RegistryBool( "SSAO/enable" );
 
     // g buffer should resolve to MainHDRTarget so it can still do luminance, etc.
-    ImageBuffer *pOpaque = new ImageBuffer;
-    ImageBuffer *pLightMask = new ImageBuffer;
-    ImageBuffer *pSpecular = new ImageBuffer;
-    ImageBuffer *pProperties = new ImageBuffer;
-    ImageBuffer *pNormals = new ImageBuffer;
-
-    ImageBuffer *pDSBuffer = new ImageBuffer;
-
-    int sampleCount = 1;
-
     ResourceHandle hdrTarget = ResourceHandle( Id::Id( "MainHDRTarget" ) );
 
-    ResourceHandle opaqueRt = ResourceHandle( Id::Id( "OpaqueRT" ) );
-    opaqueRt.Bind( "OpaqueRT", pOpaque );
+    m_DSBuffer = GpuBuffer::CreateTexture( "DSBuffer", GpuResource::Format::Depth, GpuResource::Flags::DepthStencil, 
+                                                GpuResource::State::DepthWriteResource, g_scene_buffer_width, g_scene_buffer_height, 1, &Color(0, 0, 0, 0) );
 
-    ResourceHandle lightMaskRt = ResourceHandle( Id::Id( "LightMaskRT" ) );
-    lightMaskRt.Bind( "LightMaskRT", pLightMask );
+    ResourceHandle opaqueRt = GpuBuffer::CreateTexture( "OpaqueRT" , GpuResource::Format::OpaqueBuffer, GpuResource::Flags::RenderTarget, 
+                                                            GpuResource::State::RenderTarget, g_scene_buffer_width, g_scene_buffer_height, 1, &ClearColor );
 
-    ResourceHandle propertiesRt = ResourceHandle( Id::Id( "PropertiesRT" ) );
-    propertiesRt.Bind( "PropertiesRT", pProperties );
+    ResourceHandle lightMaskRt = GpuBuffer::CreateTexture( "LightMaskRT", GpuResource::Format::LightMaskBuffer, GpuResource::Flags::RenderTarget, 
+                                                                GpuResource::State::RenderTarget, g_scene_buffer_width, g_scene_buffer_height, 1, &ClearColor );
 
-    ResourceHandle specularRt = ResourceHandle( Id::Id( "SpecularRT" ) );
-    specularRt.Bind( "SpecularRT", pSpecular );
+    ResourceHandle propertiesRt = GpuBuffer::CreateTexture( "PropertiesRT", GpuResource::Format::MatProperties, GpuResource::Flags::RenderTarget, 
+                                                                GpuResource::State::RenderTarget, g_scene_buffer_width, g_scene_buffer_height, 1, &ClearColor );
 
-    ResourceHandle normalRt = ResourceHandle( Id::Id( "NormalRT" ) );
-    normalRt.Bind( "NormalRT", pNormals );
-
-    m_DSBuffer = ResourceHandle( "DSBuffer" );
-    m_DSBuffer.Bind( NULL, pDSBuffer );
-
-    pDSBuffer->CreateAsDepthStencil( g_scene_buffer_width, g_scene_buffer_height, sampleCount );
-    pOpaque->CreateAsTarget( Texture::Format::OpaqueBuffer, Texture::RenderTarget, ClearColor, g_scene_buffer_width, g_scene_buffer_height, sampleCount );
-    pLightMask->CreateAsTarget( Texture::Format::LightMaskBuffer, Texture::RenderTarget, ClearColor, g_scene_buffer_width, g_scene_buffer_height, sampleCount );
-    pProperties->CreateAsTarget( Texture::Format::MatProperties, Texture::RenderTarget, ClearColor, g_scene_buffer_width, g_scene_buffer_height, sampleCount );
-    pSpecular->CreateAsTarget( Texture::Format::SpecularBuffer, Texture::RenderTarget, ClearColor, g_scene_buffer_width, g_scene_buffer_height, sampleCount );
-    pNormals->CreateAsTarget( Texture::Format::NormalBuffer, Texture::RenderTarget, ClearColor, g_scene_buffer_width, g_scene_buffer_height, sampleCount );
-
-    pOpaque->AddToScene( );
-    pLightMask->AddToScene( );
-    pProperties->AddToScene( );
-    pSpecular->AddToScene( );
-    pNormals->AddToScene( );
-    pDSBuffer->AddToScene( );
-
-    pDSBuffer->Bind( );
-    pOpaque->Bind( );
-    pProperties->Bind( );
-    pSpecular->Bind( );
-    pNormals->Bind( );
-    pLightMask->Bind( );
-
+    ResourceHandle specularRt = GpuBuffer::CreateTexture( "SpecularRT", GpuResource::Format::SpecularBuffer, GpuResource::Flags::RenderTarget, 
+                                                            GpuResource::State::RenderTarget, g_scene_buffer_width, g_scene_buffer_height, 1, &ClearColor );
+    
+    ResourceHandle normalRt = GpuBuffer::CreateTexture( "NormalRT", GpuResource::Format::NormalBuffer, GpuResource::Flags::RenderTarget,
+                                                            GpuResource::State::RenderTarget, g_scene_buffer_width, g_scene_buffer_height, 1, &ClearColor );
+    
     ResourceHandle hMainCamera = ResourceHandle::FromAlias( "MainCamera" );
     CameraComponent *pCameraComponent = GetResource( hMainCamera, Node )->GetComponent<CameraComponent>( );
 
@@ -1804,7 +1700,7 @@ void App::SetupDeferredRenderer( void )
         {
             m_DepthPrepassRenderTree.Create( Id::Id( "DepthPrepassTree" ) );
             m_DepthPrepassRenderTree.AddNode( pDepthPrepass );
-            m_DepthPrepassRenderTree.AddNode( new ConvertToRenderer( m_DSBuffer, ImageBuffer::ShaderResource ) );
+            m_DepthPrepassRenderTree.AddNode( new ConvertToRenderer( m_DSBuffer, GpuBuffer::State::ShaderResource ) );
 
             AddLinearZ( &m_DepthPrepassRenderTree );
 
@@ -1851,12 +1747,12 @@ void App::SetupDeferredRenderer( void )
         {
             m_SceneRenderTree.AddNode( g_pOpaqueRenderer );
 
-            m_SceneRenderTree.AddNode( new ConvertToRenderer( opaqueRt, ImageBuffer::ShaderResource ) );
-            m_SceneRenderTree.AddNode( new ConvertToRenderer( lightMaskRt, ImageBuffer::ShaderResource ) );
-            m_SceneRenderTree.AddNode( new ConvertToRenderer( propertiesRt, ImageBuffer::ShaderResource ) );
-            m_SceneRenderTree.AddNode( new ConvertToRenderer( specularRt, ImageBuffer::ShaderResource ) );
-            m_SceneRenderTree.AddNode( new ConvertToRenderer( normalRt, ImageBuffer::ShaderResource ) );
-            m_SceneRenderTree.AddNode( new ConvertToRenderer( m_DSBuffer, ImageBuffer::ShaderResource ) );
+            m_SceneRenderTree.AddNode( new ConvertToRenderer( opaqueRt, GpuBuffer::State::ShaderResource ) );
+            m_SceneRenderTree.AddNode( new ConvertToRenderer( lightMaskRt, GpuBuffer::State::ShaderResource ) );
+            m_SceneRenderTree.AddNode( new ConvertToRenderer( propertiesRt, GpuBuffer::State::ShaderResource ) );
+            m_SceneRenderTree.AddNode( new ConvertToRenderer( specularRt, GpuBuffer::State::ShaderResource ) );
+            m_SceneRenderTree.AddNode( new ConvertToRenderer( normalRt, GpuBuffer::State::ShaderResource ) );
+            m_SceneRenderTree.AddNode( new ConvertToRenderer( m_DSBuffer, GpuBuffer::State::ShaderResource ) );
             m_SceneRenderTree.AddNode( pGBufferResolve );
 
             ResourceHandle handles[ ] =
@@ -1925,7 +1821,7 @@ void App::SetupDeferredRenderer( void )
         // transparent render pass
         {
             m_DeferredForwardRenderTree.AddNode( g_pTransparentRenderer );
-            m_DeferredForwardRenderTree.AddNode( new BarrierRenderer( hdrTarget, ImageBuffer::Barrier::Uav ) );
+            m_DeferredForwardRenderTree.AddNode( new BarrierRenderer( hdrTarget, GpuResource::Barrier::Uav ) );
 
             AddHdrMips( &m_DeferredForwardRenderTree, hdrMipDesc );
 
@@ -1957,11 +1853,6 @@ void App::SetupForwardRenderer( void )
     m_pCullTransparent = NULL;
     g_pTransparentRenderer = NULL;
 
-    ImageBuffer *pProperties = new ImageBuffer;
-    ImageBuffer *pNormals = new ImageBuffer;
-    ImageBuffer *pColorBuffer = new ImageBuffer;
-    ImageBuffer *pDSBuffer = new ImageBuffer;
-
     int sampleCount = 1;
 
     ResourceHandle hdrTarget( "MainHDRTarget" );
@@ -1980,33 +1871,18 @@ void App::SetupForwardRenderer( void )
 
     sampleCount = 1;
 
-    m_DSBuffer = ResourceHandle( "DSBuffer" );
-    m_DSBuffer.Bind( NULL, pDSBuffer );
-
-    ResourceHandle matProperties( "PropertiesRT" );
-    matProperties.Bind( "PropertiesRT", pProperties );
-
-    ResourceHandle normalRt( "NormalRT" );
-    normalRt.Bind( "NormalRT", pNormals );
-
     RenderWorld::Instance( ).AddRenderGroup( GeometryGroup );
     RenderWorld::Instance( ).AddRenderGroup( DebugGraphicsGroup );
 
     // buffers
-    {
-        pProperties->CreateAsTarget( Texture::Format::MatProperties, Texture::RenderTarget, ClearColor, g_scene_buffer_width, g_scene_buffer_height, sampleCount );
-        pNormals->CreateAsTarget( Texture::Format::NormalBuffer, Texture::RenderTarget, ClearColor, g_scene_buffer_width, g_scene_buffer_height, sampleCount );
+    ResourceHandle matProperties = GpuBuffer::CreateTexture( "PropertiesRT", GpuBuffer::Format::MatProperties, GpuBuffer::Flags::RenderTarget, 
+                                                                GpuBuffer::State::RenderTarget, g_scene_buffer_width, g_scene_buffer_height, 1, &ClearColor );
 
-        pDSBuffer->CreateAsDepthStencil( g_scene_buffer_width, g_scene_buffer_height, sampleCount );
+    ResourceHandle normalRt = GpuBuffer::CreateTexture( "NormalRT", GpuBuffer::Format::NormalBuffer, GpuBuffer::Flags::RenderTarget, 
+                                                            GpuBuffer::State::RenderTarget, g_scene_buffer_width, g_scene_buffer_height, 1, &ClearColor );
 
-        pProperties->AddToScene( );
-        pNormals->AddToScene( );
-        pDSBuffer->AddToScene( );
-
-        pProperties->Bind( );
-        pNormals->Bind( );
-        pDSBuffer->Bind( );
-    }
+    m_DSBuffer = GpuBuffer::CreateTexture( "DSBuffer", GpuBuffer::Format::Depth, GpuBuffer::Flags::DepthStencil, 
+                                            GpuResource::State::DepthWriteResource, g_scene_buffer_width, g_scene_buffer_height, 1, &Color(0, 0, 0, 0) );
 
     ResourceHandle hMainCamera = ResourceHandle::FromAlias( "MainCamera" );
     CameraComponent *pCameraComponent = GetResource( hMainCamera, Node )->GetComponent<CameraComponent>( );
@@ -2072,7 +1948,7 @@ void App::SetupForwardRenderer( void )
         {
             m_DepthPrepassRenderTree.Create( Id::Id( "DepthPrepassTree" ) );
             m_DepthPrepassRenderTree.AddNode( pDepthPrepass );
-            m_DepthPrepassRenderTree.AddNode( new ConvertToRenderer( m_DSBuffer, ImageBuffer::ShaderResource ) );
+            m_DepthPrepassRenderTree.AddNode( new ConvertToRenderer( m_DSBuffer, GpuBuffer::State::ShaderResource ) );
 
             AddLinearZ( &m_DepthPrepassRenderTree );
 
@@ -2150,9 +2026,9 @@ void App::SetupForwardRenderer( void )
         {
             m_SceneRenderTree.AddNode( g_pOpaqueRenderer );
             m_SceneRenderTree.AddNode( g_pTransparentRenderer );
-            m_SceneRenderTree.AddNode( new ConvertToRenderer( matProperties, ImageBuffer::ShaderResource ) );
-            m_SceneRenderTree.AddNode( new ConvertToRenderer( normalRt, ImageBuffer::ShaderResource ) );
-            m_SceneRenderTree.AddNode( new ConvertToRenderer( hdrTarget, ImageBuffer::ShaderResource ) );
+            m_SceneRenderTree.AddNode( new ConvertToRenderer( matProperties, GpuBuffer::State::ShaderResource ) );
+            m_SceneRenderTree.AddNode( new ConvertToRenderer( normalRt, GpuBuffer::State::ShaderResource ) );
+            m_SceneRenderTree.AddNode( new ConvertToRenderer( hdrTarget, GpuBuffer::State::ShaderResource ) );
 
             AddHdrMips( &m_SceneRenderTree, hdrMipDesc );
 
@@ -2226,7 +2102,7 @@ void App::TeardownRenderers( void )
         ResourceHandle target = ResourceHandle( pTargets[ index ] );
         if ( IsResourceLoaded( target ) )
         {
-            ImageBuffer *pBuffer = GetResource( target, ImageBuffer );
+            GpuResource *pBuffer = GetResource( target, GpuResource );
             pBuffer->RemoveFromScene( );
             pBuffer->Destroy( );
             delete pBuffer;
@@ -2240,7 +2116,7 @@ void App::TeardownRenderers( void )
         ResourceHandle target = ResourceHandle( g_pHdrMipLevels[ i ] );
         if ( IsResourceLoaded( target ) )
         {
-            ImageBuffer *pBuffer = GetResource( target, ImageBuffer );
+            GpuResource *pBuffer = GetResource( target, GpuResource );
             pBuffer->RemoveFromScene( );
             pBuffer->Destroy( );
             delete pBuffer;
@@ -2252,7 +2128,7 @@ void App::TeardownRenderers( void )
         ResourceHandle target = ResourceHandle( g_pHiZMipLevels[ i ] );
         if ( IsResourceLoaded( target ) )
         {
-            ImageBuffer *pBuffer = GetResource( target, ImageBuffer );
+            GpuResource *pBuffer = GetResource( target, GpuResource );
             pBuffer->RemoveFromScene( );
             pBuffer->Destroy( );
             delete pBuffer;

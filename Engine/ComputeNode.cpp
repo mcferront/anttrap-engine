@@ -73,9 +73,9 @@ void ComputeNode::Render(
     if ( NULL == pBatchCommandList )
     {
         if ( m_UseAsyncCompute )
-            pCommandList = GpuDevice::Instance( ).AllocComputeCommandList( );
+            pCommandList = GpuDevice::Instance( ).AllocPerFrameComputeCommandList( );
         else
-            pCommandList = GpuDevice::Instance( ).AllocGraphicsCommandList( );
+            pCommandList = GpuDevice::Instance( ).AllocPerFrameGraphicsCommandList( );
     }
 
     if ( m_pGpuTimer )

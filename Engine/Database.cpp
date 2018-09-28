@@ -292,13 +292,6 @@ Resource *Database::DeserializeResource(
 
     Resource *pResource = (Resource *) serializer.Deserialize( NULL );
 
-    if ( pResource )
-    {
-        Debug::Assert( Condition( pResource->GetType( ).IsTypeOf( Asset::StaticType( ) ) ),
-            "Database is loading a non asset resource type: %s",
-            pResource->GetType( ).ToString( ) );
-    }
-
     return pResource;
 }
 

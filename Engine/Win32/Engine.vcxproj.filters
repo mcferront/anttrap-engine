@@ -409,9 +409,6 @@
     <ClCompile Include="..\DirectX12\Dx12Material.cpp">
       <Filter>Rendering\DX12</Filter>
     </ClCompile>
-    <ClCompile Include="..\DirectX12\Dx12Texture.cpp">
-      <Filter>Rendering\DX12</Filter>
-    </ClCompile>
     <ClCompile Include="..\DirectX12\Dx12VideoPlayer.cpp">
       <Filter>Rendering\DX12</Filter>
     </ClCompile>
@@ -455,6 +452,12 @@
       <Filter>Rendering\DX12</Filter>
     </ClCompile>
     <ClCompile Include="..\DirectX12\Dx12GpuProfiler.cpp">
+      <Filter>Rendering\DX12</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DirectX12\Dx12GpuBuffer.cpp">
+      <Filter>Rendering\DX12</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DirectX12\Dx12GpuResource.cpp">
       <Filter>Rendering\DX12</Filter>
     </ClCompile>
   </ItemGroup>
@@ -924,9 +927,6 @@
     <ClInclude Include="..\DirectX12\Dx12Shader.h">
       <Filter>Rendering\DX12</Filter>
     </ClInclude>
-    <ClInclude Include="..\DirectX12\Dx12Texture.h">
-      <Filter>Rendering\DX12</Filter>
-    </ClInclude>
     <ClInclude Include="..\DirectX12\Dx12VertexBuffer.h">
       <Filter>Rendering\DX12</Filter>
     </ClInclude>
@@ -983,6 +983,18 @@
     </ClInclude>
     <ClInclude Include="..\DirectX12\Dx12GpuProfiler.h">
       <Filter>Rendering\DX12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\GpuBuffer.h">
+      <Filter>Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="..\DirectX12\Dx12GpuBuffer.h">
+      <Filter>Rendering\DX12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\DirectX12\Dx12GpuResource.h">
+      <Filter>Rendering\DX12</Filter>
+    </ClInclude>
+    <ClInclude Include="..\GpuResource.h">
+      <Filter>Rendering</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

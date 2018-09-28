@@ -62,16 +62,13 @@ void ComputeMaterial::PassData::CloneTo(
         pPassData->pMatrix4s[ c ].offset = pMatrix4s[ c ].offset;
     }
 
-    GraphicsMaterial::CreateConstantBuffer( &pPassData->constantBuffer, constantBuffer.desc.SizeInBytes );
+    GraphicsMaterial::CreateConstantBuffer( &pPassData->constantBuffer, constantBuffer.cbv.desc.SizeInBytes );
 
     if ( NULL != pPassData->constantBuffer.pData )
     {
         memcpy( pPassData->constantBuffer.pData, constantBuffer.pData, sizeof( Vector ) * pPassData->header.totalFloat4s );
-        pPassData->constantBuffer.gpuHandle = GpuDevice::Instance( ).CreateGpuHandle( pPassData->constantBuffer.id );
-        GpuDevice::Instance( ).SetGpuCbv( pPassData->constantBuffer.gpuHandle, pPassData->constantBuffer.desc );
+        GpuDevice::Instance( ).CreateCbv( &pPassData->constantBuffer.cbv );     
     }
-    else
-        pPassData->constantBuffer.gpuHandle = GpuDevice::GpuHandle::Invalid;
 }
 
 GraphicsMaterial::~GraphicsMaterial( void )
@@ -114,16 +111,13 @@ void GraphicsMaterial::PassData::CloneTo(
         pPassData->pMatrix4s[ c ].offset = pMatrix4s[ c ].offset;
     }
 
-    GraphicsMaterial::CreateConstantBuffer( &pPassData->constantBuffer, constantBuffer.desc.SizeInBytes );
+    GraphicsMaterial::CreateConstantBuffer( &pPassData->constantBuffer, constantBuffer.cbv.desc.SizeInBytes );
 
     if ( NULL != pPassData->constantBuffer.pData )
     {
         memcpy( pPassData->constantBuffer.pData, constantBuffer.pData, sizeof( Matrix ) * pPassData->header.totalMatrix4s + sizeof( Vector ) * pPassData->header.totalFloat4s );
-        pPassData->constantBuffer.gpuHandle = GpuDevice::Instance( ).CreateGpuHandle( pPassData->constantBuffer.id );
-        GpuDevice::Instance( ).SetGpuCbv( pPassData->constantBuffer.gpuHandle, pPassData->constantBuffer.desc );
+        GpuDevice::Instance( ).CreateCbv( &pPassData->constantBuffer.cbv );     
     }
-    else
-        pPassData->constantBuffer.gpuHandle = GpuDevice::GpuHandle::Invalid;
 
     pPassData->psoDesc = psoDesc;
     pPassData->pName = StringRef( pName );
@@ -140,13 +134,10 @@ bool GraphicsMaterial::CreateConstantBuffer(
 
     pBuffer->pResource = NULL;
     pBuffer->pData = NULL;
+    pBuffer->cbv = GpuDevice::ConstantBufferView::Invalid;
 
     if ( 0 == size )
-    {
-        D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = {};
-        pBuffer->desc = cbvDesc;
         return true;
-    }
 
     // Create the constant buffer.
     D3D12_HEAP_PROPERTIES heapProperties = { };
@@ -198,7 +189,7 @@ bool GraphicsMaterial::CreateConstantBuffer(
 
         pBuffer->pResource = pConstantBuffer;
         pBuffer->pData = pConstantData;
-        pBuffer->desc = cbvDesc;
+        pBuffer->cbv.desc = cbvDesc;
 
         pBuffer->pResource->SetName( String::ToWideChar(pBuffer->id.ToString()) );
 
@@ -456,8 +447,6 @@ ISerializable *MaterialSerializer::DeserializeComputeMaterial(
 
         Shader *pShader = GetResource( pPass->shader, Shader );
         pShader->SetPSO( &pPass->psoDesc );
-
-        pPass->constantBuffer.gpuHandle = GpuDevice::GpuHandle::Invalid;
     }
 
     ComputeMaterial *pCompute = new ComputeMaterial;
@@ -716,8 +705,6 @@ ISerializable *MaterialSerializer::DeserializeGraphicsMaterial(
 
         Shader *pShader = GetResource( pPass->shader, Shader );
         pShader->SetPSO( &pPass->psoDesc );
-
-        pPass->constantBuffer.gpuHandle = GpuDevice::GpuHandle::Invalid;
     }
 
     GraphicsMaterial *pGraphics = new GraphicsMaterial;

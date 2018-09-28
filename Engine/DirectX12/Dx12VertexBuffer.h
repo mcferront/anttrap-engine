@@ -4,11 +4,13 @@
 #include "Geometry.h"
 #include "MaterialAsset.h"
 
+class GpuBuffer;
+
 class VertexBuffer
 {
 private:
-   ID3D12Resource *m_pVertexBuffer;
-   ID3D12Resource *m_pIndexBuffer;
+   GpuBuffer *m_pVertexBuffer;
+   GpuBuffer *m_pIndexBuffer;
 
    D3D12_VERTEX_BUFFER_VIEW   m_VertexBufferView;
    D3D12_INDEX_BUFFER_VIEW    m_IndexBufferView;

@@ -1,7 +1,7 @@
 #include "EnginePch.h"
 
 #include "Dx12GpuProfiler.h"
-#include "Dx12Texture.h"
+#include "Dx12GpuBuffer.h"
 
 GpuProfiler &GpuProfiler::Instance( void )
 {
@@ -20,15 +20,8 @@ void GpuProfiler::Create( void )
         GpuDevice::Instance( ).GetDevice( )->CreateQueryHeap( &heapDesc, __uuidof(ID3D12QueryHeap*), (void **) &m_pHeap );
 
         for (int i = 0; i < GpuDevice::FrameCount; i++)
-        {
-            m_ReadBuffers[ i ] = ResourceHandle( Id::Create() );
-            
-            ImageBuffer *pBuffer = new ImageBuffer;
-            m_ReadBuffers[ i ].Bind(NULL, pBuffer);
-
-            pBuffer->CreateAsCopyDest( GpuProfiler::MaxTimers * 2 * sizeof(uint64) );
-            pBuffer->AddToScene();
-        }
+            m_ReadBuffers[ i ] = GpuBuffer::CreateBuffer( Id::Create(), GpuResource::Flags::None, GpuResource::State::CopyDest, 
+                                                            GpuProfiler::MaxTimers * 2 * sizeof(uint64), -1, true );
 
         memset( m_pTimers, 0, sizeof(m_pTimers) );
     }
@@ -38,7 +31,7 @@ void GpuProfiler::Destroy( void )
 {
     for (int i = 0; i < GpuDevice::FrameCount; i++)
     {
-        ImageBuffer *pBuffer = GetResource( m_ReadBuffers[i], ImageBuffer );
+        GpuBuffer *pBuffer = GetResource( m_ReadBuffers[i], GpuBuffer );
         pBuffer->RemoveFromScene();
         pBuffer->Destroy( );
         
@@ -94,16 +87,15 @@ void GpuProfiler::ResolveTimers(
 {
     MainThreadCheck;
 
-    D3D12_RANGE range = { 0 };
     uint64 *pSourceData;
     UINT64 gfxFrequency, computeFrequency;
 
     GpuDevice::Instance( ).GetGraphicsQueue( )->GetTimestampFrequency( &gfxFrequency );
     GpuDevice::Instance( ).GetComputeQueue( )->GetTimestampFrequency( &computeFrequency );
 
-    ImageBuffer *pBuffer = GetResource( m_ReadBuffers[ frameIndex ], ImageBuffer );
+    GpuBuffer *pBuffer = GetResource( m_ReadBuffers[ frameIndex ], GpuBuffer );
 
-    pBuffer->GetD3D12Resource( )->Map( 0, &range, (void **) &pSourceData );
+    pSourceData = (uint64 *) pBuffer->Map( );
 
     for (int i = 0; i < GpuProfiler::MaxTimers; i++ )
     {
@@ -111,7 +103,7 @@ void GpuProfiler::ResolveTimers(
             m_pTimers[ i ]->Resolve( gfxFrequency, computeFrequency, pSourceData );
     }
 
-    pBuffer->GetD3D12Resource( )->Unmap( 0, NULL );
+    pBuffer->Unmap( );
 }
     
 GpuTimer::GpuTimer( 
@@ -157,7 +149,7 @@ void GpuTimer::End(
     isCompute = pCommandList->isCompute;
 
     pCommandList->pList->EndQuery( pHeap, D3D12_QUERY_TYPE_TIMESTAMP, slot + 1 );
-    pCommandList->pList->ResolveQueryData( pHeap, D3D12_QUERY_TYPE_TIMESTAMP, slot, 2, GetResource(readBuffers[ frameIndex ], ImageBuffer)->GetD3D12Resource( ), slot * sizeof(uint64) );
+    pCommandList->pList->ResolveQueryData( pHeap, D3D12_QUERY_TYPE_TIMESTAMP, slot, 2, GetResource(readBuffers[ frameIndex ], GpuBuffer)->GetApiResource( ), slot * sizeof(uint64) );
 }
 
 void GpuTimer::Resolve( 

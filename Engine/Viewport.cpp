@@ -6,6 +6,7 @@
 #include "Node.h"
 #include "CameraComponent.h"
 #include "MaterialAsset.h"
+#include "GpuBuffer.h"
 
 void Viewport::Create(
    int width,
@@ -119,22 +120,22 @@ bool Viewport::ShouldRender( void )
 bool Viewport::MakeActive( void )
 {
 #if defined DIRECTX12
-   ImageBuffer *pDepthStencil;
+    GpuBuffer *pDepthStencil;
 
    if ( m_hDepthStencil != NullHandle )
-      pDepthStencil = GetResource( m_hDepthStencil, ImageBuffer );
+      pDepthStencil = GetResource( m_hDepthStencil, GpuBuffer );
    else 
       pDepthStencil = NULL;
 
    if ( NULL == pDepthStencil && 0 == m_NumRenderTargets )
       return false;
 
-   ImageBuffer *pRenderTargets[ RenderContexts::MaxRenderTargets ];
+   GpuBuffer *pRenderTargets[ RenderContexts::MaxRenderTargets ];
 
    for ( uint32 i = 0; i < m_NumRenderTargets; i++ )
-      pRenderTargets[i] = GetResource( m_hRenderTargets[i], ImageBuffer );
+      pRenderTargets[i] = GetResource( m_hRenderTargets[i], GpuBuffer );
  
-   ImageBuffer *pDimn = m_NumRenderTargets > 0 ? pRenderTargets[0] : pDepthStencil;
+   GpuBuffer *pDimn = m_NumRenderTargets > 0 ? pRenderTargets[0] : pDepthStencil;
    
    ViewportRect viewport =
    {
@@ -169,16 +170,16 @@ bool Viewport::MakeActive( void )
    if ( ( (int) viewport.width ) <= 0 || ( (int) viewport.height ) <= 0 )
       return false;
 
-   GpuDevice::CommandList *pList = GpuDevice::Instance( ).AllocGraphicsCommandList( );
+   GpuDevice::CommandList *pList = GpuDevice::Instance( ).AllocPerFrameGraphicsCommandList( );
 
    // TODO: these should be handled in the render trees
    // but it requires the viewport to not be made active before they're sest
    // maybe we make setting the viewport part of the render tree operations or nodes
    for ( uint32 i = 0; i < m_NumRenderTargets; i++ )
-      pRenderTargets[i]->ConvertTo( ImageBuffer::RenderTarget, pList );
+      pRenderTargets[i]->TransitionTo( pList, GpuResource::State::RenderTarget );
 
    if ( NULL != pDepthStencil )
-      pDepthStencil->ConvertTo( ImageBuffer::DepthWriteResource, pList );
+      pDepthStencil->TransitionTo( pList, GpuResource::State::DepthWriteResource );
 
    Set( pList );
 
@@ -188,10 +189,10 @@ bool Viewport::MakeActive( void )
    bool clearStencil = false;
 
 	for ( uint32 i = 0; i < m_NumRenderTargets; i++ )
-		GpuDevice::ClearRenderTarget( pList, pRenderTargets[i], clearColor, &m_ClearColor );
+		GpuDevice::ClearRenderTarget( pList, pRenderTargets[i]->GetRtv(), clearColor, &m_ClearColor );
    
 	if ( NULL != pDepthStencil )
-		GpuDevice::ClearDepthStencil( pList, pDepthStencil, clearDepth, 0.0f, clearStencil, 0 );
+		GpuDevice::ClearDepthStencil( pList, pDepthStencil->GetDsv(), clearDepth, 0.0f, clearStencil, 0 );
 
    GpuDevice::Instance( ).ExecuteCommandLists( &pList, 1 );
 #else
@@ -231,13 +232,14 @@ void Viewport::Set(
       scissor.bottom = (LONG) m_Viewport.height;
    }
 
-   ImageBuffer *pDepthStencil, *pRenderTargets[ RenderContexts::MaxRenderTargets ];
+   GpuDevice::RenderTargetView *pRenderTargets[ RenderContexts::MaxRenderTargets ];
+   GpuDevice::DepthStencilView *pDepthStencil;
 
    for ( uint32 i = 0; i < m_NumRenderTargets; i++ )
-      pRenderTargets[i] = GetResource( m_hRenderTargets[i], ImageBuffer );
+      pRenderTargets[i] = GetResource( m_hRenderTargets[i], GpuBuffer )->GetRtv();
 
    if ( m_hDepthStencil != NullHandle )
-      pDepthStencil = GetResource( m_hDepthStencil, ImageBuffer );
+      pDepthStencil = GetResource( m_hDepthStencil, GpuBuffer )->GetDsv();
    else
       pDepthStencil = NULL;
 
@@ -342,8 +344,8 @@ Vector2 GetMaterialSize(
 
       Texture *pTexture = GetResource( texture, Texture );
 
-      float quadWidth = (float) pTexture->GetDesiredWidth( );
-      float quadHeight = (float) pTexture->GetDesiredHeight( );
+      float quadWidth = (float) pTexture->GetWidth( );
+      float quadHeight = (float) pTexture->GetHeight( );
 
       v = Vector2( quadWidth, quadHeight );
 
@@ -375,8 +377,8 @@ Vector2 GetMaterialUV(
 
       Texture *pTexture = GetResource( texture, Texture );
 
-      u = pTexture->GetDesiredWidth( ) / (float) pTexture->GetActualWidth( );
-      v = pTexture->GetDesiredHeight( ) / (float) pTexture->GetActualHeight( );
+      u = pTexture->GetWidth( ) / (float) pTexture->GetWidth( );
+      v = pTexture->GetHeight( ) / (float) pTexture->GetHeight( );
 
    } while ( false );
 

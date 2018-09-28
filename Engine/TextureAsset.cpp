@@ -1,120 +1,14 @@
 #include "EnginePch.h"
 
 #include "TextureAsset.h"
-#include "IOStreams.h"
+#include "Log.h"
 
-
-#if defined OPENGL
-
-//for glCheckError
-#include "GlShader.h"
-
-DefineResourceType(Texture, Asset, new TextureSerializer);
+DefineResourceType( Texture, GpuBuffer, new TextureSerializer );
 
 ISerializable *TextureSerializer::Deserialize(
     Serializer *pSerializer,
     ISerializable *pSerializable
-    )
-{
-    const uint32 Version = 4;
-
-    glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
-
-    Texture::Header header;
-
-    if ( NULL == pSerializable ) pSerializable = new Texture; 
-
-    Texture *pTexture = (Texture *) pSerializable;
-
-    pSerializer->GetInputStream( )->Read( &header, sizeof(header), NULL );
-    Debug::Assert( Condition(header.version == Version), "Incorrect texture version: %d, expecting: %d", header.version, Version );
-
-    int *pMipSizes = (int *) malloc( header.mipLevels * sizeof(int) );
-    pSerializer->GetInputStream( )->Read( pMipSizes, header.mipLevels * sizeof(int) );
-
-    Id id = Id::Deserialize( pSerializer->GetInputStream() );
-
-    pTexture->Create( id );
-
-    pTexture->m_DesiredWidth  = header.desiredWidth;
-    pTexture->m_DesiredHeight = header.desiredHeight;
-    pTexture->m_ActualWidth   = header.actualWidth;
-    pTexture->m_ActualHeight  = header.actualHeight;
-    pTexture->m_MipLevels     = header.mipLevels;
-    pTexture->m_pMipSizes     = pMipSizes;
-
-    BYTE *pData = (BYTE *) malloc( header.size );
-    pSerializer->GetInputStream( )->Read( pData, header.size, NULL );
-
-    memcpy(&pTexture->m_Header, &header, sizeof(header));
-
-    pTexture->m_pData = pData;
-    pTexture->m_NeedsReload = true;
-
-    return pSerializable;
-}
-
-void Texture::Reload( void )
-{
-    if ( false == m_NeedsReload ) return;
-    m_NeedsReload = false;
-
-    if ( 0 != m_glTexture ) glDeleteTextures( 1, &m_glTexture );
-
-    Debug::Print( Debug::TypeInfo, "Recreating Texture %s\n", GetId().ToString() );
-
-    if ( NULL == m_pData )
-        Debug::Print( Debug::TypeError, "Recreating Texture %s with NULL Data!\n", GetId().ToString() );
-
-    glPixelStorei( GL_UNPACK_ALIGNMENT, 1 );
-
-    glGenTextures( 1, &m_glTexture );
-    glBindTexture( GL_TEXTURE_2D, m_glTexture );
-
-    char *pData = (char *) m_pData;
-
-    int width = m_ActualWidth;
-    int height= m_ActualHeight;
-
-    for ( uint32 i = 0; i < m_MipLevels; i++ )
-    {
-        if ( 0 == m_Header.compressed )
-        {
-            glTexImage2D( GL_TEXTURE_2D, i, (GLenum) m_Header.pixelFormat, width, height, 0, (GLenum) m_Header.format, m_Header.type, pData );
-            glCheckError("glTexImage2D");
-        }
-        else
-        {
-            glCompressedTexImage2D( GL_TEXTURE_2D, i, (GLenum) m_Header.format, width, height, 0, m_pMipSizes[i], pData );
-            glCheckError("glCompressedTexImage2D");
-        }
-
-        if ( width > 1 )
-            width = width / 2.0f;
-        
-        if ( height > 1 )
-            height = height / 2.0f;
-
-        pData += m_pMipSizes[ i ];
-    }
-
-    free( m_pData );
-    free( m_pMipSizes );
-
-    m_pMipSizes = NULL;
-    m_pData = NULL;
-}
-
-#elif defined DIRECTX9
-
-#include "Dx9.h"
-
-DefineResourceType(Texture, Asset, new TextureSerializer);
-
-ISerializable *TextureSerializer::Deserialize(
-    Serializer *pSerializer,
-    ISerializable *pSerializable
-    )
+)
 {
     const uint32 Version = 1;
 
@@ -129,45 +23,119 @@ ISerializable *TextureSerializer::Deserialize(
 
     Header header;
 
-    if ( NULL == pSerializable ) pSerializable = Instantiate(); 
+    if ( NULL == pSerializable ) pSerializable = Instantiate( );
 
     Texture *pTexture = (Texture *) pSerializable;
 
-    pSerializer->GetInputStream( )->Read( &header, sizeof(header), NULL );
-    Debug::Assert( Condition(header.version == Version), "Incorrect texture version: %d, expecting: %d", header.version, Version );
+    pSerializer->GetInputStream( )->Read( &header, sizeof( header ), NULL );
+    Debug::Assert( Condition( header.version == Version ), "Incorrect texture version: %d, expecting: %d", header.version, Version );
 
-    int *pMipSizes = (int *) malloc( header.mipLevels * sizeof(int) );
-    pSerializer->GetInputStream( )->Read( pMipSizes, header.mipLevels * sizeof(int) );
+    pSerializer->GetInputStream( )->Seek( header.mipLevels * sizeof( int ), SeekCurrent );
 
-    pTexture->m_DesiredWidth  = header.desiredWidth;
-    pTexture->m_DesiredHeight = header.desiredHeight;
-    pTexture->m_ActualWidth   = header.actualWidth;
-    pTexture->m_ActualHeight  = header.actualHeight;
-    pTexture->m_HasMips       = header.mipLevels > 1;
+    DXGI_FORMAT format;
 
-    HRESULT hr = Dx9::Instance( ).GetDevice( )->CreateTexture( header.actualWidth, header.actualHeight, header.mipLevels, NULL, (D3DFORMAT) header.format, D3DPOOL_MANAGED, &pTexture->m_pTexture, NULL );
-    Debug::Assert( Condition(SUCCEEDED(hr)), "Failed to create texture: 0x%08x", hr );
-
-    IDirect3DSurface9 *pSurface;
-
-    for ( uint32 i = 0; i < header.mipLevels; i++ )
+    //TODO: DX12 - real format support
+    switch ( header.format )
     {
-        hr = pTexture->m_pTexture->GetSurfaceLevel( i, &pSurface );
-        Debug::Assert( Condition(SUCCEEDED(hr)), "Failed to get surface for texture: 0x%08x", hr );
+    case 21:
+        format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        break;
 
-        D3DLOCKED_RECT rect;
-        hr = pSurface->LockRect( &rect, NULL, 0 );
-        Debug::Assert( Condition(SUCCEEDED(hr)), "Failed to lock surface for texture: 0x%08x", hr );
+    case MAKEFOURCC( 'D', 'X', 'T', '1' ):
+        format = DXGI_FORMAT_BC1_UNORM_SRGB;
+        break;
 
-        pSerializer->GetInputStream( )->Read( rect.pBits, pMipSizes[i], NULL );
-        pSurface->UnlockRect( );
+    case MAKEFOURCC( 'D', 'X', 'T', '2' ):
+    case MAKEFOURCC( 'D', 'X', 'T', '3' ):
+        format = DXGI_FORMAT_BC2_UNORM_SRGB;
+        break;
 
-        pSurface->Release( );
+    case MAKEFOURCC( 'D', 'X', 'T', '4' ):
+        format = DXGI_FORMAT_BC3_UNORM_SRGB;
+        break;
+    case MAKEFOURCC( 'D', 'X', 'T', '5' ):
+        format = DXGI_FORMAT_BC3_UNORM;
+        break;
+
+    default:
+        Debug::Assert( Condition( false ), "Unsupported texture format" );
     }
 
+    pTexture->Create( GpuBuffer::Heap::Default, GpuBuffer::State::CopyDest, GpuBuffer::Flags::None, (GpuResource::Format::Type) format, header.actualWidth, header.actualHeight, 1, -1, header.mipLevels, NULL, NULL );
 
-    free( pMipSizes );
+#ifdef DIRECTX12
+    GpuDevice::CommandList *pCommandList = NULL;
+    uint32 *pNumRows = NULL;
+    uint64 *pRowSizeInBytes = NULL;
+    D3D12_PLACED_SUBRESOURCE_FOOTPRINT *pDestLayouts = NULL;
 
-    return pSerializable;
-}
+    pCommandList = GpuDevice::Instance( ).AllocThreadCommandList( );
+
+    // Ask the device for the layout of the data so we know how to copy it
+    uint64 requiredSize;
+    pNumRows = (uint32 *) malloc( sizeof( uint32 ) * header.mipLevels );
+    pRowSizeInBytes = (uint64 *) malloc( sizeof( uint64 ) * header.mipLevels );
+    pDestLayouts = (D3D12_PLACED_SUBRESOURCE_FOOTPRINT *) malloc( sizeof( D3D12_PLACED_SUBRESOURCE_FOOTPRINT ) * header.mipLevels );
+
+    GpuDevice::Instance( ).GetDevice( )->GetCopyableFootprints( &pTexture->GetApiResource( )->GetDesc( ), 0, header.mipLevels, 0, pDestLayouts, pNumRows, pRowSizeInBytes, &requiredSize );
+
+    GpuBuffer *pUpload = new GpuBuffer;
+    pUpload->Create( GpuResource::Heap::Upload, GpuResource::State::GenericRead, GpuResource::Flags::None,
+        GpuResource::Format::Unknown, (size_t) requiredSize, 1, 1, -1, 1, true, NULL, NULL );
+
+    byte *pHead = (byte *) pUpload->Map( );
+
+    // Copy the data to the upload buffer
+    for ( uint32 i = 0; i < header.mipLevels; i++ )
+    {
+        uint32 c;
+
+        uint32 numRows = pNumRows[i];
+        uint64 rowSizeInBytes = pRowSizeInBytes[i];
+
+        byte *pData = pHead + pDestLayouts[i].Offset;
+
+        for ( c = 0; c < numRows; c++ )
+        {
+            pSerializer->GetInputStream( )->Read( pData, (uint32) rowSizeInBytes, NULL );
+            pData += pDestLayouts[i].Footprint.RowPitch;
+        }
+    }
+
+    pUpload->Unmap( );
+
+    // copy each mip level over to the texture
+    for ( uint32 i = 0; i < header.mipLevels; i++ )
+    {
+        D3D12_TEXTURE_COPY_LOCATION dest = { };
+        dest.pResource = pTexture->GetApiResource( );
+        dest.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
+        dest.SubresourceIndex = i;
+
+        // tell the GPU how to interpret this unknown buffer
+        // by giving it the layout desc of the texture it contains
+        D3D12_TEXTURE_COPY_LOCATION source = { };
+        source.pResource = pUpload->GetApiResource( );
+        source.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
+        source.PlacedFootprint = pDestLayouts[i];
+
+        pCommandList->pList->CopyTextureRegion( &dest, 0, 0, 0, &source, NULL );
+    }
+
+    // Ask the GPU to transition the texture memory type from copy to a shader resource
+    pTexture->TransitionTo( pCommandList, GpuResource::State::PixelShaderResource );
+
+    GpuDevice::Instance( ).ExecuteCommandLists( &pCommandList, 1, true );
+
+    free( pNumRows );
+    free( pRowSizeInBytes );
+    free( pDestLayouts );
+
+    pUpload->Destroy( );
+    delete pUpload;
+#else
+#error Graphics API not defined
 #endif
+
+    return pTexture;
+}

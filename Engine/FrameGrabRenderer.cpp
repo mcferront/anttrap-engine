@@ -1,7 +1,7 @@
 #include "EnginePch.h"
 
 #include "FrameGrabRenderer.h"
-#include "TextureAsset.h"
+#include "GpuBuffer.h"
 #include "FileStreams.h"
 
 FrameGrabRenderer::FrameGrabRenderer(
@@ -45,25 +45,25 @@ void FrameGrabRenderer::Render(
    if ( false == m_GrabFrame )
       return;
 
-   ImageBuffer *pSource = GetResource( m_ImageBuffer, ImageBuffer );
+   GpuBuffer *pSource = GetResource( m_ImageBuffer, GpuBuffer );
 
-#ifdef DIRECTX12
-   D3D12_HEAP_PROPERTIES heapProperties = { };
-   {
-      heapProperties.Type = D3D12_HEAP_TYPE_READBACK;
-      heapProperties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
-      heapProperties.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
-      heapProperties.CreationNodeMask = 1;
-      heapProperties.VisibleNodeMask = 1;
-   }
+//#ifdef DIRECTX12
+   //D3D12_HEAP_PROPERTIES heapProperties = { };
+   //{
+   //   heapProperties.Type = D3D12_HEAP_TYPE_READBACK;
+   //   heapProperties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+   //   heapProperties.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+   //   heapProperties.CreationNodeMask = 1;
+   //   heapProperties.VisibleNodeMask = 1;
+   //}
 
-   D3D12_RESOURCE_DESC desc = pSource->GetD3D12Resource( )->GetDesc( );
+   //D3D12_RESOURCE_DESC desc = pSource->GetD3D12Resource( )->GetDesc( );
 
    // Create a staging texture
-   if ( m_Width != desc.Width || m_Height != desc.Height )
+   if ( m_Width != pSource->GetWidth() || m_Height != pSource->GetHeight() )
    {
-      m_Width = (int) desc.Width;
-      m_Height = (int) desc.Height;
+      m_Width = (int) pSource->GetWidth();
+      m_Height = (int) pSource->GetHeight();
 
       m_ImageSize = Align(m_Width, 256) * m_Height * 4;
 
@@ -76,101 +76,102 @@ void FrameGrabRenderer::Render(
 
    if ( NULL == m_pCapturedImage )
    {
-      D3D12_RESOURCE_DESC bufferDesc = {};
-      {
-         bufferDesc.Alignment = D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;
-         bufferDesc.DepthOrArraySize = 1;
-         bufferDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-         bufferDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
-         bufferDesc.Format = DXGI_FORMAT_UNKNOWN;
-         bufferDesc.Height = 1;
-         bufferDesc.Width = m_ImageSize;
-         bufferDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-         bufferDesc.MipLevels = 1;
-         bufferDesc.SampleDesc.Count = 1;
-         bufferDesc.SampleDesc.Quality = 0;
-      }
+      //D3D12_RESOURCE_DESC bufferDesc = {};
+      //{
+      //   bufferDesc.Alignment = D3D12_DEFAULT_RESOURCE_PLACEMENT_ALIGNMENT;
+      //   bufferDesc.DepthOrArraySize = 1;
+      //   bufferDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+      //   bufferDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
+      //   bufferDesc.Format = DXGI_FORMAT_UNKNOWN;
+      //   bufferDesc.Height = 1;
+      //   bufferDesc.Width = m_ImageSize;
+      //   bufferDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+      //   bufferDesc.MipLevels = 1;
+      //   bufferDesc.SampleDesc.Count = 1;
+      //   bufferDesc.SampleDesc.Quality = 0;
+      //}
 
-      HRESULT hr;
+      m_pCapturedImage = new GpuBuffer;
+      m_pCapturedImage->Create( GpuBuffer::Heap::Readback, GpuBuffer::State::CopyDest, GpuResource::Flags::None,
+                                GpuResource::Format::Unknown, m_ImageSize, 1, 1, -1, 1, true, NULL );
 
-      ID3D12Resource *pStaging;
+      //HRESULT hr;
 
-      hr = GpuDevice::Instance( ).GetDevice( )->CreateCommittedResource(
-         &heapProperties,
-         D3D12_HEAP_FLAG_NONE,
-         &bufferDesc,
-         D3D12_RESOURCE_STATE_COPY_DEST,
-         nullptr,
-         __uuidof( ID3D12Resource ),
-         (void **) &pStaging );
+      //ID3D12Resource *pStaging;
 
-      if ( FAILED( hr ) )
-         return;
+      //hr = GpuDevice::Instance( ).GetDevice( )->CreateCommittedResource(
+      //   &heapProperties,
+      //   D3D12_HEAP_FLAG_NONE,
+      //   &bufferDesc,
+      //   D3D12_RESOURCE_STATE_COPY_DEST,
+      //   nullptr,
+      //   __uuidof( ID3D12Resource ),
+      //   (void **) &pStaging );
 
-      m_pCapturedImage = new ImageBuffer;
-      m_pCapturedImage->Create( pStaging, ImageBuffer::ViewType::CopyDest );
+      //if ( FAILED( hr ) )
+      //   return;
+
+      //m_pCapturedImage->Create( pStaging, ImageBuffer::ViewType::CopyDest );
    }
 
-   ImageBuffer::ViewType viewType = pSource->GetViewType( );
+   GpuBuffer::State::Type state = pSource->GetState( );
    {
       GpuDevice::CommandList *pCommandList = pBatchCommandList;
       
       if ( NULL == pBatchCommandList )
-          pCommandList = GpuDevice::Instance( ).AllocGraphicsCommandList( );
+          pCommandList = GpuDevice::Instance( ).AllocPerFrameGraphicsCommandList( );
 
-      m_pCapturedImage->ConvertTo( ImageBuffer::ViewType::CopyDest, pCommandList );
-      pSource->ConvertTo( ImageBuffer::ViewType::CopySource, pCommandList );
+      m_pCapturedImage->TransitionTo( pCommandList, GpuBuffer::State::CopyDest );
+      pSource->TransitionTo( pCommandList, GpuBuffer::State::CopySource );
 
-      // Get the copy target location
-      D3D12_PLACED_SUBRESOURCE_FOOTPRINT bufferFootprint = { 0 };
-      {
-         bufferFootprint.Footprint.Width = (UINT) desc.Width;
-         bufferFootprint.Footprint.Height = desc.Height;
-         bufferFootprint.Footprint.Depth = 1;
-         bufferFootprint.Footprint.RowPitch = (UINT) Align(desc.Width * 4, 256);
-         bufferFootprint.Footprint.Format = desc.Format;
-      }
+      GpuDevice::Instance( ).CopyResource( pCommandList, m_pCapturedImage, pSource );
 
-      D3D12_TEXTURE_COPY_LOCATION copySource = { 0 };
-      {
-         copySource.pResource = pSource->GetD3D12Resource( );
-      }
+      //// Get the copy target location
+      //D3D12_PLACED_SUBRESOURCE_FOOTPRINT bufferFootprint = { 0 };
+      //{
+      //   bufferFootprint.Footprint.Width = (UINT) desc.Width;
+      //   bufferFootprint.Footprint.Height = desc.Height;
+      //   bufferFootprint.Footprint.Depth = 1;
+      //   bufferFootprint.Footprint.RowPitch = (UINT) Align(desc.Width * 4, 256);
+      //   bufferFootprint.Footprint.Format = desc.Format;
+      //}
 
-      D3D12_TEXTURE_COPY_LOCATION copyDest = { 0 };
-      {
-         copyDest.pResource = m_pCapturedImage->GetD3D12Resource( );
-         copyDest.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
-         copyDest.PlacedFootprint = bufferFootprint;
-      }
+      //D3D12_TEXTURE_COPY_LOCATION copySource = { 0 };
+      //{
+      //   copySource.pResource = pSource->GetD3D12Resource( );
+      //}
 
-      // Copy the texture
-      pCommandList->pList->CopyTextureRegion( &copyDest, 0, 0, 0, &copySource, nullptr );
+      //D3D12_TEXTURE_COPY_LOCATION copyDest = { 0 };
+      //{
+      //   copyDest.pResource = m_pCapturedImage->GetD3D12Resource( );
+      //   copyDest.Type = D3D12_TEXTURE_COPY_TYPE_PLACED_FOOTPRINT;
+      //   copyDest.PlacedFootprint = bufferFootprint;
+      //}
+
+      //// Copy the texture
+      //pCommandList->pList->CopyTextureRegion( &copyDest, 0, 0, 0, &copySource, nullptr );
 
       // Transition the resource to the next state
-      pSource->ConvertTo( viewType, pCommandList );
+      pSource->TransitionTo( pCommandList, state );
 
       if ( NULL == pBatchCommandList )
           GpuDevice::Instance( ).ExecuteCommandLists( &pCommandList, 1 );
    }
 
    m_GrabFrame = false;
-#endif
+//#endif
 }
 
 bool FrameGrabRenderer::SaveFile(
    const char *pFilename
 )
 {
-   ID3D12Resource *pResource;
    byte *pSourceData;
 
    if ( NULL == m_pCapturedImage )
       return false;
 
-   pResource = m_pCapturedImage->GetD3D12Resource( );
-
-   D3D12_RANGE range = { 0 };
-   pResource->Map( 0, &range, (void **) &pSourceData );
+   pSourceData = (byte *) m_pCapturedImage->Map( );
 
    typedef struct _color
    {
@@ -198,8 +199,6 @@ bool FrameGrabRenderer::SaveFile(
          }
       }
    }
-
-   pResource->Unmap( 0, NULL );
 
 
    //needed for beyond compare to 

@@ -14,6 +14,11 @@ enum TOKENS
 
 void RenderTree::Destroy( void )
 {
+    if ( false == m_Created )
+        return;
+
+    m_Created = false;
+
     List<Renderer*> uniqueNodes; uniqueNodes.Create( );
 
     int i, size = m_Nodes.GetSize( );
@@ -89,7 +94,7 @@ void RenderTree::Render(
         pRenderer = m_Nodes.GetAt( i );
         
         if ( (nuint) pRenderer == BATCH_START )
-            pCommandList = GpuDevice::Instance( ).AllocGraphicsCommandList( );
+            pCommandList = GpuDevice::Instance( ).AllocPerFrameGraphicsCommandList( );
         else if ( (nuint) pRenderer == BATCH_END )
         {
             GpuDevice::Instance( ).ExecuteCommandLists( &pCommandList, 1 );

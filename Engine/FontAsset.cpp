@@ -43,7 +43,7 @@ uint32 Font::GetCharacterCount(
 
    while ( *pCharacter )
    {
-      limitX -= pFontMap->GetCharacter( *pCharacter - 32 )->width * pTexture->GetDesiredWidth( ) + spacingWidth;
+      limitX -= pFontMap->GetCharacter( *pCharacter - 32 )->width * pTexture->GetWidth( ) + spacingWidth;
       
       if ( limitX < 0.0f ) 
       {
@@ -78,7 +78,7 @@ float Font::GetStringWidth(
 
    while ( (size_t)(pCharacter - pString) < maxChars && *pCharacter )
    {
-      width += pFontMap->GetCharacter( *pCharacter - 32 )->width * pTexture->GetDesiredWidth( ) + spacingWidth;
+      width += pFontMap->GetCharacter( *pCharacter - 32 )->width * pTexture->GetWidth( ) + spacingWidth;
       ++pCharacter;
    }
    
@@ -113,8 +113,8 @@ void Font::GetMaxCharacterSize(
 
    while ( *pCharacter )
    {
-      size.x = pFontMap->GetCharacter( *pCharacter - 32 )->width  * pTexture->GetDesiredWidth( ) + spacingWidth;
-      size.y = pFontMap->GetCharacter( *pCharacter - 32 )->height * pTexture->GetDesiredHeight( )+ spacingHeight;
+      size.x = pFontMap->GetCharacter( *pCharacter - 32 )->width  * pTexture->GetWidth( ) + spacingWidth;
+      size.y = pFontMap->GetCharacter( *pCharacter - 32 )->height * pTexture->GetHeight( )+ spacingHeight;
       
       Math::Max( pSize, size, *pSize );
       
@@ -154,14 +154,14 @@ uint32 Font::Draw(
    //force uv coordinates to round down to the pixel instead of choosing nearest.
    //this more closely matches bi-linear results and vastly decreases the 'wavy' appearance of small characters in a line
    float halfStepX = 0;
-   float halfStepY = - 0.5f / pTexture->GetActualHeight( );
+   float halfStepY = - 0.5f / pTexture->GetHeight( );
 
    for ( i = 0; i < length; i++ )
    {
       FontMap::CharacterDesc *pDesc = pFontMap->GetCharacter( pString[i] - 32 );
 
-      float charWidth  = pDesc->width  * pTexture->GetDesiredWidth( );
-      float charHeight = pDesc->height * pTexture->GetDesiredHeight( );
+      float charWidth  = pDesc->width  * pTexture->GetWidth( );
+      float charHeight = pDesc->height * pTexture->GetHeight( );
 
       y = startY - (charHeight);
 

@@ -4,6 +4,7 @@
 #include "Dx12.h"
 #include "Dx12MaterialObject.h"
 #include "Dx12VertexBuffer.h"
+#include "Dx12GpuBuffer.h"
 #include "RenderWorld.h"
 
 void ExecuteIndirect::Create(
@@ -87,18 +88,17 @@ void ExecuteIndirect::Render(
 
    pVertexBuffer->Set( desc.pCommandList );
 
-   ImageBuffer *pIndirectArgs = GetResource( indirectArgs, ImageBuffer );
+   GpuBuffer *pIndirectArgs = GetResource( indirectArgs, GpuBuffer );
 
-   //pIndirectArgs->Barrier( Texture::Barrier::Uav, desc.pCommandList );
-   pIndirectArgs->ConvertTo( ImageBuffer::IndirectArg, desc.pCommandList );
+   pIndirectArgs->TransitionTo( desc.pCommandList, GpuBuffer::State::IndirectArg );
 
    desc.pCommandList->pList->ExecuteIndirect(
       pSig,
       1,
-      pIndirectArgs->GetD3D12Resource(),
+      pIndirectArgs->GetApiResource(),
       indirectArgsOffset,
       NULL,
       0 );
 
-   pIndirectArgs->ConvertTo( ImageBuffer::UavResource, desc.pCommandList );
+   pIndirectArgs->TransitionTo( desc.pCommandList, GpuBuffer::State::UnorderedAccess );
 }

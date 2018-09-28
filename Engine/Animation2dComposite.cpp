@@ -15,8 +15,7 @@ void Animation2dComposite::Create(
    m_Animations.Create( 16, 16, IdHash, IdCompare );
    
    m_pOutputTexture = new WrappedTexture;
-   m_pOutputTexture->Create( );
-
+   
    if ( identityFramemap != (int)NULL )
    {
       FrameMap *pFrameMap = GetResource( identityFramemap, FrameMap );

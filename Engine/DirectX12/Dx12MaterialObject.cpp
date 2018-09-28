@@ -1,7 +1,7 @@
 #include "EnginePch.h"
 
 #include "Dx12MaterialObject.h"
-#include "TextureAsset.h"
+#include "GpuBuffer.h"
 #include "Dx12Contexts.h"
 #include "ShaderAsset.h"
 #include "Renderer.h"
@@ -87,20 +87,14 @@ void GraphicsMaterialObject::SetRenderData(
 {
    const GraphicsMaterial::PassData *pData = pPass->pData;
 
-   ID3D12DescriptorHeap* pHeaps[ 1 ];
-
-   int heapIndex = 0;
    int descIndex = 0;
 
-   pHeaps[ heapIndex++ ] = GpuDevice::Instance( ).GetDescHeap( );
-   pCommandList->pList->SetDescriptorHeaps( heapIndex, pHeaps );
+   GpuDevice::Instance( ).SetCommonHeaps( pCommandList );
 
-   if ( pData->constantBuffer.gpuHandle != GpuDevice::GpuHandle::Invalid )
+   if ( pData->constantBuffer.cbv.view.pHeap )
    {
-      D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle = GpuDevice::Instance( ).GetGpuCbvHandle( pData->constantBuffer.gpuHandle );
-
-      pCommandList->pList->SetGraphicsRootDescriptorTable( descIndex++, gpuHandle ); //vtx shader constats
-      pCommandList->pList->SetGraphicsRootDescriptorTable( descIndex++, gpuHandle ); //pxl shader constants
+      pCommandList->pList->SetGraphicsRootDescriptorTable( descIndex++, pData->constantBuffer.cbv.view.gpuHandle ); //vtx shader constats
+      pCommandList->pList->SetGraphicsRootDescriptorTable( descIndex++, pData->constantBuffer.cbv.view.gpuHandle ); //pxl shader constants
    }
    else
    {
@@ -110,11 +104,8 @@ void GraphicsMaterialObject::SetRenderData(
 
    for ( int c = 0; c < pData->header.numTextures; c++ )
    {
-      ImageBuffer *pImage = GetResource(pData->pTextures[ c ].texture, ImageBuffer);
-      GpuDevice::GpuHandle gpuHandle = pImage->GetGpuHandle();
-
-      D3D12_GPU_DESCRIPTOR_HANDLE d3d12GpuHandle = GpuDevice::Instance( ).GetGpuSrvHandle( gpuHandle );
-      pCommandList->pList->SetGraphicsRootDescriptorTable( descIndex++, d3d12GpuHandle );
+      GpuBuffer *pImage = GetResource(pData->pTextures[ c ].texture, GpuBuffer);
+      pCommandList->pList->SetGraphicsRootDescriptorTable( descIndex++, pImage->GetSrv()->view.gpuHandle );
    }
 }
 
@@ -163,7 +154,11 @@ RenderContext GraphicsMaterialObject::GetRenderContext(
       pPass->vertexContext = vertexContext;
       pPass->viewportContext = viewportContext;
       
-      pPass->pPipelineState = RenderContexts::RegisterPipelineState( pPass->psoDesc, viewportContext, vertexContext ); 
+      char full_path[256];
+#ifdef _DEBUG
+      String::Format( full_path, sizeof(full_path), "%s %s", m_Material.GetId().ToString(), pPassName );
+#endif
+      pPass->pPipelineState = RenderContexts::RegisterPipelineState( full_path, pPass->psoDesc, viewportContext, vertexContext ); 
 
       i = m_PassContexts.Add( pPass );
    }

@@ -7,16 +7,77 @@
 #include "Resource.h"
 
 #ifndef DIRECTX12
-   #error This should not be included
+#error This should not be included
 #endif
 
 #define GRAPHICS_API_SZ "DirectX 12"
 
 class Texture;
-typedef Texture ImageBuffer;
+
+class GpuBuffer;
+class GpuResource;
 
 class GpuDevice
 {
+private:
+    struct DescHeap
+    {
+        ID3D12DescriptorHeap *pHeap;
+
+        size_t numDescriptors;
+        size_t descHandleIncSize;
+
+        D3D12_CPU_DESCRIPTOR_HANDLE cpuBaseHandle;
+        D3D12_GPU_DESCRIPTOR_HANDLE gpuBaseHandle;
+
+        size_t maxDescriptors;
+
+        DescHeap( void )
+        {
+            pHeap = NULL;
+            numDescriptors = 0;
+        }
+
+        void Create( D3D12_DESCRIPTOR_HEAP_TYPE type, D3D12_DESCRIPTOR_HEAP_FLAGS flags, uint32 _maxDescriptors )
+        {
+            maxDescriptors = _maxDescriptors;
+
+            D3D12_DESCRIPTOR_HEAP_DESC desc = { };
+            {
+                desc.NumDescriptors = maxDescriptors;
+                desc.Type = type;
+                desc.Flags = flags;
+            }
+
+            HRESULT hr = GpuDevice::Instance( ).GetDevice( )->CreateDescriptorHeap( &desc, __uuidof(ID3D12DescriptorHeap), (void **) &pHeap );
+            Debug::Assert( Condition( SUCCEEDED( hr ) ), "Failed to CreateDescriptorHeap (0x%08x)", hr );
+
+            pHeap->SetName( String::ToWideChar( "DescHeap" ) );
+
+            descHandleIncSize = GpuDevice::Instance( ).GetDevice( )->GetDescriptorHandleIncrementSize( type );
+            
+            cpuBaseHandle = pHeap->GetCPUDescriptorHandleForHeapStart( );
+            gpuBaseHandle = pHeap->GetGPUDescriptorHandleForHeapStart( );
+        }
+
+        void Destroy( void )
+        {
+            pHeap->Release( );
+        }
+
+        const DescHeap *Alloc( D3D12_CPU_DESCRIPTOR_HANDLE *pCPUHandle, D3D12_GPU_DESCRIPTOR_HANDLE *pGPUHandle)
+        {
+            Debug::Assert( Condition( numDescriptors < maxDescriptors ), "Out of GPU Descriptors" );
+            
+            size_t slot = descHandleIncSize * AtomicIncrement( &numDescriptors );
+
+            *pCPUHandle = D3D12_CPU_DESCRIPTOR_HANDLE{ slot + cpuBaseHandle.ptr };
+            *pGPUHandle = D3D12_GPU_DESCRIPTOR_HANDLE{ slot + gpuBaseHandle.ptr };
+
+            return this;
+        }
+    };
+    
 public:
     static const int FrameCount = 2;
 
@@ -32,327 +93,322 @@ private:
     static const int MaxCommandLists = 512;
 
 public:
-   struct GpuHandle
-   {
-      struct InternalRef
-      {
-         Id id;
-         uint32 uavOffset;
-         uint32 srvOffset;
-         uint32 cbvOffset;
-      };
+    struct ViewHandle
+    {
+        ViewHandle() : pHeap(NULL) {}
 
-      InternalRef *_internal;
+        D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle;
+        D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle;
 
-      static GpuHandle Invalid;
+        const GpuDevice::DescHeap *pHeap;
+    };
 
-      bool operator == (const GpuHandle &rhs) const
-      {
-         return _internal == rhs._internal;
-      }
+    struct DepthStencilView 
+    {
+        DepthStencilView() { *this = Invalid; }
 
-      bool operator != (const GpuHandle &rhs) const
-      {
-         return _internal != rhs._internal;
-      }
-   };
+        static const DepthStencilView Invalid;
 
-   struct SwapChain
-   {
-      HWND hWnd;
-      int width;
-      int height;
-      HANDLE frameLatencyWaitableObject;
-   };
+        D3D12_DEPTH_STENCIL_VIEW_DESC desc;
+        ViewHandle view;
+    };
 
-   class CommandList
-   {
-   friend class GpuDevice;
+    struct ConstantBufferView
+    {
+        ConstantBufferView() { *this = Invalid; }
 
-   public:
-      CommandList( void )
-      {
-         pList1 = NULL;
-      }
+        static const ConstantBufferView Invalid;
 
-      ~CommandList( void )
-      {
-         if ( NULL != pList1 )
-            pList1->Release();
+        D3D12_CONSTANT_BUFFER_VIEW_DESC desc;
+        ViewHandle view;
+    };
 
-         pAllocator->Release( );
-         pList->Release( );
-      }
+    struct ShaderResourceView
+    {
+        ShaderResourceView() { *this = Invalid; }
 
-      bool SetSamplePositions(
-         const Vector2 *pPositions,
-         uint32 numPositions
-      );
+        static const ShaderResourceView Invalid;
 
-   public:
-      ID3D12CommandAllocator *pAllocator;
-      ID3D12GraphicsCommandList *pList;
-      bool hasProgrammableSamplePositionsSupport;
-      bool isCompute;
+        D3D12_SHADER_RESOURCE_VIEW_DESC desc;
+        ViewHandle view;
+    };
 
-   private:
-      ID3D12GraphicsCommandList1 *pList1;
-   };
+    struct UnorderedAccessView
+    {
+        UnorderedAccessView() { *this = Invalid; }
 
-   struct FrameResources
-   {
-       CommandList *pGraphicsCommandLists[ MaxCommandLists ];
-       CommandList *pComputeCommandLists[ MaxCommandLists ];
+        static const UnorderedAccessView Invalid;
 
-       int numGraphicsCommandLists;
-       int numComputeCommandLists;
+        D3D12_UNORDERED_ACCESS_VIEW_DESC desc;
+        ViewHandle view;
+    };
 
-       List<ID3D12Resource*> resources;
-   };
+    struct RenderTargetView
+    {
+        RenderTargetView() { *this = Invalid; }
 
-private:
-   static const int MaxDescriptors = 1000000;
+        static const RenderTargetView Invalid;
+
+        D3D12_RENDER_TARGET_VIEW_DESC desc;
+        ViewHandle view;
+    };
+
+    struct SwapChain
+    {
+        HWND hWnd;
+        int width;
+        int height;
+        HANDLE frameLatencyWaitableObject;
+    };
+
+    class CommandList
+    {
+        friend class GpuDevice;
+
+    public:
+        CommandList( void )
+        {
+            pList1 = NULL;
+        }
+
+        ~CommandList( void )
+        {
+            if ( NULL != pList1 )
+                pList1->Release( );
+
+            pAllocator->Release( );
+            pList->Release( );
+        }
+
+        bool SetSamplePositions(
+            const Vector2 *pPositions,
+            uint32 numPositions
+        );
+
+    public:
+        ID3D12CommandAllocator * pAllocator;
+        ID3D12GraphicsCommandList *pList;
+        bool hasProgrammableSamplePositionsSupport;
+        bool isCompute;
+
+    private:
+        ID3D12GraphicsCommandList1 * pList1;
+    };
+
+    struct FrameResources
+    {
+        CommandList *pGraphicsCommandLists[MaxCommandLists];
+        CommandList *pComputeCommandLists[MaxCommandLists];
+
+        int numGraphicsCommandLists;
+        int numComputeCommandLists;
+
+        List<ID3D12Resource*> resources;
+    };
 
 public:
-   static GpuDevice &Instance( void );
+    static GpuDevice &Instance( void );
 
-   static void ClearRenderTarget(
-      CommandList *pCommandList,
-      ImageBuffer *pRenderTarget,
-      bool clearColor,
-      const Color *pColorValue
-      );
+    static void ClearRenderTarget(
+        CommandList *pCommandList,
+        GpuDevice::RenderTargetView *pRTV,
+        bool clearColor,
+        const Color *pColorValue
+    );
 
-   static void ClearDepthStencil(
-      CommandList *pCommandList,
-      ImageBuffer *pDepthStencil,
-      bool clearDepth,
-      float depthValue,
-      bool clearStencil,
-      byte stencilValue
-   );
+    static void ClearDepthStencil(
+        CommandList *pCommandList,
+        GpuDevice::DepthStencilView *pDSV,
+        bool clearDepth,
+        float depthValue,
+        bool clearStencil,
+        byte stencilValue
+    );
 
-   static void SetRenderTargets(
-      CommandList *pCommandList,
-      ImageBuffer *pRenderTargets[],
-      uint32 numRenderTargets,
-      ImageBuffer *pDepthStencil
-   );
+    static void SetRenderTargets(
+        CommandList *pCommandList,
+        GpuDevice::RenderTargetView *pRTVs[],
+        uint32 numRenderTargets,
+        GpuDevice::DepthStencilView *pDSV
+    );
 
-   static void CopyResource(
-      CommandList *pList,
-      ImageBuffer *pDest,
-      ImageBuffer *pSource
-      );
+    static void CopyResource(
+        CommandList *pList,
+        GpuResource *pDest,
+        GpuResource *pSource
+    );
 
 public:
-   bool Create(
-      HWND hwnd,
-      bool windowed,
-      uint32 width,
-      uint32 height
-      );
+    bool Create(
+        HWND hwnd,
+        bool windowed,
+        uint32 width,
+        uint32 height
+    );
 
-   void Destroy( void );
+    void Destroy( void );
 
-   void ResetDevice( void );
+    void ResetDevice( void );
 
-   bool HasDevice( void );
+    bool HasDevice( void );
 
-   void AppReady( void );
+    void AppReady( void );
 
-   void AppShutdown( void );
+    void AppShutdown( void );
 
-   void BeginRender( void );
+    void BeginRender( void );
 
-   void EndRender( void );
+    void EndRender( void );
 
-   void FinishFrame( void );
+    void FinishFrame( void );
 
-   void Fullscreen( void );
+    void Fullscreen( void );
 
-   void WaitForSwapChain( void );
+    void WaitForSwapChain( void );
 
-   HRESULT CreateSwapChain( 
-      HWND hWnd,
-      int width, 
-      int height, 
-      bool windowed 
-   );
+    HRESULT CreateSwapChain(
+        HWND hWnd,
+        int width,
+        int height,
+        bool windowed
+    );
 
-   void DestroySwapChain( void );
+    void DestroySwapChain( void );
 
-   CommandList *AllocGraphicsCommandList( void );
-   CommandList *AllocComputeCommandList( void );
+    CommandList *AllocPerFrameGraphicsCommandList( void );
+    CommandList *AllocPerFrameComputeCommandList( void );
+    CommandList *AllocThreadCommandList( void );
 
-   void ExecuteCommandLists( 
-      CommandList *pCommandLists[],
-      uint32 count 
-   );
+    void ExecuteCommandLists(
+        CommandList *pCommandLists[],
+        uint32 count,
+        bool waitForCompletion = false
+    );
 
-   GpuHandle CreateGpuHandle(
-      const Id &id
-   );
+    void CreateCbv(
+        ConstantBufferView *pCBV
+    );
 
-   void SetGpuCbv(
-      GpuHandle gpuHandle,
-      const D3D12_CONSTANT_BUFFER_VIEW_DESC &desc
-      );
+    void CreateSrv(
+        ShaderResourceView *pSRV,
+        ID3D12Resource *pResource
+    );
 
-   void SetGpuSrv(
-      GpuHandle gpuHandle,
-      ID3D12Resource *pResource,
-      const D3D12_SHADER_RESOURCE_VIEW_DESC &desc
-   );
+    void CreateUav(
+        UnorderedAccessView *pUAV,
+        ID3D12Resource *pResource,
+        bool hasCounter
+    );
 
-   void SetGpuUav(
-      GpuHandle gpuHandle,
-      ID3D12Resource *pResource,
-      const D3D12_UNORDERED_ACCESS_VIEW_DESC &desc,
-      bool hasCounter = false
-   );
+    void CreateRtv(
+        RenderTargetView *pRTV,
+        ID3D12Resource *pResource
+    );
 
-   bool CheckSupport(
-       GpuDevice::Support::Feature feature
-   );
+    void CreateDsv(
+        DepthStencilView *pDSV,
+        ID3D12Resource *pResource
+    );
 
-   void SetPresentInterval(
-      uint32 interval
-   )
-   {
-      m_PresentInterval = interval;
-   }
+    void DestroyCbv(
+        ConstantBufferView *pCBV
+    );
 
-   void ClearGpuHandle(
-      GpuHandle handle
-      )
-   {
-      MainThreadCheck;
+    void DestroySrv(
+        ShaderResourceView *pSRV
+    );
 
-      GpuHandle::InternalRef *pRef;
+    void DestroyUav(
+        UnorderedAccessView *pUAV
+    );
 
-      if( NULL != handle._internal )
-      {
-         if ( m_ViewOffsets.Remove(handle._internal->id, NULL, &pRef) )
-            m_FreeViewOffsets.Add( pRef );
-      }
-   }
+    void DestroyRtv(
+        RenderTargetView *pRTV
+    );
 
-   D3D12_GPU_DESCRIPTOR_HANDLE GetGpuSrvHandle(
-      const GpuHandle &gpuHandle
-      )
-   {
-      D3D12_GPU_DESCRIPTOR_HANDLE handle = m_GpuBaseHandle;
-		Debug::Assert( Condition(gpuHandle._internal->srvOffset != -1), "Invalid SRV Handle" );
-		
-		handle.ptr += gpuHandle._internal->srvOffset;
+    void DestroyDsv(
+        DepthStencilView *pDSV
+    );
 
-      return handle;
-   }
-   
-   D3D12_GPU_DESCRIPTOR_HANDLE GetGpuCbvHandle(
-      const GpuHandle &gpuHandle
-   )
-   {
-      D3D12_GPU_DESCRIPTOR_HANDLE handle = m_GpuBaseHandle;
-		Debug::Assert( Condition(gpuHandle._internal->cbvOffset != -1), "Invalid CBV Handle" );
-		
-		handle.ptr += gpuHandle._internal->cbvOffset;
+    bool CheckSupport(
+        Support::Feature feature
+    );
 
-      return handle;
-   }
+    void SetPresentInterval(
+        uint32 interval
+    )
+    {
+        m_PresentInterval = interval;
+    }
 
-   D3D12_GPU_DESCRIPTOR_HANDLE GetGpuUavHandle(
-      const GpuHandle &gpuHandle
-   )
-   {
-      D3D12_GPU_DESCRIPTOR_HANDLE handle = m_GpuBaseHandle;
-      Debug::Assert( Condition(gpuHandle._internal->uavOffset != -1), "Invalid UAV Handle" );
+    void SetCommonHeaps(
+        GpuDevice::CommandList *pList
+    )
+    {
+        pList->pList->SetDescriptorHeaps( 1, &m_CbvSrvUavDesc.pHeap );
+    }
 
-		handle.ptr += gpuHandle._internal->uavOffset;
+    void AddPerFrameResource(
+        ID3D12Resource *pResource
+    )
+    {
+        static Lock _lock;
 
-      return handle;
-   }
+        ScopeLock lock( _lock );
+        m_FrameResources[m_FrameIndex].resources.Add( pResource );
+    }
 
-   void AddPerFrameResource(
-      ID3D12Resource *pResource
-      )
-   {
-       static Lock _lock;
-
-       ScopeLock lock( _lock );
-           m_FrameResources[ m_FrameIndex ].resources.Add( pResource );
-   }
-
-   ID3D12Device *GetDevice( void ) { return m_pDevice; }
-   ID3D12DescriptorHeap *GetDescHeap( void ) { return m_pDescHeap; }
-   ID3D12CommandQueue *GetGraphicsQueue( void ) { return m_pGraphicsQueue; }
-   ID3D12CommandQueue *GetComputeQueue( void ) { return m_pComputeQueue; }
-   const SwapChain *GetSwapChain( void ) const { return &m_SwapChain; }
-   uint32 GetFrameIndex( void ) const { return m_FrameIndex; }
+    ID3D12Device *GetDevice( void ) { return m_pDevice; }
+    ID3D12CommandQueue *GetGraphicsQueue( void ) { return m_pGraphicsQueue; }
+    ID3D12CommandQueue *GetComputeQueue( void ) { return m_pComputeQueue; }
+    const SwapChain *GetSwapChain( void ) const { return &m_SwapChain; }
+    uint32 GetFrameIndex( void ) const { return m_FrameIndex; }
 
 private:
-   CommandList *CreateGraphicsCommandList( void );
-   CommandList *CreateComputeCommandList( void );
+    CommandList *CreateGraphicsCommandList( void );
+    CommandList *CreateComputeCommandList( void );
 
-   void FreePerFrameResources( 
-       int index 
-   );
-
-   GpuHandle::InternalRef *CreateGpuRef(
-      const Id &id
-   );
-
-   uint32 GetNextCpuOffset( void )
-   {
-      MainThreadCheck;
-
-      Debug::Assert( Condition(m_NumDescriptors < MaxDescriptors), "Out of GPU Descriptors" );
-
-      return m_DescHandleIncSize * m_NumDescriptors++;
-   }
+    void FreePerFrameResources(
+        int index
+    );
 
 private:
-   FrameResources m_FrameResources[ FrameCount ];
+    FrameResources m_FrameResources[FrameCount];
+    DescHeap m_CbvSrvUavDesc;
+    DescHeap m_RtvDesc;
+    DescHeap m_DsvDesc;
 
-   IDXGIFactory4 *m_pFactory;
-   ID3D12Device *m_pDevice;
-   ID3D12CommandQueue *m_pGraphicsQueue;
-   ID3D12CommandQueue *m_pComputeQueue;
-   IDXGISwapChain3 *m_pSwapChain;
-   ID3D12DescriptorHeap *m_pRTVDescHeap;
-   ID3D12DescriptorHeap *m_pDescHeap;
-   ID3D12Fence *m_pGraphicsFence;
-   ID3D12Fence *m_pComputeFence;
-   ID3D12Resource *m_pRenderTargets[ FrameCount ];
+    IDXGIFactory4 *m_pFactory;
+    ID3D12Device *m_pDevice;
+    ID3D12CommandQueue *m_pGraphicsQueue;
+    ID3D12CommandQueue *m_pComputeQueue;
+    IDXGISwapChain3 *m_pSwapChain;
+    ID3D12Fence *m_pGraphicsFence;
+    ID3D12Fence *m_pComputeFence;
+    ID3D12Resource *m_pRenderTargets[FrameCount];
+    D3D12_CPU_DESCRIPTOR_HANDLE m_Rtvs[FrameCount];
 
-   CommandList *m_pGraphicsPool[ MaxCommandLists ];
-   CommandList *m_pComputePool[ MaxCommandLists ];
-   //CommandList *m_pGraphicsThreadLists[ MaxThreads ];
-   //CommandList *m_pComputeThreadLists[ MaxThreads ];
+    CommandList *m_pGraphicsPool[MaxCommandLists];
+    CommandList *m_pComputePool[MaxCommandLists];
 
-   D3D12_CPU_DESCRIPTOR_HANDLE m_CpuBaseHandle;
-   D3D12_GPU_DESCRIPTOR_HANDLE m_GpuBaseHandle;
-   SwapChain m_SwapChain;
-   
-   HANDLE m_GraphicsFenceEvent;
-   HANDLE m_ComputeFenceEvent;
-   HashTable<Id, GpuHandle::InternalRef *> m_ViewOffsets;
-   List<GpuHandle::InternalRef *> m_FreeViewOffsets;
-   
-   ResourceHandle m_BackBuffer;
+    CommandList *m_pMainThreadCommandList;
 
-   uint32 m_PresentInterval;
-   uint32 m_NumDescriptors;
-   uint32 m_DescHandleIncSize;
-   uint32 m_FrameIndex;
-   uint32 m_PrevFrameIndex;
-   uint32 m_RtvDescSize;
+    SwapChain m_SwapChain;
 
-   int m_NumGraphicsCommandLists;
-   int m_NumComputeCommandLists;
+    HANDLE m_GraphicsFenceEvent;
+    HANDLE m_ComputeFenceEvent;
+    
+    ResourceHandle m_BackBuffer;
 
-   uint64 m_FenceCount;
+    uint32 m_PresentInterval;
+    
+    uint32 m_FrameIndex;
+    uint32 m_PrevFrameIndex;
+    
+    int m_NumGraphicsCommandLists;
+    int m_NumComputeCommandLists;
 
-   bool m_ProgrammableSamplePositionsSupport;
+    uint64 m_FenceCount;
+
+    bool m_ProgrammableSamplePositionsSupport;
 };

@@ -6,19 +6,19 @@
 #include "GpuProfiler.h"
 
 ConvertToRenderer::ConvertToRenderer(
-    ResourceHandle image,
-    ImageBuffer::ViewType convertTo
+    ResourceHandle gpuResource,
+    GpuResource::State::Type convertTo
 )
 {
     Identifiable::Create( Id::Create( ) );
 
-    m_Image = image;
+    m_Resource = gpuResource;
     m_ConvertTo = convertTo;
 }
 
 ConvertToRenderer::~ConvertToRenderer( void )
 {
-    m_Image = NullHandle;
+    m_Resource = NullHandle;
     Identifiable::Destroy( );
 }
 
@@ -32,16 +32,16 @@ void ConvertToRenderer::Render(
     GpuDevice::CommandList *pBatchCommandList
 )
 {
-    ImageBuffer *pDest = GetResource( m_Image, ImageBuffer );
+    GpuResource *pResource = GetResource( m_Resource, GpuResource );
 
-    if ( pDest->RequiresConvert( m_ConvertTo ) )
+    if ( pResource->GetState( ) != m_ConvertTo )
     {
         GpuDevice::CommandList *pCommandList = pBatchCommandList;
 
         if ( NULL == pBatchCommandList )
-            pCommandList = GpuDevice::Instance( ).AllocGraphicsCommandList( );
+            pCommandList = GpuDevice::Instance( ).AllocPerFrameGraphicsCommandList( );
 
-        pDest->ConvertTo( m_ConvertTo, pCommandList );
+        pResource->TransitionTo( pCommandList, m_ConvertTo );
 
         if ( NULL == pBatchCommandList )
             GpuDevice::Instance( ).ExecuteCommandLists( &pCommandList, 1 );
@@ -50,13 +50,13 @@ void ConvertToRenderer::Render(
 
 BarrierRenderer::BarrierRenderer(
     ResourceHandle buffer,
-    ImageBuffer::Barrier::Type type
+    GpuResource::Barrier::Type barrier
 )
 {
     Identifiable::Create( Id::Create( ) );
 
     m_Buffer = buffer;
-    m_Type = type;
+    m_Barrier = barrier;
 }
 
 BarrierRenderer::~BarrierRenderer( void )
@@ -79,10 +79,21 @@ void BarrierRenderer::Render(
     GpuDevice::CommandList *pCommandList = pBatchCommandList;
 
     if ( NULL == pBatchCommandList )
-        pCommandList = GpuDevice::Instance( ).AllocGraphicsCommandList( );
+        pCommandList = GpuDevice::Instance( ).AllocPerFrameGraphicsCommandList( );
 
-    ImageBuffer *pDest = GetResource( m_Buffer, ImageBuffer );
-    pDest->Barrier( m_Type, pCommandList );
+    if ( m_Barrier == GpuResource::Barrier::Uav )
+    {
+        D3D12_RESOURCE_UAV_BARRIER source = { };
+        source.pResource = GetResource(m_Buffer, GpuResource)->GetApiResource();
+    
+        D3D12_RESOURCE_BARRIER barrier = { };
+        barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_UAV;
+        barrier.UAV = source;
+    
+        pCommandList->pList->ResourceBarrier( 1, &barrier );
+    }
+    else
+        Debug::Assert( Condition(false), "Unrecognized barrier type: %d", m_Barrier );
 
     if ( NULL == pBatchCommandList )
         GpuDevice::Instance( ).ExecuteCommandLists( &pCommandList, 1 );
@@ -114,7 +125,7 @@ void GpuTimerNode::Render(
     GpuDevice::CommandList *pCommandList = pBatchCommandList;
 
     if ( NULL == pBatchCommandList )
-        pCommandList = GpuDevice::Instance( ).AllocGraphicsCommandList( );
+        pCommandList = GpuDevice::Instance( ).AllocPerFrameGraphicsCommandList( );
 
     if ( false == m_Started )
     {

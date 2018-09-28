@@ -1,6 +1,7 @@
 #include "EnginePch.h"
 
 #include "MipGenNode.h"
+#include "GpuBuffer.h"
 
 MipGenNode::MipGenNode(
     ResourceHandle target,
@@ -42,9 +43,9 @@ void MipGenNode::Render(
 {
     uint32 numMips = m_MipLevels.GetSize( );
 
-    ImageBuffer *pDestBuffer = GetResource( m_Target, ImageBuffer );
+    GpuBuffer *pDestBuffer = GetResource( m_Target, GpuBuffer );
 
-    ID3D12Resource *pDest = pDestBuffer->GetD3D12Resource( );
+    ID3D12Resource *pDest = pDestBuffer->GetApiResource( );
 
     if ( NULL == m_pDestLayouts )
     {
@@ -61,16 +62,16 @@ void MipGenNode::Render(
     GpuDevice::CommandList *pCommandList = pBatchCommandList;
     
     if ( NULL == pBatchCommandList )
-        pCommandList = GpuDevice::Instance( ).AllocGraphicsCommandList( );
+        pCommandList = GpuDevice::Instance( ).AllocPerFrameGraphicsCommandList( );
 
-    GetResource( m_Target, ImageBuffer )->ConvertTo( Texture::CopyDest, pCommandList );
+    GetResource( m_Target, GpuBuffer )->TransitionTo( pCommandList, GpuBuffer::State::CopyDest );
 
     for ( uint32 i = 0; i < numMips; i++ )
     {
-        ImageBuffer *pSourceBuffer = GetResource( m_MipLevels.Get( i ), ImageBuffer );
-        pSourceBuffer->ConvertTo( Texture::CopySource, pCommandList );
+        GpuBuffer *pSourceBuffer = GetResource( m_MipLevels.Get( i ), GpuBuffer );
+        pSourceBuffer->TransitionTo( pCommandList, GpuBuffer::State::CopySource );
 
-        ID3D12Resource *pSource = pSourceBuffer->GetD3D12Resource( );
+        ID3D12Resource *pSource = pSourceBuffer->GetApiResource( );
 
         dest.pResource = pDest;
         dest.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
@@ -83,10 +84,10 @@ void MipGenNode::Render(
         source.SubresourceIndex = 0;
 
         pCommandList->pList->CopyTextureRegion( &dest, 0, 0, 0, &source, NULL );
-        pSourceBuffer->ConvertTo( Texture::PixelShaderResource, pCommandList );
+        pSourceBuffer->TransitionTo( pCommandList, GpuBuffer::State::PixelShaderResource );
     }
 
-    pDestBuffer->ConvertTo( Texture::PixelShaderResource, pCommandList );
+    pDestBuffer->TransitionTo( pCommandList, GpuBuffer::State::PixelShaderResource );
 
     if ( NULL == pBatchCommandList )
         GpuDevice::Instance( ).ExecuteCommandLists( &pCommandList, 1 );

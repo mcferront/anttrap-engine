@@ -246,7 +246,7 @@ void DefaultRenderer::RenderSequentially(
         threadCommandList.pCommandList = pBatchCommandList;
         
         if ( NULL == pBatchCommandList )
-            threadCommandList.pCommandList = GpuDevice::Instance( ).AllocGraphicsCommandList( );
+            threadCommandList.pCommandList = GpuDevice::Instance( ).AllocPerFrameGraphicsCommandList( );
 
         params.pStats = &m_Stats;
         params.pPass = m_RendererDesc.pPass;
@@ -316,7 +316,7 @@ void DefaultRenderer::RenderMultithreaded(
 
         for ( int i = 0; i < numThreads; i++ )
         {
-            threadCommandLists[i].pCommandList = GpuDevice::Instance( ).AllocGraphicsCommandList( );
+            threadCommandLists[i].pCommandList = GpuDevice::Instance( ).AllocPerFrameGraphicsCommandList( );
             threadCommandLists[i].threadId = TaskWorld::Instance( ).GetThreadId( i );
 
             pCommandLists[i] = threadCommandLists[i].pCommandList;

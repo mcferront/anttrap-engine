@@ -1,7 +1,7 @@
 #include "EnginePch.h"
 
 #include "Dx12Contexts.h"
-#include "TextureAsset.h"
+#include "GpuBuffer.h"
 #include "ShaderAsset.h"
 #include "Renderer.h"
 #include "Viewport.h"
@@ -25,9 +25,9 @@ RenderContexts::ViewportContextDesc::ViewportContextDesc(
 
    if ( dsHandle != NullHandle )
    {
-      ImageBuffer *pDS = GetResource( dsHandle, ImageBuffer );
+      GpuBuffer *pDS = GetResource( dsHandle, GpuBuffer );
 
-      dsvFormat = (DXGI_FORMAT) pDS->GetDepthStencilFormat( );
+      dsvFormat = (DXGI_FORMAT) pDS->GetDsv()->desc.Format;
       dsSampleCount = pDS->GetSampleCount( );
    }
    else
@@ -37,9 +37,9 @@ RenderContexts::ViewportContextDesc::ViewportContextDesc(
 
    for ( uint32 i = 0; i < numRTVFormats; i++ )
    {
-      ImageBuffer *pRT = GetResource( viewport.GetRenderTarget(i), ImageBuffer );
+      GpuBuffer *pRT = GetResource( viewport.GetRenderTarget(i), GpuBuffer );
 
-      rtvFormats[i] = (DXGI_FORMAT) pRT->GetRenderTargetFormat( );
+      rtvFormats[i] = (DXGI_FORMAT) pRT->GetRtv()->desc.Format;
       rtSampleCounts[i] = pRT->GetSampleCount();
    }
 }
@@ -374,6 +374,7 @@ ID3D12RootSignature *RenderContexts::RegisterRootSignature(
 }
 
 ID3D12PipelineState *RenderContexts::RegisterPipelineState(
+   const char *pDebugName,
    const D3D12_GRAPHICS_PIPELINE_STATE_DESC &pipelineDesc,
    ViewportContext viewportContext,
    VertexContext vertexContext
@@ -398,13 +399,21 @@ ID3D12PipelineState *RenderContexts::RegisterPipelineState(
    hr = GpuDevice::Instance( ).GetDevice( )->CreateGraphicsPipelineState( &desc.graphics, __uuidof(ID3D12PipelineState), (void **) &desc.pPipelineState );
    Debug::Assert( Condition( SUCCEEDED( hr ) ), "Failed to CreateGraphicsPipelineState 0x%08x", hr );
 
+#if defined(_DEBUG)
+   wchar_t wname[256] = { };
+
+   MultiByteToWideChar(CP_UTF8, 0, pDebugName, -1, wname, _countof(wname));
+   desc.pPipelineState->SetName( wname );
+#endif
+
    s_PipelineStates.Add( desc );
 
    return desc.pPipelineState;
 }
 
 ID3D12PipelineState *RenderContexts::RegisterPipelineState(
-      const D3D12_COMPUTE_PIPELINE_STATE_DESC &pipelineDesc
+    const char *pDebugName,
+    const D3D12_COMPUTE_PIPELINE_STATE_DESC &pipelineDesc
    )
    {
       MainThreadCheck;
@@ -425,6 +434,13 @@ ID3D12PipelineState *RenderContexts::RegisterPipelineState(
 
       hr = GpuDevice::Instance( ).GetDevice( )->CreateComputePipelineState( &desc.compute, __uuidof(ID3D12PipelineState), (void **) &desc.pPipelineState );
       Debug::Assert( Condition( SUCCEEDED( hr ) ), "Failed to CreateComputePipelineState 0x%08x", hr );
+
+#if defined(_DEBUG)
+      wchar_t wname[256] = { };
+
+      MultiByteToWideChar(CP_UTF8, 0, pDebugName, -1, wname, _countof(wname));
+      desc.pPipelineState->SetName( wname );
+#endif
 
       s_PipelineStates.Add( desc );
 

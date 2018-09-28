@@ -10,6 +10,7 @@
 #include "MipGenNode.h"
 #include "DefaultRenderer.h"
 #include "SearchHierarchy.h"
+#include "GpuBuffer.h"
 
 void SSAOProc(
     ComputeMaterialObject *pCompute,
@@ -143,7 +144,7 @@ void SSRProc(
         Node *pNode = GetResource( hCamera, Node );
         Camera *pCamera = pNode->GetComponent<CameraComponent>( )->GetCamera( );
 
-        ImageBuffer *pImage = GetResource( ResourceHandle( "PropertiesRT" ), ImageBuffer );
+        GpuBuffer *pImage = GetResource( ResourceHandle( "PropertiesRT" ), GpuBuffer );
 
         uint32 flags = 0;
         Vector params( (float) ssr_iterations.GetValue( ), ssr_offset_bias.GetValue( ), *(float *) &flags, 0.0f );
@@ -177,7 +178,7 @@ void SSRProc(
         static RegistryBool ssr_composite_show_z = RegistryBool( "SSR/composite_show_z", false );
         static RegistryInt ssr_composite_mip = RegistryInt( "SSR/composite_mip", 0 );
 
-        ImageBuffer *pImage = GetResource( ResourceHandle( "PropertiesRT" ), ImageBuffer );
+        GpuBuffer *pImage = GetResource( ResourceHandle( "PropertiesRT" ), GpuBuffer );
 
         uint32 flags = 0;
 
@@ -403,18 +404,18 @@ void CreateDof(
         pTimers->Add( pDesc->pGauss[i]->AddGpuTimer( timer ) );
 
         if ( ( i & 0x1 ) == 0 )
-            pDesc->pBufferBarriers[i] = new BarrierRenderer( ResourceHandle( "DofBlurredBuffer" ), ImageBuffer::Barrier::Uav );
+            pDesc->pBufferBarriers[i] = new BarrierRenderer( ResourceHandle( "DofBlurredBuffer" ), GpuBuffer::Barrier::Uav );
         else
-            pDesc->pBufferBarriers[i] = new BarrierRenderer( ResourceHandle( "DofBuffer" ), ImageBuffer::Barrier::Uav );
+            pDesc->pBufferBarriers[i] = new BarrierRenderer( ResourceHandle( "DofBuffer" ), GpuBuffer::Barrier::Uav );
     }
 
     {
         pDesc->pComposite = new ComputeNode( "DofComposite", computeMaterials, false, DofProc );
         pTimers->Add( pDesc->pComposite->AddGpuTimer( "DofComposite" ) );
 
-        pDesc->pSplitPlanesBarrier = new BarrierRenderer( ResourceHandle( "DofBuffer" ), ImageBuffer::Barrier::Uav );
-        pDesc->pCocBarrier = new BarrierRenderer( ResourceHandle( "CocBuffer" ), ImageBuffer::Barrier::Uav );
-        pDesc->pMainHdrTargetBarrier = new BarrierRenderer( ResourceHandle( "MainHDRTarget" ), ImageBuffer::Barrier::Uav );
+        pDesc->pSplitPlanesBarrier = new BarrierRenderer( ResourceHandle( "DofBuffer" ), GpuBuffer::Barrier::Uav );
+        pDesc->pCocBarrier = new BarrierRenderer( ResourceHandle( "CocBuffer" ), GpuBuffer::Barrier::Uav );
+        pDesc->pMainHdrTargetBarrier = new BarrierRenderer( ResourceHandle( "MainHDRTarget" ), GpuBuffer::Barrier::Uav );
     }
 }
 
@@ -483,8 +484,8 @@ void CreateSpecBloom(
     pDesc->pComposite = new ComputeNode( "Composite", computeMaterials, false, SpecBloomProc );
     pTimers->Add( pDesc->pComposite->AddGpuTimer( "SpecBloom Composite" ) );
 
-    pDesc->pMainHdrBarrier1 = new BarrierRenderer( ResourceHandle( "MainHDRTarget" ), ImageBuffer::Barrier::Uav );
-    pDesc->pMainHdrBarrier2 = new BarrierRenderer( ResourceHandle( "MainHDRTarget" ), ImageBuffer::Barrier::Uav );
+    pDesc->pMainHdrBarrier1 = new BarrierRenderer( ResourceHandle( "MainHDRTarget" ), GpuBuffer::Barrier::Uav );
+    pDesc->pMainHdrBarrier2 = new BarrierRenderer( ResourceHandle( "MainHDRTarget" ), GpuBuffer::Barrier::Uav );
 }
 
 void AddSpecBloom(
@@ -514,7 +515,7 @@ void CreateHdrMips(
     for ( int i = 0; i < HdrMipLevels; i++ )
     {
         mipLevels[ i ] = ResourceHandle( g_pHdrMipLevels[ i ] );
-        pDesc->hdrLevels[ i ].pMipBarrier = new BarrierRenderer( mipLevels[ i ], ImageBuffer::Barrier::Uav );
+        pDesc->hdrLevels[ i ].pMipBarrier = new BarrierRenderer( mipLevels[ i ], GpuBuffer::Barrier::Uav );
     }
 
     pDesc->pHdrMipBuffer = new MipGenNode( ResourceHandle( "HdrMipBuffer" ), mipLevels, HdrMipLevels );
@@ -535,7 +536,7 @@ void CreateHdrMips(
         for ( int i = 0; i < HdrBlurIterations; i++ )
         {
             pDesc->hdrLevels[ m ].pBlurIterations[ i ] = new ComputeNode( "HdrBlur", computeMaterials, false, HdrBlurProc, (const char *) g_pHdrMipLevels[ m ] );
-            pDesc->hdrLevels[ m ].pBlurBarriers[ i ] = new BarrierRenderer( mipLevels[ i ], ImageBuffer::Barrier::Uav );
+            pDesc->hdrLevels[ m ].pBlurBarriers[ i ] = new BarrierRenderer( mipLevels[ i ], GpuBuffer::Barrier::Uav );
 
             String::Format( timer, sizeof(timer), "HdrBlur_%d_%d", m, i );
             pTimers->Add( pDesc->hdrLevels[ m ].pBlurIterations[ i ]->AddGpuTimer( timer ) );
@@ -582,7 +583,7 @@ void CreateHiZMips(
 
         mipLevels[ i ] = ResourceHandle( g_pHiZMipLevels[ i ] );
 
-        pDesc->pHiZMipBarriers[ i ] = new BarrierRenderer( ResourceHandle( g_pHiZMipLevels[ i ] ), ImageBuffer::Barrier::Uav );
+        pDesc->pHiZMipBarriers[ i ] = new BarrierRenderer( ResourceHandle( g_pHiZMipLevels[ i ] ), GpuBuffer::Barrier::Uav );
 
         const char *pPass;
 
@@ -632,16 +633,16 @@ void CreateSSAO(
     };
 
     // Create SSAO map
-    pDesc->pBarriers[0] = new BarrierRenderer( ResourceHandle( "SSAOMap" ), ImageBuffer::Barrier::Uav );
+    pDesc->pBarriers[0] = new BarrierRenderer( ResourceHandle( "SSAOMap" ), GpuBuffer::Barrier::Uav );
     pDesc->pSsaos[0] = new ComputeNode( pPasses[ 0 ], computeMaterials, false, SSAOProc );
 
 
     // Blur
-    pDesc->pBarriers[1] = new BarrierRenderer( ResourceHandle( "SSAOBlur" ), ImageBuffer::Barrier::Uav );
+    pDesc->pBarriers[1] = new BarrierRenderer( ResourceHandle( "SSAOBlur" ), GpuBuffer::Barrier::Uav );
     pDesc->pSsaos[1] = new ComputeNode( pPasses[ 1 ], computeMaterials, false, SSAOProc );
 
     // Blur
-    pDesc->pBarriers[2] = new ConvertToRenderer( ResourceHandle( "SSAOFinal" ), ImageBuffer::ShaderResource );
+    pDesc->pBarriers[2] = new ConvertToRenderer( ResourceHandle( "SSAOFinal" ), GpuBuffer::State::ShaderResource );
     pDesc->pSsaos[2] = new ComputeNode( pPasses[ 2 ], computeMaterials, false, SSAOProc );
 }
 
@@ -659,7 +660,7 @@ void AddLinearZ(
     };
 
     pTree->AddNode( new ComputeNode( "LinearZ", computeMaterials, false, SSAOProc ) );
-    pTree->AddNode( new BarrierRenderer( ResourceHandle( "LinearZ" ), ImageBuffer::Barrier::Uav ) );
+    pTree->AddNode( new BarrierRenderer( ResourceHandle( "LinearZ" ), GpuBuffer::Barrier::Uav ) );
 }
 
 void AddSSAO(
@@ -680,7 +681,7 @@ void CreateShadowMap(
 )
 {
     // convert shadowmap to texture
-    pDesc->pShadowMapToTexture = new ConvertToRenderer( shadowMapTarget, ImageBuffer::ShaderResource );
+    pDesc->pShadowMapToTexture = new ConvertToRenderer( shadowMapTarget, GpuBuffer::State::ShaderResource );
     
     // Shadowmap Render Node
     {
@@ -711,7 +712,7 @@ void AddShadowMap(
 //
 //      RenderWorld::Instance( ).AddRenderGroup( "DofBokeh" );
 //
-//      ImageBuffer *pIndirectArgs = new ImageBuffer;
+//      GpuBuffer *pIndirectArgs = new GpuBuffer;
 //      ResourceHandle indirectArgs = ResourceHandle( "DofBokehArgs" );
 //      indirectArgs.Bind( NULL, pIndirectArgs );
 //
@@ -797,7 +798,7 @@ void AddShadowMap(
 //         ConvertToRenderer *pRenderer;
 //
 //         pRenderer = new ConvertToRenderer;
-//         pRenderer->Create( dofMipToSRV, ResourceHandle("DofMip2"), ImageBuffer::ShaderResource );
+//         pRenderer->Create( dofMipToSRV, ResourceHandle("DofMip2"), GpuBuffer::State::ShaderResource );
 //         m_Renderers.Add( pRenderer );
 //      }
 //

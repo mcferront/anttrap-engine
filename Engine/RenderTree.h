@@ -12,12 +12,14 @@ class RenderTree : public Identifiable
 {
 private:
     List<Renderer *> m_Nodes;
+    bool m_Created;
 
 public:
     void Create( Id id )
     {
         SetId( id );
         m_Nodes.Create();
+        m_Created = true;
     }
 
     void Destroy( void );

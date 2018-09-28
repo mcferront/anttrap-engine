@@ -3,16 +3,17 @@
 #include "EngineGlobal.h"
 #include "Identifiable.h"
 #include "Renderer.h"
+#include "GpuResource.h"
 
 class ConvertToRenderer : public Renderer
 {
-    ResourceHandle m_Image;
-    ImageBuffer::ViewType m_ConvertTo;
+    ResourceHandle m_Resource;
+    GpuResource::State::Type m_ConvertTo;
 
 public:
     ConvertToRenderer(
-        ResourceHandle image,
-        ImageBuffer::ViewType converTo
+        ResourceHandle resource,
+        GpuResource::State::Type converTo
     );
 
     ~ConvertToRenderer( void );
@@ -29,19 +30,13 @@ public:
 
 class BarrierRenderer : public Renderer
 {
-    enum Type
-    {
-        Uav,
-        Alias,
-    };
-
     ResourceHandle m_Buffer;
-    ImageBuffer::Barrier::Type m_Type;
+    GpuResource::Barrier::Type m_Barrier;
 
 public:
     BarrierRenderer(
         ResourceHandle buffer,
-        ImageBuffer::Barrier::Type
+        GpuResource::Barrier::Type
     );
 
     ~BarrierRenderer( void );

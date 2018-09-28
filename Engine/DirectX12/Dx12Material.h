@@ -16,8 +16,7 @@ struct ConstantBuffer
 {
    Id id;
    ID3D12Resource *pResource;
-   D3D12_CONSTANT_BUFFER_VIEW_DESC desc;
-   GpuDevice::GpuHandle gpuHandle;
+   GpuDevice::ConstantBufferView cbv;
    byte   *pData;
 };
 
@@ -41,7 +40,6 @@ public:
       PassData( void )
       {
          constantBuffer.id = Id::Create( );
-         constantBuffer.gpuHandle = GpuDevice::GpuHandle::Invalid;
       }
 
       const char *GetName( void ) const { return pName; }
@@ -135,8 +133,7 @@ public:
       {
          shader = NullHandle;
          groupSizeTarget = NullHandle;
-
-         GpuDevice::Instance( ).ClearGpuHandle( constantBuffer.gpuHandle );
+         GpuDevice::Instance( ).DestroyCbv( &constantBuffer.cbv );
 
          for ( int c = 0; c < header.numBuffers; c++ )
          {
@@ -303,7 +300,6 @@ public:
       PassData( void ) 
       {
          constantBuffer.id = Id::Create( );
-         constantBuffer.gpuHandle = GpuDevice::GpuHandle::Invalid;
       }
 
       int GetMatrixMacroIndex(
@@ -411,7 +407,7 @@ public:
       {
          shader = NullHandle;
 
-         GpuDevice::Instance( ).ClearGpuHandle( constantBuffer.gpuHandle );
+         GpuDevice::Instance( ).DestroyCbv( &constantBuffer.cbv );
 
          for ( int c = 0; c < header.numTextures; c++ )
          {

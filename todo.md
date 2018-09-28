@@ -1,7 +1,4 @@
-# TODOs
-
 ## Game:
-* get rid of upload heap for vert/index buffers, like we do with textures
 * desc tables cleaned up
 * bindless textures
 ** send all textures for the frame up at once

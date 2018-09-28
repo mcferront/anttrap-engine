@@ -5,7 +5,7 @@
 #include "MaterialAsset.h"
 #include "TaskWorld.h"
 #include "Quad.h"
-#include "TextureAsset.h"
+#include "GpuBuffer.h"
 
 CopyResourceRenderer::CopyResourceRenderer(
    ResourceHandle destination,
@@ -39,13 +39,13 @@ void CopyResourceRenderer::Render(
    GpuDevice::CommandList *pCommandList = pBatchCommandList;
    
    if ( NULL == pBatchCommandList )
-       pCommandList = GpuDevice::Instance( ).AllocGraphicsCommandList( );
+       pCommandList = GpuDevice::Instance( ).AllocPerFrameGraphicsCommandList( );
 
-   ImageBuffer *pDest = GetResource( m_Destination, ImageBuffer );
-   ImageBuffer *pSource = GetResource( m_Source, ImageBuffer );
+   GpuBuffer *pDest = GetResource( m_Destination, GpuBuffer );
+   GpuBuffer *pSource = GetResource( m_Source, GpuBuffer );
 
-   pDest->ConvertTo( ImageBuffer::CopyDest, pCommandList );
-   pSource->ConvertTo( ImageBuffer::CopySource, pCommandList );
+   pDest->TransitionTo( pCommandList, GpuBuffer::State::CopyDest );
+   pSource->TransitionTo( pCommandList, GpuBuffer::State::CopySource );
 
    GpuDevice::CopyResource( pCommandList, pDest, pSource );
 
