@@ -1,11 +1,6 @@
 ## Game:
-* clean up black bar artifact
-** dof related
-   do we want the transition in MO? maybe an assert instead?
-   fix kernel size so it can be constant for all resolutions
-
 * ssr writeup
-
+* work around for none UAV read 11_11_10 support?
 * desc tables cleaned up
 * bindless textures
 ** send all textures for the frame up at once
