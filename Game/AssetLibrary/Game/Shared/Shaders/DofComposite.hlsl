@@ -1,7 +1,6 @@
 Texture2D<float> g_coc_map : register(t0);
 Texture2D<float4> g_dof_map : register(t1);
-Texture2D<float3> g_hdr_in : register(t2);
-RWTexture2D<float3> g_hdr_out : register(u0);
+RWTexture2D<float3> g_hdr : register(u0);
 
 SamplerState g_input_sampler : register(s0);
 
@@ -21,7 +20,7 @@ void cs_composite(uint3 dispatch_thread_id : SV_DispatchThreadID )
    int2 d_pixel = dispatch_thread_id.xy;
    
    int2 dispatch_res;
-   g_hdr_out.GetDimensions( dispatch_res.x, dispatch_res.y );
+   g_hdr.GetDimensions( dispatch_res.x, dispatch_res.y );
 
    const float2 uv = (d_pixel + .5) / (float2) dispatch_res;
    const float2 near_uv = uv * float2(.5, 1.0);
@@ -42,12 +41,12 @@ void cs_composite(uint3 dispatch_thread_id : SV_DispatchThreadID )
       // but that will cause some haloing
       if ( coc_blend > 0 )
       {
-         color = g_hdr_in[ d_pixel ];
+         color = g_hdr[ d_pixel ];
          color = lerp( color, far_color.rgb, min(coc * coc_blend, 1) );
       }
    }
    else
-      color = g_hdr_in[ d_pixel ];
+      color = g_hdr[ d_pixel ];
 
    {
 
@@ -59,7 +58,7 @@ void cs_composite(uint3 dispatch_thread_id : SV_DispatchThreadID )
       color = lerp( color, dof_near.rgb, alpha );
    }
    
-   g_hdr_out[ d_pixel ] = color;
+   g_hdr[ d_pixel ] = color;
 }
 
 

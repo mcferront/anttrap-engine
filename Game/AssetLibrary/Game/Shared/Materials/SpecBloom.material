@@ -4,8 +4,7 @@ Pass=Composite
 Shader=28F369F3-8E66-4F7C-B4C8-5B67E029EF37   #SpecBloomComposite.shader
 
 specBloom<SrvBuffer>=HdrMipBuffer
-hdr_in<SrvBuffer>=MainHDRTarget
-hdr_out<UavBuffer>=MainHDRTarget
+hdr<UavBuffer>=MainHDRTarget
 
 specBloom<filter>=Bilinear
 specBloom<address>=Clamp

@@ -17,8 +17,8 @@ GroupSizeTarget=MainHDRTarget
 GroupDiv=8,8
 
 
-Pass=DofBlur
-Shader=818AFDAE-5EFA-4DF2-BE6B-6261EE65B1E8   #DofBlur.shader
+Pass=DofFarBlur
+Shader=818AFDAE-5EFA-4DF2-BE6B-6261EE65B1E8   #DofFarBlur.shader
 
 $SOURCE<SrvBuffer>=NULL
 $DEST<UavBuffer>=NULL
@@ -26,27 +26,27 @@ $DEST<UavBuffer>=NULL
 coc<SrvBuffer>=CocBuffer
 
 $SOURCE<filter>=Bilinear
-$SOURCE<address>=Clamp
+$SOURCE<address>=Mirror
 
 params<float4>=$PARAMS
 
 GroupSizeTarget=DofBuffer
-GroupDiv=16,8
+GroupDiv=16,4
 
 
-Pass=DofGauss
-Shader=73E303D8-BD21-442A-B1E0-823237E9B718    #DofGauss.shader
+Pass=DofNearBlur
+Shader=73E303D8-BD21-442A-B1E0-823237E9B718    #DofNearBlur.shader
 
 $SOURCE<SrvBuffer>=NULL
 $DEST<UavBuffer>=NULL
 
 $SOURCE<filter>=Bilinear
-$SOURCE<address>=Clamp
+$SOURCE<address>=Mirror
 
 params<float4>=$PARAMS
 
 GroupSizeTarget=DofBuffer
-GroupDiv=16,8
+GroupDiv=16,4
 
 
 Pass=DofComposite
@@ -54,8 +54,7 @@ Shader=8337459E-7E74-47D8-85F2-7071BCCEC5FB   #DofComposite.shader
 
 coc<SrvBuffer>=CocBuffer
 dof<SrvBuffer>=DofBlurredBuffer
-hdr_in<SrvBuffer>=MainHDRTarget
-hdr_out<UavBuffer>=MainHDRTarget
+hdr<UavBuffer>=MainHDRTarget
 
 coc<filter>=Bilinear
 coc<address>=Clamp

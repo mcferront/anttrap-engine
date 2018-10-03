@@ -56,11 +56,8 @@ struct DofDesc
     // for dof description
     GpuTimerNode *pTimerNode;
     ComputeNode *pSplitPlanes;
-    ComputeNode *pBlurs[ DofBlurs ];
-    ComputeNode *pGauss[ DofBlurs ];
-    Renderer *pBufferBarriers[ DofBlurs ];
-    Renderer *pSplitPlanesBarrier;
-    Renderer *pCocBarrier;
+    ComputeNode *pFarBlurs[ DofBlurs ];
+    ComputeNode *pNearBlurs[ DofBlurs ];
     ComputeNode *pComposite;
     Renderer *pMainHdrTargetBarrier;
 };

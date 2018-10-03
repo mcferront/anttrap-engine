@@ -729,7 +729,7 @@ void App::Create(
     RegistryInt app_interval( "App/interval", 1, 0, 3 );
     RegistryMethod value( "App/reg_key_save", App_SaveRegKey );
 
-    RegistryBool deferred( "Render/deferred", true, RebuildRenderer );
+    RegistryBool deferred( "Render/deferred", false, RebuildRenderer );
     RegistryBool depth_prepass( "Render/depth_prepass", true, RebuildRenderer );
     RegistryInt method( "Tonemap/method", 0 );
 

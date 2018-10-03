@@ -199,3 +199,8 @@ inline uint32 AtomicDecrement( uint32 *v )
 {
    return InterlockedDecrement( v );
 }
+
+inline uint32 AtomicExchange( uint32 *v, uint32 nv )
+{
+    return InterlockedExchange( v, nv );
+}

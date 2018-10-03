@@ -83,7 +83,7 @@ void cs_coc(uint3 group_thread_id : SV_GroupThreadId, uint3 dispatch_thread_id :
       g_dof[ dof_pixel ] = float4( color, coc.x > 0 ? 1 : 0 );
       
       // far coc
-      g_dof[ dof_pixel + int2(dof_res.x * .5, 1) ] = float4( color, coc.y > 0 ? 1 : 0 );
+      g_dof[ dof_pixel + int2(dof_res.x * .5, 0) ] = float4( color, coc.y > 0 ? 1 : 0 );
    }
 
    g_coc[ d_pixel ] = coc.y;

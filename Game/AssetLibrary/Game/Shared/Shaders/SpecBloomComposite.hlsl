@@ -1,6 +1,5 @@
 Texture2D<float3> g_hdr_blur  : register(t0);
-Texture2D<float3> g_hdr_in    : register(t1);
-RWTexture2D<float3> g_hdr_out : register(u0);
+RWTexture2D<float3> g_hdr : register(u0);
 
 SamplerState g_input_sampler : register(s0);
 
@@ -20,7 +19,7 @@ void cs_composite(uint3 dispatch_thread_id : SV_DispatchThreadID )
    float spec_bloom_min = g_params.x;
    float spec_bloom_gradient = g_params.y;
 
-   float3 color = g_hdr_in[ d_pixel ];
+   float3 color = g_hdr[ d_pixel ];
    float3 spec_bloom = g_hdr_blur.SampleLevel( g_input_sampler, (d_pixel + .5) / resolution, 5 );
    
    // get the energy and normalize
@@ -33,7 +32,7 @@ void cs_composite(uint3 dispatch_thread_id : SV_DispatchThreadID )
    // restore the bloom color based on the new energy level
    spec_bloom = spec_bloom * bloom_energy;
 
-   g_hdr_out[ d_pixel ] = color.rgb + spec_bloom;
+   g_hdr[ d_pixel ] = color.rgb + spec_bloom;
 }
 
 

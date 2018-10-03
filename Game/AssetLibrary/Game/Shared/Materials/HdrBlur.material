@@ -27,11 +27,7 @@ GroupDiv=8,8
 Pass=HdrBlur
 Shader=31EE46D6-8956-4439-B9CF-46D1EA71AED3 #HdrBlur.shader
 
-$SOURCE<SrvBuffer>=NULL
 $DEST<UavBuffer>=NULL
-
-$SOURCE<filter>=Bilinear
-$SOURCE<address>=Clamp
 
 params<float4>=$PARAMS
 

@@ -227,7 +227,6 @@ void HdrBlurProc(
 
         ResourceHandle rh( (const char *) pUserData );
 
-        pPass->GetData( )->SetMacro( pSource, rh );
         pPass->GetData( )->SetMacro( pDest, rh );
         pPass->GetData( )->SetMacro( pGroupSizeTarget, rh );
 
@@ -260,8 +259,8 @@ void DofProc(
 {
     static const char *pParams = StringRef( "$PARAMS" );
     static const char *pSplitPlanes = StringRef( "DofSplitPlanes" );
-    static const char *pDofBlur = StringRef( "DofBlur" );
-    static const char *pDofGauss = StringRef( "DofGauss" );
+    static const char *pDofFar = StringRef( "DofFarBlur" );
+    static const char *pDofNear = StringRef( "DofNearBlur" );
     static const char *pDofComposite = StringRef( "DofComposite" );
 
     static const char *pSource = StringRef( "$SOURCE" );
@@ -281,7 +280,7 @@ void DofProc(
         Vector dof( focal_plane_start.GetValue( ), focal_plane_end.GetValue( ) );
         pPass->GetData( )->SetMacro( pParams, &dof, 1 );
     }
-    else if ( pDofBlur == pPass->GetData( )->GetName( ) )
+    else if ( pDofFar == pPass->GetData( )->GetName( ) )
     {
         static int type;
 
@@ -306,7 +305,7 @@ void DofProc(
 
         type = ( type + 1 ) % DofBlurs;
     }
-    else if ( pDofGauss == pPass->GetData( )->GetName( ) )
+    else if ( pDofNear == pPass->GetData( )->GetName( ) )
     {
         static int type;
 
@@ -394,27 +393,20 @@ void CreateDof(
 
     for ( int i = 0; i < DofBlurs; i++ )
     {
-        pDesc->pBlurs[i] = new ComputeNode( "DofBlur", computeMaterials, false, DofProc );
-        pDesc->pGauss[i] = new ComputeNode( "DofGauss", computeMaterials, false, DofProc );
+        pDesc->pFarBlurs[i] = new ComputeNode( "DofFarBlur", computeMaterials, false, DofProc );
+        pDesc->pNearBlurs[i] = new ComputeNode( "DofNearBlur", computeMaterials, false, DofProc );
 
-        String::Format( timer, sizeof( timer ), "DofBlur_%d", i );
-        pTimers->Add( pDesc->pBlurs[i]->AddGpuTimer( timer ) );
+        String::Format( timer, sizeof( timer ), "DofFarBlur_%d", i );
+        pTimers->Add( pDesc->pFarBlurs[i]->AddGpuTimer( timer ) );
 
-        String::Format( timer, sizeof( timer ), "DofGauss_%d", i );
-        pTimers->Add( pDesc->pGauss[i]->AddGpuTimer( timer ) );
-
-        if ( ( i & 0x1 ) == 0 )
-            pDesc->pBufferBarriers[i] = new BarrierRenderer( ResourceHandle( "DofBlurredBuffer" ), GpuBuffer::Barrier::Uav );
-        else
-            pDesc->pBufferBarriers[i] = new BarrierRenderer( ResourceHandle( "DofBuffer" ), GpuBuffer::Barrier::Uav );
+        String::Format( timer, sizeof( timer ), "DofNearBlur_%d", i );
+        pTimers->Add( pDesc->pNearBlurs[i]->AddGpuTimer( timer ) );
     }
 
     {
         pDesc->pComposite = new ComputeNode( "DofComposite", computeMaterials, false, DofProc );
         pTimers->Add( pDesc->pComposite->AddGpuTimer( "DofComposite" ) );
 
-        pDesc->pSplitPlanesBarrier = new BarrierRenderer( ResourceHandle( "DofBuffer" ), GpuBuffer::Barrier::Uav );
-        pDesc->pCocBarrier = new BarrierRenderer( ResourceHandle( "CocBuffer" ), GpuBuffer::Barrier::Uav );
         pDesc->pMainHdrTargetBarrier = new BarrierRenderer( ResourceHandle( "MainHDRTarget" ), GpuBuffer::Barrier::Uav );
     }
 }
@@ -429,17 +421,14 @@ void AddDof(
         pTree->AddNode( desc.pTimerNode );
 
         pTree->AddNode( desc.pSplitPlanes );              // split near/far + coc
-        pTree->AddNode( desc.pSplitPlanesBarrier );       
-        // wait on color
-        pTree->AddNode( desc.pCocBarrier );            // wait on coc
 
         for ( int i = 0; i < DofBlurs; i++ )
         {
-            pTree->AddNode( desc.pBlurs[ i ] );            // blur color horiz
-            pTree->AddNode( desc.pGauss[ i ] );            // blur color horiz
-            pTree->AddNode( desc.pBufferBarriers[ i ] );         // wait on color
+            pTree->AddNode( desc.pFarBlurs[ i ] );            // blur color horiz
+            pTree->AddNode( desc.pNearBlurs[ i ] );            // blur color horiz
         }
 
+        pTree->AddNode( desc.pMainHdrTargetBarrier );
         pTree->AddNode( desc.pComposite );             // composite to mainhdr
         pTree->AddNode( desc.pMainHdrTargetBarrier );
 

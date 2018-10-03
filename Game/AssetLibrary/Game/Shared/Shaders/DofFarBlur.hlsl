@@ -5,7 +5,7 @@ RWTexture2D<float4> g_output : register(u0);
 SamplerState g_input_sampler : register(s0);
 
 #define THREADS_X 8
-#define THREADS_Y 8
+#define THREADS_Y 4
 
 cbuffer cb0 : register(b0)
 {
@@ -107,7 +107,10 @@ float4 blur(float coc, float2 pixel, uint2 resolution, float kernel_size)
    int start = 1;
    
    for ( i = 0; i < max_bokeh_samples; i++ )
-      color[ start++ ] = g_input.SampleLevel( g_input_sampler, uv + texel_size * kernel[i] * dist, 0 );      
+   {
+      float2 sample_uv = uv + (texel_size * kernel[i] * dist);
+      color[ start++ ] = g_input.SampleLevel( g_input_sampler, sample_uv, 0 );
+   }
 
    // only use pixels which are a definite blur (alpha == 1)
    // this prevents haloing when bilinear samples take in a blur and non blur pixel
@@ -115,7 +118,7 @@ float4 blur(float coc, float2 pixel, uint2 resolution, float kernel_size)
 
    int valid_count = 1;
    
-   for ( i = 0; i < total_colors; i++ )
+   for ( i = 1; i < total_colors; i++ )
    {
       if ( color[ i ].a == 1 )
       {
@@ -124,7 +127,7 @@ float4 blur(float coc, float2 pixel, uint2 resolution, float kernel_size)
       }
    }
 
-   blur_color *= (1.0f / valid_count);
+   blur_color /= valid_count;
 
    // this pixel has blur
    // so guarantee its alpha is maintained
@@ -152,7 +155,7 @@ float4 blur_gauss(float coc, float2 pixel, uint2 resolution, float2 direction, f
    float dist = kernel;
    
    color[ 0 ] = g_input.SampleLevel( g_input_sampler, pixel / resolution, 0 );
-
+   
    if ( coc == 0 )
       return color[ 0 ];
 

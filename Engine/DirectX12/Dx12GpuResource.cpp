@@ -35,9 +35,9 @@ void GpuResource::TransitionTo(
     State::Type oldState = m_State;
 
     {
-        ScopeLock lock( m_Lock );
+        oldState = (GpuResource::State::Type) AtomicExchange( (uint32 *) &m_State, state );
 
-        if ( m_State == state )
+        if ( oldState == state )
             return;
 
         m_State = state;

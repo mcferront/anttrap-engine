@@ -3,6 +3,7 @@
 #include "Dx12ComputeMaterialObject.h"
 #include "GpuResource.h"
 #include "GpuBuffer.h"
+#include "RegistryAsset.h"
 
 ComputeMaterialObject::ComputeMaterialObject(
     ResourceHandle computeMaterial
@@ -175,15 +176,36 @@ void ComputeMaterialObject::Pass::SetComputeData(
 
     descIndex++;
 
+#ifndef _DISTRIBUTION
+    static RegistryBool validate("material.validate", false);
+
+    if ( validate.GetValue() )
+    {
+        for ( int c = 0; c < pData->header.numBuffers; c++ )
+        {
+            ResourceHandle h = pData->pBuffers[c].buffer;
+
+            for ( int i = c + 1; i < pData->header.numBuffers; i++ )
+                Debug::Print( Condition(h != pData->pBuffers[i].buffer), Debug::Type::TypeWarning, "%s is used twice in %s\r\n", h.GetId(), pPass->GetData()->GetName() );
+        }
+    }
+#endif
+
     for ( int c = 0; c < pData->header.numBuffers; c++ )
     {
         D3D12_GPU_DESCRIPTOR_HANDLE d3d12GpuHandle;
         GpuBuffer *pBuffer = GetResource( pData->pBuffers[c].buffer, GpuBuffer );
 
         if ( pData->pBuffers[c].header.type == ComputeMaterial::PassData::Buffer::UAV )
+        {
+            pBuffer->TransitionTo( pCommandList, GpuResource::State::UnorderedAccess );
             d3d12GpuHandle = pBuffer->GetUav()->view.gpuHandle;
+        }
         else if ( pData->pBuffers[c].header.type == ComputeMaterial::PassData::Buffer::SRV )
+        {
+            pBuffer->TransitionTo( pCommandList, GpuResource::State::ShaderResource );
             d3d12GpuHandle = pBuffer->GetSrv()->view.gpuHandle;
+        }
 
         pCommandList->pList->SetComputeRootDescriptorTable( descIndex++, d3d12GpuHandle );
     }
