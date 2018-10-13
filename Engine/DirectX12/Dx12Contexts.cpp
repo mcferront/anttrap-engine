@@ -27,7 +27,7 @@ RenderContexts::ViewportContextDesc::ViewportContextDesc(
    {
       GpuBuffer *pDS = GetResource( dsHandle, GpuBuffer );
 
-      dsvFormat = (DXGI_FORMAT) pDS->GetDsv()->desc.Format;
+      dsvFormat = pDS->GetDsv()->format;
       dsSampleCount = pDS->GetSampleCount( );
    }
    else
@@ -39,7 +39,7 @@ RenderContexts::ViewportContextDesc::ViewportContextDesc(
    {
       GpuBuffer *pRT = GetResource( viewport.GetRenderTarget(i), GpuBuffer );
 
-      rtvFormats[i] = (DXGI_FORMAT) pRT->GetRtv()->desc.Format;
+      rtvFormats[i] = pRT->GetRtv()->format;
       rtSampleCounts[i] = pRT->GetSampleCount();
    }
 }

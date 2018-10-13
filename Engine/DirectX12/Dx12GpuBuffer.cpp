@@ -4,68 +4,6 @@
 
 DefineResourceType( GpuBuffer, GpuResource, NULL );
 
-//GpuBuffer::GpuBuffer(
-//    GpuBuffer::Heap::Type heapType,
-//    State::Type state,
-//    size_t size,
-//    bool isBuffer,
-//    const void *pInitialData //= NULL
-//) : GpuResource( state )
-//{
-//    Create( heapType, state, Flags::None, Format::Unknown, size, 1, 1, -1, 1, isBuffer, NULL, pInitialData );
-//}
-//
-//GpuBuffer::GpuBuffer(
-//    GpuBuffer::Heap::Type heapType,
-//    State::Type state,
-//    Flags::Type flags,
-//    size_t size,
-//    uint32 stride,
-//    bool isBuffer,
-//    const void *pInitialData // = NULL
-//) : GpuResource( state )
-//{
-//    Create( heapType, state, flags, Format::Unknown, size, 1, 1, stride, 1, isBuffer, NULL, pInitialData );
-//}
-//
-// GpuBuffer::GpuBuffer( 
-//     Heap::Type heapType, 
-//     State::Type state,
-//     Flags::Type flags,
-//     Format::Type format, 
-//     size_t width, 
-//     size_t height, 
-//     uint32 mipLevels,
-//     uint32 sampleCount,
-//     bool isBuffer,
-//     const Color *pClearColor,
-//     const void *pInitialData //= NULL
-// ) : GpuResource( state )
-// {
-//     Create( heapType, state, flags, format, width, height, sampleCount, -1, mipLevels, isBuffer, pClearColor, pInitialData );
-// }
-//
-// GpuBuffer::GpuBuffer(
-//     ID3D12Resource *pResource,
-//     State::Type state
-// ) : GpuResource( state )
-// {
-//     m_pUAV = NULL;
-//     m_pSRV = NULL;
-//     m_pDSV = NULL;
-//     m_pRTV = NULL;
-//
-//     m_pResource = pResource;
-//
-//     if (m_pResource != NULL)
-//         m_pResource->AddRef();
-// }
-
- //GpuBuffer::~GpuBuffer( void )
- //{
- //    DestroyViews( );
- //}
-
 void GpuBuffer::Create(
     Heap::Type heapType,
     State::Type state,
@@ -191,29 +129,10 @@ GpuDevice::UnorderedAccessView *GpuBuffer::GetUav( void )
     if ( m_pUAV )
         return m_pUAV;
 
-    m_pUAV = new GpuDevice::UnorderedAccessView;
+    D3D12_UNORDERED_ACCESS_VIEW_DESC desc;
+    BuildUavDesc( &desc );
 
-    D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc = { };
-    {
-        Debug::Assert( Condition( m_pResource->GetDesc( ).Flags & GpuResource::Flags::UnorderedAccess ), "UnorderedAccessView was not one of the flags" );
-
-        uavDesc.Format = m_pResource->GetDesc( ).Format;
-
-        if ( m_IsBuffer )
-        {
-            uavDesc.Buffer.FirstElement = 0;
-            uavDesc.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_NONE;
-            uavDesc.Buffer.NumElements = (UINT) m_pResource->GetDesc( ).Width / m_Stride;
-            uavDesc.Buffer.StructureByteStride = m_Stride;
-            uavDesc.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
-        }
-        else if ( DXGI_FORMAT_UNKNOWN != uavDesc.Format )
-            uavDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
-    }
-
-    m_pUAV->desc = uavDesc;
-
-    GpuDevice::Instance( ).CreateUav( m_pUAV, m_pResource, false );
+    m_pUAV = GpuDevice::Instance( ).CreateUav( desc, this );
 
     return m_pUAV;
 }
@@ -223,33 +142,10 @@ GpuDevice::ShaderResourceView *GpuBuffer::GetSrv( void )
     if ( m_pSRV )
         return m_pSRV;
 
-    m_pSRV = new GpuDevice::ShaderResourceView;
+    D3D12_SHADER_RESOURCE_VIEW_DESC desc;
+    BuildSrvDesc( &desc );
 
-    D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = { };
-    {
-        srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-        srvDesc.Texture2D.MipLevels = this->GetNumMips( );
-
-        if ( m_pResource->GetDesc( ).Format == DXGI_FORMAT_R32_TYPELESS )
-            srvDesc.Format = DXGI_FORMAT_R32_FLOAT;
-        else
-            srvDesc.Format = m_pResource->GetDesc( ).Format;
-
-        if ( m_IsBuffer )
-        {
-            srvDesc.Buffer.FirstElement = 0;
-            srvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
-            srvDesc.Buffer.NumElements = (UINT) m_pResource->GetDesc( ).Width / m_Stride;
-            srvDesc.Buffer.StructureByteStride = m_Stride;
-            srvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
-        }
-        else
-            srvDesc.ViewDimension = GetSampleCount( ) > 1 ? D3D12_SRV_DIMENSION_TEXTURE2DMS : D3D12_SRV_DIMENSION_TEXTURE2D;
-    }
-
-    m_pSRV->desc = srvDesc;
-
-    GpuDevice::Instance( ).CreateSrv( m_pSRV, m_pResource );
+    m_pSRV = GpuDevice::Instance( ).CreateSrv( desc, this );
 
     return m_pSRV;
 }
@@ -259,15 +155,10 @@ GpuDevice::RenderTargetView *GpuBuffer::GetRtv( void )
     if ( m_pRTV )
         return m_pRTV;
 
-    m_pRTV = new GpuDevice::RenderTargetView;
+    D3D12_RENDER_TARGET_VIEW_DESC rtvDesc;
+    BuildRtvDesc( &rtvDesc );
 
-    D3D12_RENDER_TARGET_VIEW_DESC rtvDesc = { };
-    rtvDesc.Format = m_pResource->GetDesc( ).Format;
-    rtvDesc.ViewDimension = GetSampleCount( ) > 1 ? D3D12_RTV_DIMENSION_TEXTURE2DMS : D3D12_RTV_DIMENSION_TEXTURE2D;
-
-    m_pRTV->desc = rtvDesc;
-
-    GpuDevice::Instance( ).CreateRtv( m_pRTV, m_pResource );
+    m_pRTV = GpuDevice::Instance( ).CreateRtv( rtvDesc, this );
 
     return m_pRTV;
 }
@@ -277,21 +168,10 @@ GpuDevice::DepthStencilView *GpuBuffer::GetDsv( void )
     if ( m_pDSV )
         return m_pDSV;
 
-    m_pDSV = new GpuDevice::DepthStencilView;
+    D3D12_DEPTH_STENCIL_VIEW_DESC depthViewDesc;
+    BuildDsvDesc( &depthViewDesc );
 
-    D3D12_DEPTH_STENCIL_VIEW_DESC depthViewDesc = { };
-    {
-        if ( m_pResource->GetDesc( ).Format == DXGI_FORMAT_R32_TYPELESS )
-            depthViewDesc.Format = DXGI_FORMAT_D32_FLOAT;
-        else
-            depthViewDesc.Format = m_pResource->GetDesc( ).Format;
-
-        depthViewDesc.ViewDimension = GetSampleCount( ) > 1 ? D3D12_DSV_DIMENSION_TEXTURE2DMS : D3D12_DSV_DIMENSION_TEXTURE2D;
-    }
-
-    m_pDSV->desc = depthViewDesc;
-
-    GpuDevice::Instance( ).CreateDsv( m_pDSV, m_pResource );
+    m_pDSV = GpuDevice::Instance( ).CreateDsv( depthViewDesc, this );
 
     return m_pDSV;
 }
@@ -317,6 +197,90 @@ void GpuBuffer::RemoveFromScene( void )
 {
     Resource::RemoveFromScene( );
     DestroyViews( );
+}
+
+void GpuBuffer::BuildSrvDesc(
+    D3D12_SHADER_RESOURCE_VIEW_DESC *pDesc
+)
+{
+    D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = { };
+    {
+        srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+        srvDesc.Texture2D.MipLevels = this->GetNumMips( );
+
+        if ( m_pResource->GetDesc( ).Format == DXGI_FORMAT_R32_TYPELESS )
+            srvDesc.Format = DXGI_FORMAT_R32_FLOAT;
+        else
+            srvDesc.Format = m_pResource->GetDesc( ).Format;
+
+        if ( m_IsBuffer )
+        {
+            srvDesc.Buffer.FirstElement = 0;
+            srvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
+            srvDesc.Buffer.NumElements = (UINT) m_pResource->GetDesc( ).Width / m_Stride;
+            srvDesc.Buffer.StructureByteStride = m_Stride;
+            srvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+        }
+        else
+            srvDesc.ViewDimension = GetSampleCount( ) > 1 ? D3D12_SRV_DIMENSION_TEXTURE2DMS : D3D12_SRV_DIMENSION_TEXTURE2D;
+    }
+
+    *pDesc = srvDesc;
+}
+
+void GpuBuffer::BuildUavDesc(
+    D3D12_UNORDERED_ACCESS_VIEW_DESC *pDesc 
+)
+{
+    D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc = { };
+    {
+        Debug::Assert( Condition( m_pResource->GetDesc( ).Flags & GpuResource::Flags::UnorderedAccess ), "UnorderedAccessView was not one of the flags" );
+
+        uavDesc.Format = m_pResource->GetDesc( ).Format;
+
+        if ( m_IsBuffer )
+        {
+            uavDesc.Buffer.FirstElement = 0;
+            uavDesc.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_NONE;
+            uavDesc.Buffer.NumElements = (UINT) m_pResource->GetDesc( ).Width / m_Stride;
+            uavDesc.Buffer.StructureByteStride = m_Stride;
+            uavDesc.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
+        }
+        else if ( DXGI_FORMAT_UNKNOWN != uavDesc.Format )
+            uavDesc.ViewDimension = D3D12_UAV_DIMENSION_TEXTURE2D;
+    }
+
+    *pDesc = uavDesc;
+}
+
+void GpuBuffer::BuildRtvDesc(
+    D3D12_RENDER_TARGET_VIEW_DESC *pDesc
+)
+{
+    D3D12_RENDER_TARGET_VIEW_DESC desc = {};
+    {
+        desc.Format = m_pResource->GetDesc( ).Format;
+        desc.ViewDimension = GetSampleCount( ) > 1 ? D3D12_RTV_DIMENSION_TEXTURE2DMS : D3D12_RTV_DIMENSION_TEXTURE2D;
+    }
+
+    *pDesc = desc;
+}
+
+void GpuBuffer::BuildDsvDesc(
+    D3D12_DEPTH_STENCIL_VIEW_DESC *pDesc
+)
+{
+    D3D12_DEPTH_STENCIL_VIEW_DESC desc = { };
+    {
+        if ( m_pResource->GetDesc( ).Format == DXGI_FORMAT_R32_TYPELESS )
+            desc.Format = DXGI_FORMAT_D32_FLOAT;
+        else
+            desc.Format = m_pResource->GetDesc( ).Format;
+
+        desc.ViewDimension = GetSampleCount( ) > 1 ? D3D12_DSV_DIMENSION_TEXTURE2DMS : D3D12_DSV_DIMENSION_TEXTURE2D;
+    }
+
+    *pDesc = desc;
 }
 
  void GpuBuffer::Create(
@@ -354,11 +318,6 @@ void GpuBuffer::DestroyViews( void )
     GpuDevice::Instance( ).DestroyRtv( m_pRTV );
     GpuDevice::Instance( ).DestroyUav( m_pUAV );
     GpuDevice::Instance( ).DestroySrv( m_pSRV );
-
-    free( m_pDSV );
-    free( m_pRTV );
-    free( m_pUAV );
-    free( m_pSRV );
 
     m_pDSV = NULL;
     m_pRTV = NULL;

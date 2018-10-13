@@ -167,14 +167,14 @@ void ComputeMaterialObject::Pass::SetComputeData(
 {
     const ComputeMaterial::PassData *pData = pPass->pData;
 
-    int descIndex = 0;
+    int rootIndex = 0;
 
     GpuDevice::Instance( ).SetCommonHeaps( pCommandList );
 
-    if ( pData->constantBuffer.cbv.view.pHeap )
-        pCommandList->pList->SetComputeRootDescriptorTable( descIndex, pData->constantBuffer.cbv.view.gpuHandle ); //shader constants
+    if ( pData->constantBuffer.pCBV )
+        pCommandList->pList->SetComputeRootConstantBufferView( rootIndex, pData->constantBuffer.pResource->GetGPUVirtualAddress() ); //shader constants
 
-    descIndex++;
+    ++rootIndex;
 
 #ifndef _DISTRIBUTION
     static RegistryBool validate("material.validate", false);
@@ -207,6 +207,6 @@ void ComputeMaterialObject::Pass::SetComputeData(
             d3d12GpuHandle = pBuffer->GetSrv()->view.gpuHandle;
         }
 
-        pCommandList->pList->SetComputeRootDescriptorTable( descIndex++, d3d12GpuHandle );
+        pCommandList->pList->SetComputeRootDescriptorTable( rootIndex++, d3d12GpuHandle );
     }
 }

@@ -62,12 +62,12 @@ void ComputeMaterial::PassData::CloneTo(
         pPassData->pMatrix4s[ c ].offset = pMatrix4s[ c ].offset;
     }
 
-    GraphicsMaterial::CreateConstantBuffer( &pPassData->constantBuffer, constantBuffer.cbv.desc.SizeInBytes );
+    GraphicsMaterial::CreateConstantBuffer( &pPassData->constantBuffer, constantBuffer.desc.SizeInBytes );
 
     if ( NULL != pPassData->constantBuffer.pData )
     {
         memcpy( pPassData->constantBuffer.pData, constantBuffer.pData, sizeof( Vector ) * pPassData->header.totalFloat4s );
-        GpuDevice::Instance( ).CreateCbv( &pPassData->constantBuffer.cbv );     
+        pPassData->constantBuffer.pCBV = GpuDevice::Instance( ).CreateCbv( pPassData->constantBuffer.desc );     
     }
 }
 
@@ -97,6 +97,22 @@ void GraphicsMaterial::PassData::CloneTo(
         pPassData->pTextures[ c ].header = pTextures[ c ].header;
     }
 
+    if ( pPassData->header.numTextures > 0 )
+    {
+        D3D12_SHADER_RESOURCE_VIEW_DESC descs[64];
+        GpuResource *pResources[64];
+
+        Debug::Assert( Condition(pPassData->header.numTextures <= _countof(descs)), "Need to increase temp array" );
+
+        for (int i = 0; i < pPassData->header.numTextures; i++)
+        {
+            GetResource(pPassData->pTextures[i].texture, GpuBuffer)->BuildSrvDesc( &descs[i] );
+            pResources[i] = GetResource(pPassData->pTextures[i].texture, GpuBuffer);
+        }
+    
+        pPassData->pSRVs = GpuDevice::Instance().CreateSrvRange( descs, pResources, pPassData->header.numTextures );
+    }
+
     for ( int c = 0; c < pPassData->header.numFloat4Names; c++ )
     {
         pPassData->pFloat4s[ c ].pName = StringRef( pFloat4s[ c ].pName );
@@ -111,12 +127,12 @@ void GraphicsMaterial::PassData::CloneTo(
         pPassData->pMatrix4s[ c ].offset = pMatrix4s[ c ].offset;
     }
 
-    GraphicsMaterial::CreateConstantBuffer( &pPassData->constantBuffer, constantBuffer.cbv.desc.SizeInBytes );
+    GraphicsMaterial::CreateConstantBuffer( &pPassData->constantBuffer, constantBuffer.desc.SizeInBytes );
 
     if ( NULL != pPassData->constantBuffer.pData )
     {
         memcpy( pPassData->constantBuffer.pData, constantBuffer.pData, sizeof( Matrix ) * pPassData->header.totalMatrix4s + sizeof( Vector ) * pPassData->header.totalFloat4s );
-        GpuDevice::Instance( ).CreateCbv( &pPassData->constantBuffer.cbv );     
+        pPassData->constantBuffer.pCBV = GpuDevice::Instance( ).CreateCbv( pPassData->constantBuffer.desc );     
     }
 
     pPassData->psoDesc = psoDesc;
@@ -125,7 +141,7 @@ void GraphicsMaterial::PassData::CloneTo(
 
 bool GraphicsMaterial::CreateConstantBuffer(
     ConstantBuffer *pBuffer,
-    size_t size
+    uint32 size
 )
 {
     byte *pConstantData;
@@ -134,7 +150,8 @@ bool GraphicsMaterial::CreateConstantBuffer(
 
     pBuffer->pResource = NULL;
     pBuffer->pData = NULL;
-    pBuffer->cbv = GpuDevice::ConstantBufferView::Invalid;
+    pBuffer->pCBV = NULL;
+    pBuffer->desc.SizeInBytes = 0;
 
     if ( 0 == size )
         return true;
@@ -189,7 +206,7 @@ bool GraphicsMaterial::CreateConstantBuffer(
 
         pBuffer->pResource = pConstantBuffer;
         pBuffer->pData = pConstantData;
-        pBuffer->cbv.desc = cbvDesc;
+        pBuffer->desc = cbvDesc;
 
         pBuffer->pResource->SetName( String::ToWideChar(pBuffer->id.ToString()) );
 
@@ -342,17 +359,10 @@ ISerializable *MaterialSerializer::DeserializeComputeMaterial(
         D3D12_STATIC_SAMPLER_DESC samplers[ MaxBuffers ];
 
         // constant buffer
-        descRange[ descIndex ].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
-        descRange[ descIndex ].NumDescriptors = 1;
-        descRange[ descIndex ].BaseShaderRegister = 0;
-        descRange[ descIndex ].RegisterSpace = 0;
-        descRange[ descIndex ].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-        ++descIndex;
-
-        rootParameters[ rootParamIndex ].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+        rootParameters[ rootParamIndex ].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
         rootParameters[ rootParamIndex ].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-        rootParameters[ rootParamIndex ].DescriptorTable.NumDescriptorRanges = 1;
-        rootParameters[ rootParamIndex ].DescriptorTable.pDescriptorRanges = &descRange[ descIndex - 1 ];
+        rootParameters[ rootParamIndex ].Descriptor.ShaderRegister = 0;
+        rootParameters[ rootParamIndex ].Descriptor.RegisterSpace = 0;
         ++rootParamIndex;
 
         // buffers
@@ -560,99 +570,78 @@ ISerializable *MaterialSerializer::DeserializeGraphicsMaterial(
 
         const int MaxTextures = 16;
 
-        int descIndex = 0;
         int samplerIndex = 0;
         int rootParamIndex = 0;
 
-        D3D12_DESCRIPTOR_RANGE descRange[ MaxTextures + 1 ]; // +1 for constant buffer
-        D3D12_ROOT_PARAMETER rootParameters[ MaxTextures + 2 ]; // +2 for each constant buffer
+        D3D12_ROOT_PARAMETER rootParameters[ MaxTextures + 2 ]; // +1 for constant buffer
         D3D12_STATIC_SAMPLER_DESC samplers[ MaxTextures ];
-        D3D12_DESCRIPTOR_RANGE vtxDescRange = {};
-
-        // constant buffer for vertex shader
-        vtxDescRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
-        vtxDescRange.NumDescriptors = 1;
-        vtxDescRange.BaseShaderRegister = 0;
-        vtxDescRange.RegisterSpace = 0;
-        vtxDescRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-
-        rootParameters[ rootParamIndex ].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-        rootParameters[ rootParamIndex ].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
-        rootParameters[ rootParamIndex ].DescriptorTable.NumDescriptorRanges = 1;
-        rootParameters[ rootParamIndex ].DescriptorTable.pDescriptorRanges = &vtxDescRange;
+        
+        // vertex/pixel shader constants
+        rootParameters[ rootParamIndex ].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+        rootParameters[ rootParamIndex ].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+        rootParameters[ rootParamIndex ].Descriptor.ShaderRegister = 0;
+        rootParameters[ rootParamIndex ].Descriptor.RegisterSpace = 0;
         ++rootParamIndex;
 
-        // constant buffer for pixel shader
-        descRange[ descIndex ].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_CBV;
-        descRange[ descIndex ].NumDescriptors = 1;
-        descRange[ descIndex ].BaseShaderRegister = descIndex;
-        descRange[ descIndex ].RegisterSpace = 0;
-        descRange[ descIndex ].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-        descIndex++;
-
-        rootParameters[ rootParamIndex ].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-        rootParameters[ rootParamIndex ].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-        rootParameters[ rootParamIndex ].DescriptorTable.NumDescriptorRanges = 1;
-        rootParameters[ rootParamIndex ].DescriptorTable.pDescriptorRanges = &descRange[ descIndex - 1 ];
-        ++rootParamIndex;
-
-
-        // textures for pixel shader
-        for ( int c = 0; c < pPass->header.numTextures; c++ )
+        if ( pPass->header.numTextures )
         {
-            descRange[ descIndex ].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-            descRange[ descIndex ].NumDescriptors = 1;
-            descRange[ descIndex ].BaseShaderRegister = c;
-            descRange[ descIndex ].RegisterSpace = 0;
-            descRange[ descIndex ].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-            descIndex++;
-
-            rootParameters[ rootParamIndex ].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-            rootParameters[ rootParamIndex ].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;//TODO: DX12 - should be smart about which
-            rootParameters[ rootParamIndex ].DescriptorTable.NumDescriptorRanges = 1;
-            rootParameters[ rootParamIndex ].DescriptorTable.pDescriptorRanges = &descRange[ descIndex - 1 ];
-            ++rootParamIndex;
-
-
-            D3D12_FILTER filter;
-
-            //TODO: DX12 better converter
-            switch ( pPass->pTextures[ c ].header.filter )
-            {
-            case 1:
-                filter = D3D12_FILTER_MIN_MAG_MIP_POINT;
-                break;
-            case 2:
-                filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
-                break;
-
-            case 9:
-                filter = D3D12_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
-                break;
-
-            case 10:
-                filter = D3D12_FILTER_COMPARISON_MIN_MAG_MIP_POINT;
-                break;
+            D3D12_DESCRIPTOR_RANGE descRange = {};
+            { 
+                descRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+                descRange.NumDescriptors = pPass->header.numTextures;
+                descRange.BaseShaderRegister = 0;
+                descRange.RegisterSpace = 0;
+                descRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
             }
 
-            samplers[ samplerIndex ].Filter = filter;
+            rootParameters[ rootParamIndex ].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+            rootParameters[ rootParamIndex ].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+            rootParameters[ rootParamIndex ].DescriptorTable.NumDescriptorRanges = 1;
+            rootParameters[ rootParamIndex ].DescriptorTable.pDescriptorRanges = &descRange;
+            ++rootParamIndex;
 
-            //TODO: DX12 better converter
-            samplers[ samplerIndex ].AddressU = (D3D12_TEXTURE_ADDRESS_MODE) pPass->pTextures[ c ].header.address;
-            samplers[ samplerIndex ].AddressV = (D3D12_TEXTURE_ADDRESS_MODE) pPass->pTextures[ c ].header.address;
-            samplers[ samplerIndex ].AddressW = (D3D12_TEXTURE_ADDRESS_MODE) pPass->pTextures[ c ].header.address;
-            samplers[ samplerIndex ].MipLODBias = 0;
-            samplers[ samplerIndex ].MaxAnisotropy = 0;
-            samplers[ samplerIndex ].ComparisonFunc = D3D12_COMPARISON_FUNC_LESS;
-            samplers[ samplerIndex ].BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;
-            samplers[ samplerIndex ].MinLOD = 0.0f;
-            samplers[ samplerIndex ].MaxLOD = D3D12_FLOAT32_MAX;
-            samplers[ samplerIndex ].ShaderRegister = c;
-            samplers[ samplerIndex ].RegisterSpace = 0;
-            samplers[ samplerIndex ].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
-            ++samplerIndex;
+            // textures for pixel shader
+            for ( int c = 0; c < pPass->header.numTextures; c++ )
+            {
+                D3D12_FILTER filter;
+
+                //TODO: DX12 better converter
+                switch ( pPass->pTextures[ c ].header.filter )
+                {
+                case 1:
+                    filter = D3D12_FILTER_MIN_MAG_MIP_POINT;
+                    break;
+                case 2:
+                    filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
+                    break;
+
+                case 9:
+                    filter = D3D12_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
+                    break;
+
+                case 10:
+                    filter = D3D12_FILTER_COMPARISON_MIN_MAG_MIP_POINT;
+                    break;
+                }
+
+                samplers[ samplerIndex ].Filter = filter;
+
+                //TODO: DX12 better converter
+                samplers[ samplerIndex ].AddressU = (D3D12_TEXTURE_ADDRESS_MODE) pPass->pTextures[ c ].header.address;
+                samplers[ samplerIndex ].AddressV = (D3D12_TEXTURE_ADDRESS_MODE) pPass->pTextures[ c ].header.address;
+                samplers[ samplerIndex ].AddressW = (D3D12_TEXTURE_ADDRESS_MODE) pPass->pTextures[ c ].header.address;
+                samplers[ samplerIndex ].MipLODBias = 0;
+                samplers[ samplerIndex ].MaxAnisotropy = 0;
+                samplers[ samplerIndex ].ComparisonFunc = D3D12_COMPARISON_FUNC_LESS;
+                samplers[ samplerIndex ].BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;
+                samplers[ samplerIndex ].MinLOD = 0.0f;
+                samplers[ samplerIndex ].MaxLOD = D3D12_FLOAT32_MAX;
+                samplers[ samplerIndex ].ShaderRegister = c;
+                samplers[ samplerIndex ].RegisterSpace = 0;
+                samplers[ samplerIndex ].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+                ++samplerIndex;
+            }
         }
-
 
         // store the descriptor tables in the root signature
         D3D12_ROOT_SIGNATURE_DESC rootSignatureDesc = {};

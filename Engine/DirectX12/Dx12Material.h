@@ -16,7 +16,8 @@ struct ConstantBuffer
 {
    Id id;
    ID3D12Resource *pResource;
-   GpuDevice::ConstantBufferView cbv;
+   D3D12_CONSTANT_BUFFER_VIEW_DESC desc;
+   GpuDevice::ConstantBufferView *pCBV;
    byte   *pData;
 };
 
@@ -39,7 +40,8 @@ public:
    public:
       PassData( void )
       {
-         constantBuffer.id = Id::Create( );
+          constantBuffer.id = Id::Create( );
+          constantBuffer.pCBV = nullptr;
       }
 
       const char *GetName( void ) const { return pName; }
@@ -133,7 +135,7 @@ public:
       {
          shader = NullHandle;
          groupSizeTarget = NullHandle;
-         GpuDevice::Instance( ).DestroyCbv( &constantBuffer.cbv );
+         GpuDevice::Instance( ).DestroyCbv( constantBuffer.pCBV );
 
          for ( int c = 0; c < header.numBuffers; c++ )
          {
@@ -300,6 +302,8 @@ public:
       PassData( void ) 
       {
          constantBuffer.id = Id::Create( );
+         constantBuffer.pCBV = nullptr;
+         pSRVs = nullptr;
       }
 
       int GetMatrixMacroIndex(
@@ -407,7 +411,7 @@ public:
       {
          shader = NullHandle;
 
-         GpuDevice::Instance( ).DestroyCbv( &constantBuffer.cbv );
+         GpuDevice::Instance( ).DestroyCbv( constantBuffer.pCBV );
 
          for ( int c = 0; c < header.numTextures; c++ )
          {
@@ -433,6 +437,8 @@ public:
 
          if ( NULL != constantBuffer.pResource )
             constantBuffer.pResource->Release( );
+
+         GpuDevice::Instance( ).DestroySrv( pSRVs );
       }
 
       struct Header
@@ -486,6 +492,7 @@ public:
       Float4 *pFloat4s;
       Texture *pTextures;
       Matrix4 *pMatrix4s;
+      GpuDevice::ShaderResourceView *pSRVs;
 
       D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc;
 
@@ -499,7 +506,7 @@ private:
 public:
    static bool CreateConstantBuffer(
       ConstantBuffer *pBuffer,
-      size_t size
+      uint32 sizeInBytes
    );
 };
 

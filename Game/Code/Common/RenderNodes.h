@@ -74,6 +74,7 @@ void AddDof(
 
 struct SsrDesc
 {
+    GpuTimerNode *pTimerNode;
     ComputeNode *pSSR;
     ComputeNode *pComposite;
 };

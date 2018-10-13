@@ -195,6 +195,11 @@ inline uint32 AtomicIncrement( uint32 *v )
    return InterlockedIncrement( v );
 }
 
+inline uint32 AtomicAdd( uint32 *v, uint32 inc )
+{
+    return InterlockedAdd( (LONG *) v, inc );
+}
+
 inline uint32 AtomicDecrement( uint32 *v )
 {
    return InterlockedDecrement( v );

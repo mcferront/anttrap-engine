@@ -24,39 +24,6 @@ public:
         m_IsBuffer = false;
     };
 
-    //GpuBuffer(
-    //    Heap::Type heapType,
-    //    State::Type state,
-    //    size_t size,
-    //    bool isBuffer,
-    //    const void *pInitialData = NULL
-    //);
-
-    //GpuBuffer(
-    //    Heap::Type heapType,
-    //    State::Type state,
-    //    Flags::Type flags,
-    //    size_t size,
-    //    uint32 stride,
-    //    bool isBuffer,
-    //    const void *pInitialData = NULL
-    //);
-
-    //GpuBuffer( 
-    //    Heap::Type heapType, 
-    //    State::Type state,
-    //    Flags::Type flags,
-    //    Format::Type format, 
-    //    size_t width, 
-    //    size_t height, 
-    //    uint32 mipLevels,
-    //    uint32 sampleCount,
-    //    bool isBuffer,
-    //    const Color *pClearColor,
-    //    const void *pInitialData = NULL
-    //);
-
-    //~GpuBuffer( void );
     void Create(
         Heap::Type heapType, 
         State::Type state,
@@ -81,6 +48,22 @@ public:
     void Unmap( void );
 
     virtual void RemoveFromScene( void );
+
+    void BuildSrvDesc(
+        D3D12_SHADER_RESOURCE_VIEW_DESC *pDesc
+    );
+
+    void BuildUavDesc(
+        D3D12_UNORDERED_ACCESS_VIEW_DESC *pDesc 
+    );
+
+    void BuildRtvDesc(
+        D3D12_RENDER_TARGET_VIEW_DESC *pDesc
+    );
+
+    void BuildDsvDesc(
+        D3D12_DEPTH_STENCIL_VIEW_DESC *pDesc
+    );
 
     size_t GetWidth( void ) const { return (size_t) m_pResource->GetDesc().Width; }
     size_t GetHeight( void ) const { return (size_t) m_pResource->GetDesc().Height; }

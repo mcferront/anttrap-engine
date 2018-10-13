@@ -1,3 +1,5 @@
+#include "Encodings.hlsl"
+
 #define MAX_MIPS     12  //Match HiZMipLevels in RenderNodes.h
 
 Texture2D<float> g_depth : register(t0);
@@ -94,18 +96,6 @@ uint2 ray_trace( float3 start, float3 end, float distance_3d, int iterations, fl
    return MISSED_PIXEL;
 }
 
-float3 normal_decode(float2 enc)
-{
-    float2 fenc = enc * 4 - 2;
-    float f = dot( fenc, fenc );
-    float g = sqrt( 1 - f / 4 );
-    float3 n;
-    n.xy = fenc * g;
-    n.z = 1 - f / 2;
-
-    return n;
-}
-
 [numthreads(THREADS_X, THREADS_Y, 1)]
 void cs_ssr(uint3 dispatchThreadId : SV_DispatchThreadID)
 {  
@@ -122,9 +112,7 @@ void cs_ssr(uint3 dispatchThreadId : SV_DispatchThreadID)
    uint mat_width, mat_height, count;
    g_mat_properties.GetDimensions( mat_width, mat_height );
    
-   const float scale = mat_width / float(resolution.x);
-   
-   float4 props = g_mat_properties[ d_pixel * scale ];   
+   float4 props = g_mat_properties[ d_pixel ];   
 
    float refl = saturate(1.0 - props.x * REFL_DAMPER);
 
@@ -143,8 +131,7 @@ void cs_ssr(uint3 dispatchThreadId : SV_DispatchThreadID)
       float3 world_normal, view_normal;
       {
          // view space normal
-         world_normal = normal_decode( g_normals[ d_pixel * scale ].xy );
-         
+         world_normal = normal_decode( g_normals[ d_pixel ].xy );
          view_normal = mul( float4(world_normal, 0), g_view ).xyz;
       }
       
@@ -165,6 +152,17 @@ void cs_ssr(uint3 dispatchThreadId : SV_DispatchThreadID)
       
       // trace a ray
       hdr_pixel = ray_trace( start, end, ray_dist, iterations, offset_bias, resolution );
+      
+      if ( hdr_pixel.x != MISSED_PIXEL.x )
+      {
+         world_normal = normal_decode( g_normals[ hdr_pixel ].xy );
+         view_normal = mul( float4(world_normal, 0), g_view ).xyz;
+
+         float c = dot(view_normal, reflection);
+         
+         if ( c >= -.4 )
+            hdr_pixel = MISSED_PIXEL;
+      }
    }
    
    g_output[ d_pixel ] = hdr_pixel;

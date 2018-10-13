@@ -639,59 +639,116 @@ void GpuDevice::ExecuteCommandLists(
     }
 }
 
-void GpuDevice::CreateCbv(
-    GpuDevice::ConstantBufferView *pCBV
+GpuDevice::ConstantBufferView *GpuDevice::CreateCbv(
+    const D3D12_CONSTANT_BUFFER_VIEW_DESC &desc
 )
 {
-    if ( NULL == pCBV->view.pHeap )
-        pCBV->view.pHeap = m_CbvSrvUavDesc.Alloc( &pCBV->view.cpuHandle, &pCBV->view.gpuHandle );
+    GpuDevice::ConstantBufferView *pCBV = new GpuDevice::ConstantBufferView;
+    pCBV->view.pHeap = m_CbvSrvUavDesc.Alloc( &pCBV->view.cpuHandle, &pCBV->view.gpuHandle );
 
-    m_pDevice->CreateConstantBufferView( &pCBV->desc, pCBV->view.cpuHandle );
+    m_pDevice->CreateConstantBufferView( &desc, pCBV->view.cpuHandle );
+
+    return pCBV;
 }
 
-void GpuDevice::CreateSrv(
-    GpuDevice::ShaderResourceView *pSRV,
-    ID3D12Resource *pResource
+GpuDevice::ShaderResourceView *GpuDevice::CreateSrv(
+    const D3D12_SHADER_RESOURCE_VIEW_DESC &desc,
+    GpuResource *pResource
 )
 {
-    if ( NULL == pSRV->view.pHeap )
-        pSRV->view.pHeap = m_CbvSrvUavDesc.Alloc( &pSRV->view.cpuHandle, &pSRV->view.gpuHandle );
-
-    m_pDevice->CreateShaderResourceView( pResource, &pSRV->desc, pSRV->view.cpuHandle );
+    return CreateSrvRange( &desc, &pResource, 1 );
 }
 
-void GpuDevice::CreateUav(
-    GpuDevice::UnorderedAccessView *pUAV,
-    ID3D12Resource *pResource,
-    bool hasCounter
+GpuDevice::ShaderResourceView *GpuDevice::CreateSrvRange(
+    const D3D12_SHADER_RESOURCE_VIEW_DESC *pDescs,
+    GpuResource *pResources[],
+    size_t numResources
 )
 {
-    if ( NULL == pUAV->view.pHeap )
-        pUAV->view.pHeap = m_CbvSrvUavDesc.Alloc( &pUAV->view.cpuHandle, &pUAV->view.gpuHandle );
+    D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle;
+    D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle;
 
-    m_pDevice->CreateUnorderedAccessView( pResource, hasCounter ? pResource : NULL, &pUAV->desc, pUAV->view.cpuHandle );
+    const GpuDevice::DescHeap *pHeap = m_CbvSrvUavDesc.Alloc( &cpuHandle, &gpuHandle, numResources );
+
+    GpuDevice::ShaderResourceView *pSRV = new GpuDevice::ShaderResourceView;
+    pSRV->view.cpuHandle = cpuHandle;
+    pSRV->view.gpuHandle = gpuHandle;
+    pSRV->view.pHeap = pHeap;
+
+    for (uint32 i = 0; i < numResources; i++)
+    {
+        m_pDevice->CreateShaderResourceView( pResources[i]->GetApiResource(), &pDescs[i], cpuHandle );
+
+        cpuHandle.ptr += pHeap->descHandleIncSize;
+        gpuHandle.ptr += pHeap->descHandleIncSize;
+
+    }
+
+    return pSRV;
 }
 
-void GpuDevice::CreateRtv(
-    GpuDevice::RenderTargetView *pRTV,
-    ID3D12Resource *pResource
+GpuDevice::UnorderedAccessView *GpuDevice::CreateUav(
+    const D3D12_UNORDERED_ACCESS_VIEW_DESC &desc,
+    GpuResource *pResources
 )
 {
-    if ( NULL == pRTV->view.pHeap )
-        pRTV->view.pHeap = m_RtvDesc.Alloc( &pRTV->view.cpuHandle, &pRTV->view.gpuHandle );
-
-    m_pDevice->CreateRenderTargetView( pResource, &pRTV->desc, pRTV->view.cpuHandle );
+    return CreateUavRange( &desc, &pResources, 1 );
 }
 
-void GpuDevice::CreateDsv(
-    GpuDevice::DepthStencilView *pDSV,
-    ID3D12Resource *pResource
+GpuDevice::UnorderedAccessView *GpuDevice::CreateUavRange(
+    const D3D12_UNORDERED_ACCESS_VIEW_DESC *pDescs,
+    GpuResource *pResources[],
+    size_t numResources
 )
 {
-    if ( NULL == pDSV->view.pHeap )
-        pDSV->view.pHeap = m_DsvDesc.Alloc( &pDSV->view.cpuHandle, &pDSV->view.gpuHandle );
+    D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle;
+    D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle;
 
-    m_pDevice->CreateDepthStencilView( pResource, &pDSV->desc, pDSV->view.cpuHandle );
+    const GpuDevice::DescHeap *pHeap = m_CbvSrvUavDesc.Alloc( &cpuHandle, &gpuHandle, numResources );
+
+    GpuDevice::UnorderedAccessView *pUAV = new GpuDevice::UnorderedAccessView;
+    pUAV->view.cpuHandle = cpuHandle;
+    pUAV->view.gpuHandle = gpuHandle;
+    pUAV->view.pHeap = pHeap;
+
+    for (uint32 i = 0; i < numResources; i++)
+    {
+        m_pDevice->CreateUnorderedAccessView( pResources[i]->GetApiResource(), NULL, &pDescs[i], cpuHandle );
+
+        cpuHandle.ptr += pHeap->descHandleIncSize;
+        gpuHandle.ptr += pHeap->descHandleIncSize;
+
+    }
+
+    return pUAV;
+}
+
+GpuDevice::RenderTargetView *GpuDevice::CreateRtv(
+    const D3D12_RENDER_TARGET_VIEW_DESC &desc,
+    GpuResource *pResource
+)
+{
+    RenderTargetView *pRTV = new RenderTargetView;
+    pRTV->view.pHeap = m_RtvDesc.Alloc( &pRTV->view.cpuHandle, &pRTV->view.gpuHandle );
+    pRTV->format = desc.Format;
+
+    m_pDevice->CreateRenderTargetView( pResource->GetApiResource(), &desc, pRTV->view.cpuHandle );
+
+    return pRTV;
+}
+
+GpuDevice::DepthStencilView *GpuDevice::CreateDsv(
+    const D3D12_DEPTH_STENCIL_VIEW_DESC &desc,
+    GpuResource *pResource
+)
+{
+    DepthStencilView *pDSV = new DepthStencilView;
+    pDSV->view.pHeap = m_DsvDesc.Alloc( &pDSV->view.cpuHandle, &pDSV->view.gpuHandle );
+    pDSV->format = desc.Format;
+
+    m_pDevice->CreateDepthStencilView( pResource->GetApiResource(), &desc, pDSV->view.cpuHandle );
+
+    return pDSV;
 }
 
 void GpuDevice::DestroyCbv(
@@ -699,8 +756,10 @@ void GpuDevice::DestroyCbv(
 )
 {
     //TODO: DX12 should be able to determine the offset
-    // from the handle - heap->basehandle
+    // from the handle - heap->basehandle and the range
     // and the heap can keep a free list
+
+    delete pCBV;
 }
 
 void GpuDevice::DestroySrv(
@@ -708,8 +767,10 @@ void GpuDevice::DestroySrv(
 )
 {
     //TODO: DX12 should be able to determine the offset
-    // from the handle - heap->basehandle
+    // from the handle - heap->basehandle and the range
     // and the heap can keep a free list
+
+    delete pSRV;
 }
 
 void GpuDevice::DestroyUav(
@@ -717,8 +778,10 @@ void GpuDevice::DestroyUav(
 )
 {
     //TODO: DX12 should be able to determine the offset
-    // from the handle - heap->basehandle
+    // from the handle - heap->basehandle and the range
     // and the heap can keep a free list
+
+    delete pUAV;
 }
 
 void GpuDevice::DestroyRtv(
@@ -726,8 +789,10 @@ void GpuDevice::DestroyRtv(
 )
 {
     //TODO: DX12 should be able to determine the offset
-    // from the handle - heap->basehandle
+    // from the handle - heap->basehandle and the range
     // and the heap can keep a free list
+
+    delete pRTV;
 }
 
 void GpuDevice::DestroyDsv(
@@ -735,8 +800,10 @@ void GpuDevice::DestroyDsv(
 )
 {
     //TODO: DX12 should be able to determine the offset
-    // from the handle - heap->basehandle
+    // from the handle - heap->basehandle and the range
     // and the heap can keep a free list
+
+    delete pDSV;
 }
 
 bool GpuDevice::CheckSupport( GpuDevice::Support::Feature feature )

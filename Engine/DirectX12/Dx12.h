@@ -24,7 +24,7 @@ private:
     {
         ID3D12DescriptorHeap *pHeap;
 
-        size_t numDescriptors;
+        size_t __declspec(align(32)) numDescriptors;
         size_t descHandleIncSize;
 
         D3D12_CPU_DESCRIPTOR_HANDLE cpuBaseHandle;
@@ -65,11 +65,11 @@ private:
             pHeap->Release( );
         }
 
-        const DescHeap *Alloc( D3D12_CPU_DESCRIPTOR_HANDLE *pCPUHandle, D3D12_GPU_DESCRIPTOR_HANDLE *pGPUHandle)
+        const DescHeap *Alloc( D3D12_CPU_DESCRIPTOR_HANDLE *pCPUHandle, D3D12_GPU_DESCRIPTOR_HANDLE *pGPUHandle, size_t count = 1)
         {
-            Debug::Assert( Condition( numDescriptors < maxDescriptors ), "Out of GPU Descriptors" );
-            
-            size_t slot = descHandleIncSize * AtomicIncrement( &numDescriptors );
+            size_t slot = descHandleIncSize * AtomicAdd( &numDescriptors, count );
+
+            Debug::Assert( Condition( numDescriptors <= maxDescriptors ), "Out of GPU Descriptors" );
 
             *pCPUHandle = D3D12_CPU_DESCRIPTOR_HANDLE{ slot + cpuBaseHandle.ptr };
             *pGPUHandle = D3D12_GPU_DESCRIPTOR_HANDLE{ slot + gpuBaseHandle.ptr };
@@ -109,7 +109,7 @@ public:
 
         static const DepthStencilView Invalid;
 
-        D3D12_DEPTH_STENCIL_VIEW_DESC desc;
+        DXGI_FORMAT format;
         ViewHandle view;
     };
 
@@ -119,7 +119,6 @@ public:
 
         static const ConstantBufferView Invalid;
 
-        D3D12_CONSTANT_BUFFER_VIEW_DESC desc;
         ViewHandle view;
     };
 
@@ -129,7 +128,6 @@ public:
 
         static const ShaderResourceView Invalid;
 
-        D3D12_SHADER_RESOURCE_VIEW_DESC desc;
         ViewHandle view;
     };
 
@@ -139,7 +137,6 @@ public:
 
         static const UnorderedAccessView Invalid;
 
-        D3D12_UNORDERED_ACCESS_VIEW_DESC desc;
         ViewHandle view;
     };
 
@@ -149,7 +146,7 @@ public:
 
         static const RenderTargetView Invalid;
 
-        D3D12_RENDER_TARGET_VIEW_DESC desc;
+        DXGI_FORMAT format;
         ViewHandle view;
     };
 
@@ -285,29 +282,40 @@ public:
         bool waitForCompletion = false
     );
 
-    void CreateCbv(
-        ConstantBufferView *pCBV
+    ConstantBufferView *CreateCbv(
+        const D3D12_CONSTANT_BUFFER_VIEW_DESC &desc
     );
 
-    void CreateSrv(
-        ShaderResourceView *pSRV,
-        ID3D12Resource *pResource
+    ShaderResourceView *CreateSrv(
+        const D3D12_SHADER_RESOURCE_VIEW_DESC &desc,
+        GpuResource *pResource
     );
 
-    void CreateUav(
-        UnorderedAccessView *pUAV,
-        ID3D12Resource *pResource,
-        bool hasCounter
+    ShaderResourceView *CreateSrvRange(
+        const D3D12_SHADER_RESOURCE_VIEW_DESC *pDescs,
+        GpuResource *pResources[],
+        uint32 numResources
     );
 
-    void CreateRtv(
-        RenderTargetView *pRTV,
-        ID3D12Resource *pResource
+    UnorderedAccessView *CreateUav(
+        const D3D12_UNORDERED_ACCESS_VIEW_DESC &desc,
+        GpuResource *pResource
     );
 
-    void CreateDsv(
-        DepthStencilView *pDSV,
-        ID3D12Resource *pResource
+    UnorderedAccessView *CreateUavRange(
+        const D3D12_UNORDERED_ACCESS_VIEW_DESC *pDescs,
+        GpuResource *pResources[],
+        uint32 numResources
+    );
+
+    RenderTargetView *CreateRtv(
+        const D3D12_RENDER_TARGET_VIEW_DESC &desc,
+        GpuResource *pResource
+    );
+
+    DepthStencilView *CreateDsv(
+        const D3D12_DEPTH_STENCIL_VIEW_DESC &desc,
+        GpuResource *pResource
     );
 
     void DestroyCbv(

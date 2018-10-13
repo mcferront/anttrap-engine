@@ -446,6 +446,9 @@ void CreateSsr(
     ResourceHandle ssrMaterial = ResourceHandle( "47FD531C-1E5C-4EF4-9297-61DF0D27B24D" );
     ResourceHandle computeMaterials[ ] = { ssrMaterial, NullHandle };
 
+    pDesc->pTimerNode = new GpuTimerNode( "SSR Batch" );
+    pTimers->Add( pDesc->pTimerNode->GetTimer( ) );
+
     pDesc->pSSR = new ComputeNode( "SSR", computeMaterials, false, SSRProc );
     pTimers->Add( pDesc->pSSR->AddGpuTimer( "SSR" ) );
 
@@ -458,8 +461,15 @@ void AddSsr(
     const SsrDesc &desc
 )
 {
-    pTree->AddNode( desc.pSSR );
-    pTree->AddNode( desc.pComposite );
+    pTree->BeginBatch( );
+    pTree->AddNode( desc.pTimerNode );
+    {
+        pTree->AddNode( desc.pSSR );
+        pTree->AddNode( desc.pComposite );
+
+    }
+    pTree->AddNode( desc.pTimerNode );
+    pTree->EndBatch( );
 }
 
 void CreateSpecBloom(

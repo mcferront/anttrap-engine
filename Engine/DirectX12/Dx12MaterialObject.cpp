@@ -87,26 +87,15 @@ void GraphicsMaterialObject::SetRenderData(
 {
    const GraphicsMaterial::PassData *pData = pPass->pData;
 
-   int descIndex = 0;
+   int rootIndex = 0;
 
    GpuDevice::Instance( ).SetCommonHeaps( pCommandList );
 
-   if ( pData->constantBuffer.cbv.view.pHeap )
-   {
-      pCommandList->pList->SetGraphicsRootDescriptorTable( descIndex++, pData->constantBuffer.cbv.view.gpuHandle ); //vtx shader constats
-      pCommandList->pList->SetGraphicsRootDescriptorTable( descIndex++, pData->constantBuffer.cbv.view.gpuHandle ); //pxl shader constants
-   }
-   else
-   {
-      // for now vtx/pxl shader constants are slot 0 and 1 even if no constants exist
-      descIndex = 2;
-   }
+   if ( pData->constantBuffer.pCBV )
+      pCommandList->pList->SetGraphicsRootConstantBufferView( rootIndex++, pData->constantBuffer.pResource->GetGPUVirtualAddress() );
 
-   for ( int c = 0; c < pData->header.numTextures; c++ )
-   {
-      GpuBuffer *pImage = GetResource(pData->pTextures[ c ].texture, GpuBuffer);
-      pCommandList->pList->SetGraphicsRootDescriptorTable( descIndex++, pImage->GetSrv()->view.gpuHandle );
-   }
+   if ( pData->pSRVs )
+      pCommandList->pList->SetGraphicsRootDescriptorTable( rootIndex++, pData->pSRVs->view.gpuHandle );
 }
 
 RenderContext GraphicsMaterialObject::GetRenderContext(

@@ -46,7 +46,7 @@ void cs_ssr_composite(uint3 groupThreadId : SV_GroupThreadId, uint3 dispatchThre
    {
       uint2 ssr_index = g_ssr[ dispatchThreadId.xy ];
       
-      if ( ssr_index.x != DOES_NOT_REFLECT.x )
+      if ( ssr_index.x != DOES_NOT_REFLECT.x && ssr_index.x != MISSED_PIXEL.x )
       {
          uint width, height;
          g_ssr.GetDimensions( width, height );
