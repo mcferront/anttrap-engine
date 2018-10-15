@@ -166,8 +166,8 @@ bool GpuDevice::Create(
 
             if ( SUCCEEDED( hr ) )
             {
-                //pDebugController->SetEnableGPUBasedValidation( TRUE );
                 pDebugController->EnableDebugLayer( );
+                //pDebugController->SetEnableGPUBasedValidation( TRUE );
                 pDebugController->Release( );
             }
         }

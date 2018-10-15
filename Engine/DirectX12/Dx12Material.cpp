@@ -359,11 +359,14 @@ ISerializable *MaterialSerializer::DeserializeComputeMaterial(
         D3D12_STATIC_SAMPLER_DESC samplers[ MaxBuffers ];
 
         // constant buffer
-        rootParameters[ rootParamIndex ].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-        rootParameters[ rootParamIndex ].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-        rootParameters[ rootParamIndex ].Descriptor.ShaderRegister = 0;
-        rootParameters[ rootParamIndex ].Descriptor.RegisterSpace = 0;
-        ++rootParamIndex;
+        if ( constantBufferSize > 0 )
+        {
+            rootParameters[ rootParamIndex ].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+            rootParameters[ rootParamIndex ].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+            rootParameters[ rootParamIndex ].Descriptor.ShaderRegister = 0;
+            rootParameters[ rootParamIndex ].Descriptor.RegisterSpace = 0;
+            ++rootParamIndex;
+        }
 
         // buffers
         int srvReg = 0;
@@ -573,26 +576,27 @@ ISerializable *MaterialSerializer::DeserializeGraphicsMaterial(
         int samplerIndex = 0;
         int rootParamIndex = 0;
 
-        D3D12_ROOT_PARAMETER rootParameters[ MaxTextures + 2 ]; // +1 for constant buffer
-        D3D12_STATIC_SAMPLER_DESC samplers[ MaxTextures ];
+        D3D12_DESCRIPTOR_RANGE descRange = {};
+        D3D12_ROOT_PARAMETER rootParameters[ 2 ] = {};
+        D3D12_STATIC_SAMPLER_DESC samplers[ MaxTextures ] = {};
         
-        // vertex/pixel shader constants
-        rootParameters[ rootParamIndex ].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
-        rootParameters[ rootParamIndex ].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-        rootParameters[ rootParamIndex ].Descriptor.ShaderRegister = 0;
-        rootParameters[ rootParamIndex ].Descriptor.RegisterSpace = 0;
-        ++rootParamIndex;
+        if ( constantBufferSize > 0 )
+        {
+            // vertex/pixel shader constants
+            rootParameters[ rootParamIndex ].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
+            rootParameters[ rootParamIndex ].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+            rootParameters[ rootParamIndex ].Descriptor.ShaderRegister = 0;
+            rootParameters[ rootParamIndex ].Descriptor.RegisterSpace = 0;
+            ++rootParamIndex;
+        }
 
         if ( pPass->header.numTextures )
         {
-            D3D12_DESCRIPTOR_RANGE descRange = {};
-            { 
-                descRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-                descRange.NumDescriptors = pPass->header.numTextures;
-                descRange.BaseShaderRegister = 0;
-                descRange.RegisterSpace = 0;
-                descRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-            }
+            descRange.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+            descRange.NumDescriptors = pPass->header.numTextures;
+            descRange.BaseShaderRegister = 0;
+            descRange.RegisterSpace = 0;
+            descRange.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
             rootParameters[ rootParamIndex ].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
             rootParameters[ rootParamIndex ].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;

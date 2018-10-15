@@ -172,9 +172,7 @@ void ComputeMaterialObject::Pass::SetComputeData(
     GpuDevice::Instance( ).SetCommonHeaps( pCommandList );
 
     if ( pData->constantBuffer.pCBV )
-        pCommandList->pList->SetComputeRootConstantBufferView( rootIndex, pData->constantBuffer.pResource->GetGPUVirtualAddress() ); //shader constants
-
-    ++rootIndex;
+        pCommandList->pList->SetComputeRootConstantBufferView( rootIndex++, pData->constantBuffer.pResource->GetGPUVirtualAddress() ); //shader constants
 
 #ifndef _DISTRIBUTION
     static RegistryBool validate("material.validate", false);

@@ -1552,9 +1552,9 @@ void App::SetupRenderers( void )
         m_UIRenderTree.Create( Id("UI Tree") );
 
         m_UIRenderTree.AddNode( new ConvertToRenderer( ldrTarget, GpuBuffer::State::UnorderedAccess ) );
-        m_UIRenderTree.AddNode( new ConvertToRenderer( hdrTarget, GpuBuffer::State::ShaderResource ) );
+        m_UIRenderTree.AddNode( new ConvertToRenderer( hdrTarget, GpuBuffer::State::PixelShaderResource ) );
         m_UIRenderTree.AddNode( pLdrPostProcess );
-        m_UIRenderTree.AddNode( new ConvertToRenderer( exposure, GpuBuffer::State::ShaderResource ) );
+        m_UIRenderTree.AddNode( new ConvertToRenderer( exposure, GpuBuffer::State::PixelShaderResource ) );
         m_UIRenderTree.AddNode( pLdrPostProcessResolve );
         m_UIRenderTree.AddNode( new ConvertToRenderer( ldrTarget, GpuBuffer::State::RenderTarget ) );
 

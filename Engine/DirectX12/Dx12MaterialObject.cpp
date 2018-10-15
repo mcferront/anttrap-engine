@@ -95,7 +95,15 @@ void GraphicsMaterialObject::SetRenderData(
       pCommandList->pList->SetGraphicsRootConstantBufferView( rootIndex++, pData->constantBuffer.pResource->GetGPUVirtualAddress() );
 
    if ( pData->pSRVs )
+   {
+      for (int i = 0; i < pData->header.numTextures; i++)
+      {
+         GpuBuffer *pBuffer = GetResource(pData->pTextures[i].texture, GpuBuffer);
+         pBuffer->TransitionTo( pCommandList, GpuResource::State::PixelShaderResource );
+      }
+
       pCommandList->pList->SetGraphicsRootDescriptorTable( rootIndex++, pData->pSRVs->view.gpuHandle );
+   }
 }
 
 RenderContext GraphicsMaterialObject::GetRenderContext(

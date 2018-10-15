@@ -67,7 +67,8 @@ private:
 
         const DescHeap *Alloc( D3D12_CPU_DESCRIPTOR_HANDLE *pCPUHandle, D3D12_GPU_DESCRIPTOR_HANDLE *pGPUHandle, size_t count = 1)
         {
-            size_t slot = descHandleIncSize * AtomicAdd( &numDescriptors, count );
+            size_t slot = AtomicAdd( &numDescriptors, count ) - count;
+            slot *= descHandleIncSize;
 
             Debug::Assert( Condition( numDescriptors <= maxDescriptors ), "Out of GPU Descriptors" );
 
