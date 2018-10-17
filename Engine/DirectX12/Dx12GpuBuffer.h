@@ -65,10 +65,10 @@ public:
         D3D12_DEPTH_STENCIL_VIEW_DESC *pDesc
     );
 
-    size_t GetWidth( void ) const { return (size_t) m_pResource->GetDesc().Width; }
-    size_t GetHeight( void ) const { return (size_t) m_pResource->GetDesc().Height; }
-    uint32 GetSampleCount( void ) const { return m_pResource->GetDesc().SampleDesc.Count; }
-    uint32 GetNumMips( void ) const { return m_pResource->GetDesc().MipLevels; }
+    size_t GetWidth( void ) const { return (size_t) m_ResourceDesc.Width; }
+    size_t GetHeight( void ) const { return (size_t) m_ResourceDesc.Height; }
+    uint32 GetSampleCount( void ) const { return m_ResourceDesc.SampleDesc.Count; }
+    uint32 GetNumMips( void ) const { return m_ResourceDesc.MipLevels; }
 
 protected:
     // TODO: get rid of the need for this call
@@ -86,6 +86,8 @@ private:
     void DestroyViews( void );
 
 private:
+    D3D12_RESOURCE_DESC m_ResourceDesc;
+
     uint32 m_Stride;
     bool m_IsBuffer;
 

@@ -40,6 +40,7 @@ void ComputeMaterial::PassData::CloneTo(
     pPassData->pFloat4s = new ComputeMaterial::PassData::Float4[ pPassData->header.numFloat4Names ];
     pPassData->pMatrix4s = new ComputeMaterial::PassData::Matrix4[ pPassData->header.numMatrix4Names ];
     pPassData->pBuffers = new PassData::Buffer[ pPassData->header.numBuffers ];
+    pPassData->viewHandles.pHeap = nullptr;
 
     for ( int c = 0; c < pPassData->header.numBuffers; c++ )
     {
@@ -60,6 +61,39 @@ void ComputeMaterial::PassData::CloneTo(
         pPassData->pMatrix4s[ c ].pName = StringRef( pMatrix4s[ c ].pName );
         pPassData->pMatrix4s[ c ].pRef = StringRef( pMatrix4s[ c ].pRef );
         pPassData->pMatrix4s[ c ].offset = pMatrix4s[ c ].offset;
+    }
+
+    if ( pPassData->header.numBuffers > 0 )
+    {
+        GpuDevice::Instance().AllocShaderDescRange( &pPassData->viewHandles, pPassData->header.numBuffers );
+
+        uint32 descHandleSize = pPassData->viewHandles.pHeap->descHandleIncSize;
+
+        for ( int c = 0; c < pPassData->header.numBuffers; c++ )
+        {
+            D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle = { pPassData->viewHandles.cpuHandle.ptr + (c * descHandleSize) };
+
+            if ( pPassData->pBuffers[c].pName[0] != '$' )
+            {
+                GpuBuffer *pBuffer = GetResource( pPassData->pBuffers[c].buffer, GpuBuffer );
+
+                if ( pPassData->pBuffers[c].header.type == ComputeMaterial::PassData::Buffer::UAV )
+                {
+                    D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc;
+
+                    pBuffer->BuildUavDesc( &uavDesc );
+                    GpuDevice::Instance().CreateUav( uavDesc, pBuffer, cpuHandle );
+                }
+
+                else if ( pPassData->pBuffers[c].header.type == ComputeMaterial::PassData::Buffer::SRV )
+                {
+                    D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc;
+
+                    pBuffer->BuildSrvDesc( &srvDesc );
+                    GpuDevice::Instance().CreateSrv( srvDesc, pBuffer, cpuHandle );
+                }
+            }
+        }
     }
 
     GraphicsMaterial::CreateConstantBuffer( &pPassData->constantBuffer, constantBuffer.desc.SizeInBytes );
@@ -89,6 +123,7 @@ void GraphicsMaterial::PassData::CloneTo(
     pPassData->pFloat4s = new GraphicsMaterial::PassData::Float4[ pPassData->header.numFloat4Names ];
     pPassData->pMatrix4s = new GraphicsMaterial::PassData::Matrix4[ pPassData->header.numMatrix4Names ];
     pPassData->pTextures = new GraphicsMaterial::PassData::Texture[ pPassData->header.numTextures ];
+    pPassData->pSRVs = nullptr;
 
     for ( int c = 0; c < pPassData->header.numTextures; c++ )
     {
@@ -99,8 +134,8 @@ void GraphicsMaterial::PassData::CloneTo(
 
     if ( pPassData->header.numTextures > 0 )
     {
-        D3D12_SHADER_RESOURCE_VIEW_DESC descs[64];
-        GpuResource *pResources[64];
+        D3D12_SHADER_RESOURCE_VIEW_DESC descs[16];
+        GpuResource *pResources[16];
 
         Debug::Assert( Condition(pPassData->header.numTextures <= _countof(descs)), "Need to increase temp array" );
 
@@ -277,6 +312,8 @@ ISerializable *MaterialSerializer::DeserializeComputeMaterial(
         pPass->pMatrix4s = NULL;
         pPass->constantBuffer.pData = NULL;
         pPass->constantBuffer.pResource = NULL;
+        pPass->constantBuffer.pCBV = NULL;
+        pPass->viewHandles.pHeap = NULL;
 
         pSerializer->GetInputStream( )->Read( &pPass->header, sizeof( pPass->header ) );
 
@@ -294,13 +331,44 @@ ISerializable *MaterialSerializer::DeserializeComputeMaterial(
         if ( pPass->header.numMatrix4Names )
             pPass->pMatrix4s = new ComputeMaterial::PassData::Matrix4[ pPass->header.numMatrix4Names ];
 
+        ComputeMaterial::PassData::Buffer *pUnsortedBuffers = new ComputeMaterial::PassData::Buffer[ pPass->header.numBuffers ];
+
         for ( int c = 0; c < pPass->header.numBuffers; c++ )
         {
-            pSerializer->GetInputStream( )->Read( &pPass->pBuffers[ c ].header, sizeof( pPass->pBuffers[ c ].header ) );
+            pSerializer->GetInputStream( )->Read( &pUnsortedBuffers[ c ].header, sizeof( pUnsortedBuffers[ c ].header ) );
 
-            pPass->pBuffers[ c ].pName = StringPool::Deserialize( pSerializer->GetInputStream( ) );
-            pPass->pBuffers[ c ].buffer = ResourceHandle( Id::Deserialize( pSerializer->GetInputStream( ) ) );
+            pUnsortedBuffers[ c ].pName = StringPool::Deserialize( pSerializer->GetInputStream( ) );
+            pUnsortedBuffers[ c ].buffer = ResourceHandle( Id::Deserialize( pSerializer->GetInputStream( ) ) );
         }
+
+        // sort: srvs first then uavs
+        
+        int index = 0;
+        
+        for ( int c = 0; c < pPass->header.numBuffers; c++ )
+        {
+            if ( pUnsortedBuffers[ c ].header.type == ComputeMaterial::PassData::Buffer::SRV )
+            {
+                pPass->pBuffers[ index ].pName = StringRef( pUnsortedBuffers[ c ].pName );
+                pPass->pBuffers[ index ].header = pUnsortedBuffers[ c ].header;
+                pPass->pBuffers[ index ].buffer = pUnsortedBuffers[ c ].buffer;
+                ++index;
+            }
+        }
+    
+        for ( int c = 0; c < pPass->header.numBuffers; c++ )
+        {
+            if ( pUnsortedBuffers[ c ].header.type == ComputeMaterial::PassData::Buffer::UAV )
+            {
+                pPass->pBuffers[ index ].pName = StringRef( pUnsortedBuffers[ c ].pName );
+                pPass->pBuffers[ index ].header = pUnsortedBuffers[ c ].header;
+                pPass->pBuffers[ index ].buffer = pUnsortedBuffers[ c ].buffer;
+                ++index;
+            }
+        }
+
+        delete [] pUnsortedBuffers;
+
 
         bool result = GraphicsMaterial::CreateConstantBuffer( &pPass->constantBuffer, constantBufferSize );
         BreakIf( false == result );
@@ -350,12 +418,10 @@ ISerializable *MaterialSerializer::DeserializeComputeMaterial(
 
         const int MaxBuffers = 16;
 
-        int descIndex = 0;
         int samplerIndex = 0;
         int rootParamIndex = 0;
 
-        D3D12_DESCRIPTOR_RANGE descRange[ MaxBuffers + 1 ]; // +1 for constant buffer
-        D3D12_ROOT_PARAMETER rootParameters[ MaxBuffers + 2 ]; // +2 for each constant buffer
+        D3D12_ROOT_PARAMETER rootParameters[ 2 ];
         D3D12_STATIC_SAMPLER_DESC samplers[ MaxBuffers ];
 
         // constant buffer
@@ -372,34 +438,17 @@ ISerializable *MaterialSerializer::DeserializeComputeMaterial(
         int srvReg = 0;
         int uavReg = 0;
         int samplerShaderRegister = 0;
+
         for ( int c = 0; c < pPass->header.numBuffers; c++ )
         {
             int baseReg;
 
             if ( pPass->pBuffers[ c ].header.type == ComputeMaterial::PassData::Buffer::UAV )
-            {
-                descRange[ descIndex ].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
                 baseReg = uavReg++;
-            }
             else if ( pPass->pBuffers[ c ].header.type == ComputeMaterial::PassData::Buffer::SRV )
-            {
-                descRange[ descIndex ].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
                 baseReg = srvReg++;
-            }
             else
                 Debug::Assert( Condition( false ), "Unrecognized compute buffer type: %d", pPass->pBuffers[ c ].header.type );
-
-            descRange[ descIndex ].NumDescriptors = 1;
-            descRange[ descIndex ].BaseShaderRegister = baseReg;
-            descRange[ descIndex ].RegisterSpace = 0;
-            descRange[ descIndex ].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
-            ++descIndex;
-
-            rootParameters[ rootParamIndex ].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-            rootParameters[ rootParamIndex ].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
-            rootParameters[ rootParamIndex ].DescriptorTable.NumDescriptorRanges = 1;
-            rootParameters[ rootParamIndex ].DescriptorTable.pDescriptorRanges = &descRange[ descIndex - 1 ];
-            ++rootParamIndex;
 
             if ( pPass->pBuffers[ c ].header.hasSampler )
             {
@@ -441,6 +490,38 @@ ISerializable *MaterialSerializer::DeserializeComputeMaterial(
                 samplers[ samplerIndex ].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
                 ++samplerIndex;
             }
+        }
+
+        D3D12_DESCRIPTOR_RANGE ranges[2];
+        int numRanges = 0;
+
+        if ( srvReg > 0 )
+        {
+            ranges[numRanges].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+            ranges[numRanges].NumDescriptors = srvReg;
+            ranges[numRanges].BaseShaderRegister = 0;
+            ranges[numRanges].RegisterSpace = 0;
+            ranges[numRanges].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+            ++numRanges;
+        }
+
+        if ( uavReg > 0 )
+        {
+            ranges[numRanges].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_UAV;
+            ranges[numRanges].NumDescriptors = uavReg;
+            ranges[numRanges].BaseShaderRegister = 0;
+            ranges[numRanges].RegisterSpace = 0;
+            ranges[numRanges].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+            ++numRanges;
+        }
+
+        if ( numRanges > 0 )
+        {
+            rootParameters[ rootParamIndex ].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+            rootParameters[ rootParamIndex ].ShaderVisibility = D3D12_SHADER_VISIBILITY_ALL;
+            rootParameters[ rootParamIndex ].DescriptorTable.NumDescriptorRanges = numRanges;
+            rootParameters[ rootParamIndex ].DescriptorTable.pDescriptorRanges = ranges;
+            ++rootParamIndex;
         }
 
         // store the descriptor tables in the root signature
@@ -503,6 +584,8 @@ ISerializable *MaterialSerializer::DeserializeGraphicsMaterial(
         pPass->pFloat4s = NULL;
         pPass->pMatrix4s = NULL;
         pPass->pTextures = NULL;
+        pPass->pSRVs = NULL;
+        pPass->constantBuffer.pCBV = NULL;
         pPass->constantBuffer.pData = NULL;
         pPass->constantBuffer.pResource = NULL;
 

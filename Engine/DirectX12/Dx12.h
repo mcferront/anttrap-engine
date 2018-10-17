@@ -298,6 +298,12 @@ public:
         uint32 numResources
     );
 
+    void CreateSrv(
+        const D3D12_SHADER_RESOURCE_VIEW_DESC &desc,
+        GpuResource *pResource,
+        D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle
+    );
+
     UnorderedAccessView *CreateUav(
         const D3D12_UNORDERED_ACCESS_VIEW_DESC &desc,
         GpuResource *pResource
@@ -309,6 +315,12 @@ public:
         uint32 numResources
     );
 
+    void CreateUav(
+        const D3D12_UNORDERED_ACCESS_VIEW_DESC &desc,
+        GpuResource *pResource,
+        D3D12_CPU_DESCRIPTOR_HANDLE cpuhandle
+    );
+
     RenderTargetView *CreateRtv(
         const D3D12_RENDER_TARGET_VIEW_DESC &desc,
         GpuResource *pResource
@@ -317,6 +329,11 @@ public:
     DepthStencilView *CreateDsv(
         const D3D12_DEPTH_STENCIL_VIEW_DESC &desc,
         GpuResource *pResource
+    );
+
+    void AllocShaderDescRange(
+        ViewHandle *pHandles,
+        uint32 count
     );
 
     void DestroyCbv(
@@ -339,6 +356,10 @@ public:
         DepthStencilView *pDSV
     );
 
+    void FreeViewHandles(
+        ViewHandle *pHandles
+    );
+
     bool CheckSupport(
         Support::Feature feature
     );
@@ -348,13 +369,6 @@ public:
     )
     {
         m_PresentInterval = interval;
-    }
-
-    void SetCommonHeaps(
-        GpuDevice::CommandList *pList
-    )
-    {
-        pList->pList->SetDescriptorHeaps( 1, &m_CbvSrvUavDesc.pHeap );
     }
 
     void AddPerFrameResource(
@@ -383,7 +397,7 @@ private:
 
 private:
     FrameResources m_FrameResources[FrameCount];
-    DescHeap m_CbvSrvUavDesc;
+    DescHeap m_ShaderDescHeap;
     DescHeap m_RtvDesc;
     DescHeap m_DsvDesc;
 

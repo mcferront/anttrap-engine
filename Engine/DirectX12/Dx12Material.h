@@ -41,7 +41,6 @@ public:
       PassData( void )
       {
           constantBuffer.id = Id::Create( );
-          constantBuffer.pCBV = nullptr;
       }
 
       const char *GetName( void ) const { return pName; }
@@ -135,7 +134,6 @@ public:
       {
          shader = NullHandle;
          groupSizeTarget = NullHandle;
-         GpuDevice::Instance( ).DestroyCbv( constantBuffer.pCBV );
 
          for ( int c = 0; c < header.numBuffers; c++ )
          {
@@ -161,6 +159,9 @@ public:
 
          if ( NULL != constantBuffer.pResource )
             constantBuffer.pResource->Release( );
+
+         GpuDevice::Instance( ).DestroyCbv( constantBuffer.pCBV );
+         GpuDevice::Instance( ).FreeViewHandles( &viewHandles );
       }
 
       void CloneTo( 
@@ -275,6 +276,8 @@ public:
       Matrix4 *pMatrix4s;
 
       ConstantBuffer constantBuffer;
+
+      GpuDevice::ViewHandle viewHandles;
    };
 
 private:
@@ -302,8 +305,6 @@ public:
       PassData( void ) 
       {
          constantBuffer.id = Id::Create( );
-         constantBuffer.pCBV = nullptr;
-         pSRVs = nullptr;
       }
 
       int GetMatrixMacroIndex(
@@ -411,8 +412,6 @@ public:
       {
          shader = NullHandle;
 
-         GpuDevice::Instance( ).DestroyCbv( constantBuffer.pCBV );
-
          for ( int c = 0; c < header.numTextures; c++ )
          {
             pTextures[ c ].texture = NullHandle;
@@ -438,6 +437,7 @@ public:
          if ( NULL != constantBuffer.pResource )
             constantBuffer.pResource->Release( );
 
+         GpuDevice::Instance( ).DestroyCbv( constantBuffer.pCBV );
          GpuDevice::Instance( ).DestroySrv( pSRVs );
       }
 

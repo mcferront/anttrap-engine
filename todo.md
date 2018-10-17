@@ -1,7 +1,10 @@
 ## Game:
-* ssr writeup
-* work around for none UAV read 11_11_10 support?
 * desc tables cleaned up
+   compute: two sets of buffers - constants which can be a range and macros which are set individually
+
+* ssr writeup
+* remove ConvertTo nodes?
+* work around for none UAV read 11_11_10 support?
 * bindless textures
 ** send all textures for the frame up at once
 ** use constant buffers to tell shaders how to index into their texture

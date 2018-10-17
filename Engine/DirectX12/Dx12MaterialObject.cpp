@@ -89,8 +89,6 @@ void GraphicsMaterialObject::SetRenderData(
 
    int rootIndex = 0;
 
-   GpuDevice::Instance( ).SetCommonHeaps( pCommandList );
-
    if ( pData->constantBuffer.pCBV )
       pCommandList->pList->SetGraphicsRootConstantBufferView( rootIndex++, pData->constantBuffer.pResource->GetGPUVirtualAddress() );
 

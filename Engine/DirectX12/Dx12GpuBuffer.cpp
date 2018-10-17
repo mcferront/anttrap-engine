@@ -56,6 +56,7 @@ void GpuBuffer::Create(
             resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
         }
     }
+    m_ResourceDesc = resourceDesc;
 
     D3D12_CLEAR_VALUE clearValue;
 
@@ -206,23 +207,23 @@ void GpuBuffer::BuildSrvDesc(
     D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = { };
     {
         srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-        srvDesc.Texture2D.MipLevels = this->GetNumMips( );
+        srvDesc.Texture2D.MipLevels = m_ResourceDesc.MipLevels;
 
-        if ( m_pResource->GetDesc( ).Format == DXGI_FORMAT_R32_TYPELESS )
+        if ( m_ResourceDesc.Format == DXGI_FORMAT_R32_TYPELESS )
             srvDesc.Format = DXGI_FORMAT_R32_FLOAT;
         else
-            srvDesc.Format = m_pResource->GetDesc( ).Format;
+            srvDesc.Format = m_ResourceDesc.Format;
 
         if ( m_IsBuffer )
         {
             srvDesc.Buffer.FirstElement = 0;
             srvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
-            srvDesc.Buffer.NumElements = (UINT) m_pResource->GetDesc( ).Width / m_Stride;
+            srvDesc.Buffer.NumElements = (UINT) m_ResourceDesc.Width / m_Stride;
             srvDesc.Buffer.StructureByteStride = m_Stride;
             srvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
         }
         else
-            srvDesc.ViewDimension = GetSampleCount( ) > 1 ? D3D12_SRV_DIMENSION_TEXTURE2DMS : D3D12_SRV_DIMENSION_TEXTURE2D;
+            srvDesc.ViewDimension = m_ResourceDesc.SampleDesc.Count > 1 ? D3D12_SRV_DIMENSION_TEXTURE2DMS : D3D12_SRV_DIMENSION_TEXTURE2D;
     }
 
     *pDesc = srvDesc;
@@ -234,15 +235,15 @@ void GpuBuffer::BuildUavDesc(
 {
     D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc = { };
     {
-        Debug::Assert( Condition( m_pResource->GetDesc( ).Flags & GpuResource::Flags::UnorderedAccess ), "UnorderedAccessView was not one of the flags" );
+        Debug::Assert( Condition( m_ResourceDesc.Flags & GpuResource::Flags::UnorderedAccess ), "UnorderedAccessView was not one of the flags" );
 
-        uavDesc.Format = m_pResource->GetDesc( ).Format;
+        uavDesc.Format = m_ResourceDesc.Format;
 
         if ( m_IsBuffer )
         {
             uavDesc.Buffer.FirstElement = 0;
             uavDesc.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_NONE;
-            uavDesc.Buffer.NumElements = (UINT) m_pResource->GetDesc( ).Width / m_Stride;
+            uavDesc.Buffer.NumElements = (UINT) m_ResourceDesc.Width / m_Stride;
             uavDesc.Buffer.StructureByteStride = m_Stride;
             uavDesc.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
         }
@@ -259,8 +260,8 @@ void GpuBuffer::BuildRtvDesc(
 {
     D3D12_RENDER_TARGET_VIEW_DESC desc = {};
     {
-        desc.Format = m_pResource->GetDesc( ).Format;
-        desc.ViewDimension = GetSampleCount( ) > 1 ? D3D12_RTV_DIMENSION_TEXTURE2DMS : D3D12_RTV_DIMENSION_TEXTURE2D;
+        desc.Format = m_ResourceDesc.Format;
+        desc.ViewDimension = m_ResourceDesc.SampleDesc.Count > 1 ? D3D12_RTV_DIMENSION_TEXTURE2DMS : D3D12_RTV_DIMENSION_TEXTURE2D;
     }
 
     *pDesc = desc;
@@ -272,12 +273,12 @@ void GpuBuffer::BuildDsvDesc(
 {
     D3D12_DEPTH_STENCIL_VIEW_DESC desc = { };
     {
-        if ( m_pResource->GetDesc( ).Format == DXGI_FORMAT_R32_TYPELESS )
+        if ( m_ResourceDesc.Format == DXGI_FORMAT_R32_TYPELESS )
             desc.Format = DXGI_FORMAT_D32_FLOAT;
         else
-            desc.Format = m_pResource->GetDesc( ).Format;
+            desc.Format = m_ResourceDesc.Format;
 
-        desc.ViewDimension = GetSampleCount( ) > 1 ? D3D12_DSV_DIMENSION_TEXTURE2DMS : D3D12_DSV_DIMENSION_TEXTURE2D;
+        desc.ViewDimension = m_ResourceDesc.SampleDesc.Count > 1 ? D3D12_DSV_DIMENSION_TEXTURE2DMS : D3D12_DSV_DIMENSION_TEXTURE2D;
     }
 
     *pDesc = desc;

@@ -167,13 +167,6 @@ void ComputeMaterialObject::Pass::SetComputeData(
 {
     const ComputeMaterial::PassData *pData = pPass->pData;
 
-    int rootIndex = 0;
-
-    GpuDevice::Instance( ).SetCommonHeaps( pCommandList );
-
-    if ( pData->constantBuffer.pCBV )
-        pCommandList->pList->SetComputeRootConstantBufferView( rootIndex++, pData->constantBuffer.pResource->GetGPUVirtualAddress() ); //shader constants
-
 #ifndef _DISTRIBUTION
     static RegistryBool validate("material.validate", false);
 
@@ -191,20 +184,68 @@ void ComputeMaterialObject::Pass::SetComputeData(
 
     for ( int c = 0; c < pData->header.numBuffers; c++ )
     {
-        D3D12_GPU_DESCRIPTOR_HANDLE d3d12GpuHandle;
         GpuBuffer *pBuffer = GetResource( pData->pBuffers[c].buffer, GpuBuffer );
 
         if ( pData->pBuffers[c].header.type == ComputeMaterial::PassData::Buffer::UAV )
-        {
             pBuffer->TransitionTo( pCommandList, GpuResource::State::UnorderedAccess );
-            d3d12GpuHandle = pBuffer->GetUav()->view.gpuHandle;
-        }
         else if ( pData->pBuffers[c].header.type == ComputeMaterial::PassData::Buffer::SRV )
-        {
             pBuffer->TransitionTo( pCommandList, GpuResource::State::ShaderResource );
-            d3d12GpuHandle = pBuffer->GetSrv()->view.gpuHandle;
-        }
-
-        pCommandList->pList->SetComputeRootDescriptorTable( rootIndex++, d3d12GpuHandle );
     }
+
+    //for ( int c = 0; c < pData->header.numBuffers; c++ )
+    //{
+    //    if ( pData->pBuffers[c].pName[0] == '$' )
+    //    {
+    //        D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle = { pData->viewHandles.cpuHandle.ptr + (c * pData->viewHandles.pHeap->descHandleIncSize) };
+    //        
+    //        GpuBuffer *pBuffer = GetResource( pData->pBuffers[c].buffer, GpuBuffer );
+
+    //        GpuDevice::ViewHandle view;
+
+    //        if ( pData->pBuffers[c].header.type == ComputeMaterial::PassData::Buffer::UAV  )
+    //            view = pBuffer->GetUav()->view;
+    //        else if ( pData->pBuffers[c].header.type == ComputeMaterial::PassData::Buffer::SRV )
+    //            view = pBuffer->GetSrv()->view;
+
+    //        GpuDevice::Instance().GetDevice()->CopyDescriptorsSimple( 1, cpuHandle, view.cpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV );
+    //    }
+    //}
+
+    for ( int c = 0; c < pData->header.numBuffers; c++ )
+    {
+        if ( pData->pBuffers[c].pName[0] == '$' )
+        {
+            D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle = { pData->viewHandles.cpuHandle.ptr + (c * pData->viewHandles.pHeap->descHandleIncSize) };
+
+            GpuBuffer *pBuffer = GetResource( pData->pBuffers[c].buffer, GpuBuffer );
+
+            if ( pData->pBuffers[c].header.type == ComputeMaterial::PassData::Buffer::UAV  )
+            {
+                GpuDevice::ViewHandle view;
+
+                D3D12_UNORDERED_ACCESS_VIEW_DESC desc;
+                pBuffer->BuildUavDesc( &desc );
+
+                GpuDevice::Instance( ).CreateUav( desc, pBuffer, cpuHandle );
+            }
+            else if ( pData->pBuffers[c].header.type == ComputeMaterial::PassData::Buffer::SRV )
+            {
+                GpuDevice::ViewHandle view;
+
+                D3D12_SHADER_RESOURCE_VIEW_DESC desc;
+                pBuffer->BuildSrvDesc( &desc );
+
+                GpuDevice::Instance( ).CreateSrv( desc, pBuffer, cpuHandle );
+            }
+        }
+    }
+
+    int rootIndex = 0;
+
+    if ( pData->constantBuffer.pCBV )
+        pCommandList->pList->SetComputeRootConstantBufferView( rootIndex++, pData->constantBuffer.pResource->GetGPUVirtualAddress() ); //shader constants
+
+    if ( pData->viewHandles.pHeap )
+        pCommandList->pList->SetComputeRootDescriptorTable( rootIndex++, pData->viewHandles.gpuHandle );
+
 }
