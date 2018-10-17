@@ -1,7 +1,4 @@
 ## Game:
-* desc tables cleaned up
-   compute: two sets of buffers - constants which can be a range and macros which are set individually
-
 * ssr writeup
 * remove ConvertTo nodes?
 * work around for none UAV read 11_11_10 support?
