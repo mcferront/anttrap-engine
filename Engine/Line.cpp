@@ -178,6 +178,7 @@ void Line::Render(
       (void **) &pVertexBuffer
       );
    Debug::Assert( Condition( SUCCEEDED( hr ) ), "CreateCommittedResource: 0x%08x", hr );
+   pVertexBuffer->SetName( L"LineVB" );
 
    // Copy the triangle data to the vertex buffer.
    void *pMappedData;
@@ -373,6 +374,7 @@ void Triangle::Render(
       (void **) &pVertexBuffer
       );
    Debug::Assert( Condition( SUCCEEDED( hr ) ), "CreateCommittedResource: 0x%08x", hr );
+   pVertexBuffer->SetName( L"TriangleVB" );
 
    // Copy the triangle data to the vertex buffer.
    void **pMappedData;

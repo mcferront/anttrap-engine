@@ -1,4 +1,7 @@
 ## Game:
+* up next:
+** get rid of asset type
+** what resources aren't being released?
 * ssr writeup
 * remove ConvertTo nodes?
 * work around for none UAV read 11_11_10 support?

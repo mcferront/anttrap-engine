@@ -192,51 +192,22 @@ void ComputeMaterialObject::Pass::SetComputeData(
             pBuffer->TransitionTo( pCommandList, GpuResource::State::ShaderResource );
     }
 
-    //for ( int c = 0; c < pData->header.numBuffers; c++ )
-    //{
-    //    if ( pData->pBuffers[c].pName[0] == '$' )
-    //    {
-    //        D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle = { pData->viewHandles.cpuHandle.ptr + (c * pData->viewHandles.pHeap->descHandleIncSize) };
-    //        
-    //        GpuBuffer *pBuffer = GetResource( pData->pBuffers[c].buffer, GpuBuffer );
-
-    //        GpuDevice::ViewHandle view;
-
-    //        if ( pData->pBuffers[c].header.type == ComputeMaterial::PassData::Buffer::UAV  )
-    //            view = pBuffer->GetUav()->view;
-    //        else if ( pData->pBuffers[c].header.type == ComputeMaterial::PassData::Buffer::SRV )
-    //            view = pBuffer->GetSrv()->view;
-
-    //        GpuDevice::Instance().GetDevice()->CopyDescriptorsSimple( 1, cpuHandle, view.cpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV );
-    //    }
-    //}
-
     for ( int c = 0; c < pData->header.numBuffers; c++ )
     {
         if ( pData->pBuffers[c].pName[0] == '$' )
         {
             D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle = { pData->viewHandles.cpuHandle.ptr + (c * pData->viewHandles.pHeap->descHandleIncSize) };
-
+            
             GpuBuffer *pBuffer = GetResource( pData->pBuffers[c].buffer, GpuBuffer );
 
+            GpuDevice::ViewHandle view;
+
             if ( pData->pBuffers[c].header.type == ComputeMaterial::PassData::Buffer::UAV  )
-            {
-                GpuDevice::ViewHandle view;
-
-                D3D12_UNORDERED_ACCESS_VIEW_DESC desc;
-                pBuffer->BuildUavDesc( &desc );
-
-                GpuDevice::Instance( ).CreateUav( desc, pBuffer, cpuHandle );
-            }
+                view = pBuffer->GetUav()->view;
             else if ( pData->pBuffers[c].header.type == ComputeMaterial::PassData::Buffer::SRV )
-            {
-                GpuDevice::ViewHandle view;
+                view = pBuffer->GetSrv()->view;
 
-                D3D12_SHADER_RESOURCE_VIEW_DESC desc;
-                pBuffer->BuildSrvDesc( &desc );
-
-                GpuDevice::Instance( ).CreateSrv( desc, pBuffer, cpuHandle );
-            }
+            GpuDevice::Instance().GetDevice()->CopyDescriptorsSimple( 1, cpuHandle, view.cpuHandle, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV );
         }
     }
 

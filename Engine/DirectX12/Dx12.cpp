@@ -10,6 +10,9 @@
 #include "TextureAsset.h"
 #include "GpuProfiler.h"
 
+#include <dxgidebug.h>
+#pragma comment ( lib, "DXGUID.LIB")
+
 const GpuDevice::DepthStencilView     GpuDevice::DepthStencilView::Invalid; 
 const GpuDevice::ConstantBufferView   GpuDevice::ConstantBufferView::Invalid; 
 const GpuDevice::ShaderResourceView   GpuDevice::ShaderResourceView::Invalid; 
@@ -157,6 +160,8 @@ bool GpuDevice::Create(
 
     do
     {
+        DWORD debugFactoryFlags = 0;
+
 #if defined(_DEBUG)
         {
             ID3D12Debug1 *pDebugController;
@@ -170,10 +175,28 @@ bool GpuDevice::Create(
                 //pDebugController->SetEnableGPUBasedValidation( TRUE );
                 pDebugController->Release( );
             }
+        
+            IDXGIInfoQueue *pDxgiInfoQueue;
+            if (SUCCEEDED(DXGIGetDebugInterface1(0, __uuidof(IDXGIInfoQueue), (void **) &pDxgiInfoQueue)))
+            {
+                debugFactoryFlags = DXGI_CREATE_FACTORY_DEBUG;
+
+                pDxgiInfoQueue->SetBreakOnSeverity(DXGI_DEBUG_ALL, DXGI_INFO_QUEUE_MESSAGE_SEVERITY_ERROR, true);
+                pDxgiInfoQueue->SetBreakOnSeverity(DXGI_DEBUG_ALL, DXGI_INFO_QUEUE_MESSAGE_SEVERITY_CORRUPTION, true);
+
+                pDxgiInfoQueue->Release();
+            }
+
+            IDXGIDebug *pDxgiDebug;
+            if (SUCCEEDED(DXGIGetDebugInterface1(0, __uuidof(IDXGIDebug), (void **) &pDxgiDebug)))
+            {
+                pDxgiDebug->ReportLiveObjects( DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_ALL );
+                pDxgiDebug->Release();
+            }
         }
 #endif
 
-        hr = CreateDXGIFactory1( __uuidof(IDXGIFactory4), (void **) &m_pFactory );
+        hr = CreateDXGIFactory2( debugFactoryFlags, __uuidof(IDXGIFactory4), (void **) &m_pFactory );
         Debug::Assert( Condition( SUCCEEDED( hr ) ), "Failed to CreateDXGIFactory1 (0x%08x)", hr );
 
         unsigned int i = 0;
@@ -215,9 +238,10 @@ bool GpuDevice::Create(
 
         // Create descriptor heaps.
         {
-            m_RtvDesc.Create( D3D12_DESCRIPTOR_HEAP_TYPE_RTV, D3D12_DESCRIPTOR_HEAP_FLAG_NONE, 64 );
-            m_DsvDesc.Create( D3D12_DESCRIPTOR_HEAP_TYPE_DSV, D3D12_DESCRIPTOR_HEAP_FLAG_NONE, 64 );
-            m_ShaderDescHeap.Create( D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE, 1000000 );
+            m_RtvDesc.Create( "RTVHeap", D3D12_DESCRIPTOR_HEAP_TYPE_RTV, D3D12_DESCRIPTOR_HEAP_FLAG_NONE, 64 );
+            m_DsvDesc.Create( "DepthHeap", D3D12_DESCRIPTOR_HEAP_TYPE_DSV, D3D12_DESCRIPTOR_HEAP_FLAG_NONE, 64 );
+            m_ShaderDescHeap.Create( "ShaderDescHeap", D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE, 1000000 );
+            m_UploadDescHeap.Create( "ShaderUploadDescHeap", D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, D3D12_DESCRIPTOR_HEAP_FLAG_NONE, 1000000 );
         }
 
         hr = CreateSwapChain( hwnd, width, height, windowed );
@@ -311,6 +335,7 @@ void GpuDevice::Destroy( void )
     if ( NULL != m_pComputeQueue )
         m_pComputeQueue->Release( );
 
+    m_UploadDescHeap.Destroy( );
     m_ShaderDescHeap.Destroy( );
     m_RtvDesc.Destroy( );
     m_DsvDesc.Destroy( );
@@ -683,30 +708,10 @@ GpuDevice::ShaderResourceView *GpuDevice::CreateSrv(
     GpuResource *pResource
 )
 {
-    return CreateSrvRange( &desc, &pResource, 1 );
-}
-
-GpuDevice::ShaderResourceView *GpuDevice::CreateSrvRange(
-    const D3D12_SHADER_RESOURCE_VIEW_DESC *pDescs,
-    GpuResource *pResources[],
-    size_t numResources
-)
-{
-    D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle;
-    D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle;
-
-    const GpuDevice::DescHeap *pHeap = m_ShaderDescHeap.Alloc( &cpuHandle, &gpuHandle, numResources );
-
     GpuDevice::ShaderResourceView *pSRV = new GpuDevice::ShaderResourceView;
-    pSRV->view.cpuHandle = cpuHandle;
-    pSRV->view.gpuHandle = gpuHandle;
-    pSRV->view.pHeap = pHeap;
+    pSRV->view.pHeap = m_UploadDescHeap.Alloc( &pSRV->view.cpuHandle, &pSRV->view.gpuHandle, 1 );
 
-    for (uint32 i = 0; i < numResources; i++)
-    {
-        CreateSrv( pDescs[i], pResources[i], cpuHandle );
-        cpuHandle.ptr += pHeap->descHandleIncSize;
-    }
+    CreateSrv( desc, pResource, pSRV->view.cpuHandle );
 
     return pSRV;
 }
@@ -722,34 +727,14 @@ void GpuDevice::CreateSrv(
 
 GpuDevice::UnorderedAccessView *GpuDevice::CreateUav(
     const D3D12_UNORDERED_ACCESS_VIEW_DESC &desc,
-    GpuResource *pResources
+    GpuResource *pResource
 )
 {
-    return CreateUavRange( &desc, &pResources, 1 );
-}
-
-GpuDevice::UnorderedAccessView *GpuDevice::CreateUavRange(
-    const D3D12_UNORDERED_ACCESS_VIEW_DESC *pDescs,
-    GpuResource *pResources[],
-    size_t numResources
-)
-{
-    D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle;
-    D3D12_GPU_DESCRIPTOR_HANDLE gpuHandle;
-
-    const GpuDevice::DescHeap *pHeap = m_ShaderDescHeap.Alloc( &cpuHandle, &gpuHandle, numResources );
-
     GpuDevice::UnorderedAccessView *pUAV = new GpuDevice::UnorderedAccessView;
-    pUAV->view.cpuHandle = cpuHandle;
-    pUAV->view.gpuHandle = gpuHandle;
-    pUAV->view.pHeap = pHeap;
+    pUAV->view.pHeap = m_UploadDescHeap.Alloc( &pUAV->view.cpuHandle, &pUAV->view.gpuHandle, 1 );
 
-    for (uint32 i = 0; i < numResources; i++)
-    {
-        CreateUav( pDescs[i], pResources[i], cpuHandle );
-        cpuHandle.ptr += pHeap->descHandleIncSize;
-    }
-
+    CreateUav( desc, pResource, pUAV->view.cpuHandle );
+    
     return pUAV;
 }
 

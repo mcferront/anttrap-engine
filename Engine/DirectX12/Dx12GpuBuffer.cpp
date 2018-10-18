@@ -87,6 +87,7 @@ void GpuBuffer::Create(
         (void **) &m_pResource
     );
     Debug::Assert( Condition( SUCCEEDED( hr ) ), "CreateCommittedResource: 0x%08x", hr );
+    m_pResource->SetName( L"GpuBuffer" );
 
     m_Stride = stride;
     m_IsBuffer = isBuffer;

@@ -123,7 +123,7 @@ void GraphicsMaterial::PassData::CloneTo(
     pPassData->pFloat4s = new GraphicsMaterial::PassData::Float4[ pPassData->header.numFloat4Names ];
     pPassData->pMatrix4s = new GraphicsMaterial::PassData::Matrix4[ pPassData->header.numMatrix4Names ];
     pPassData->pTextures = new GraphicsMaterial::PassData::Texture[ pPassData->header.numTextures ];
-    pPassData->pSRVs = nullptr;
+    pPassData->viewHandles.pHeap = nullptr;
 
     for ( int c = 0; c < pPassData->header.numTextures; c++ )
     {
@@ -134,18 +134,20 @@ void GraphicsMaterial::PassData::CloneTo(
 
     if ( pPassData->header.numTextures > 0 )
     {
-        D3D12_SHADER_RESOURCE_VIEW_DESC descs[16];
-        GpuResource *pResources[16];
+        GpuDevice::Instance().AllocShaderDescRange( &pPassData->viewHandles, pPassData->header.numTextures );
+        uint32 descHandleSize = pPassData->viewHandles.pHeap->descHandleIncSize;
 
-        Debug::Assert( Condition(pPassData->header.numTextures <= _countof(descs)), "Need to increase temp array" );
+        D3D12_SHADER_RESOURCE_VIEW_DESC desc;
 
         for (int i = 0; i < pPassData->header.numTextures; i++)
         {
-            GetResource(pPassData->pTextures[i].texture, GpuBuffer)->BuildSrvDesc( &descs[i] );
-            pResources[i] = GetResource(pPassData->pTextures[i].texture, GpuBuffer);
+            D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle = { pPassData->viewHandles.cpuHandle.ptr + (i * descHandleSize) };
+
+            GpuBuffer *pBuffer = GetResource(pPassData->pTextures[i].texture, GpuBuffer);
+            pBuffer->BuildSrvDesc( &desc );
+
+            GpuDevice::Instance().CreateSrv( desc, pBuffer,  cpuHandle );
         }
-    
-        pPassData->pSRVs = GpuDevice::Instance().CreateSrvRange( descs, pResources, pPassData->header.numTextures );
     }
 
     for ( int c = 0; c < pPassData->header.numFloat4Names; c++ )
@@ -226,6 +228,8 @@ bool GraphicsMaterial::CreateConstantBuffer(
         //LOG( "CreateCommittedResource - ConstantBuffer" );
         Debug::Assert( Condition( SUCCEEDED( hr ) ), "Failed to CreateCommittedResource (ConstantBuffer) (0x%08x)", hr );
         BreakIf( FAILED( hr ) );
+
+        pConstantBuffer->SetName( L"ConstantBuffer" );
 
         // Initialize and map the constant buffers. We don't unmap this until the
         // app closes. Keeping things mapped for the lifetime of the resource is okay.
@@ -584,7 +588,7 @@ ISerializable *MaterialSerializer::DeserializeGraphicsMaterial(
         pPass->pFloat4s = NULL;
         pPass->pMatrix4s = NULL;
         pPass->pTextures = NULL;
-        pPass->pSRVs = NULL;
+        pPass->viewHandles.pHeap = NULL;
         pPass->constantBuffer.pCBV = NULL;
         pPass->constantBuffer.pData = NULL;
         pPass->constantBuffer.pResource = NULL;

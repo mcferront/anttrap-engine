@@ -38,7 +38,7 @@ private:
             numDescriptors = 0;
         }
 
-        void Create( D3D12_DESCRIPTOR_HEAP_TYPE type, D3D12_DESCRIPTOR_HEAP_FLAGS flags, uint32 _maxDescriptors )
+        void Create( const char *pName, D3D12_DESCRIPTOR_HEAP_TYPE type, D3D12_DESCRIPTOR_HEAP_FLAGS flags, uint32 _maxDescriptors )
         {
             maxDescriptors = _maxDescriptors;
 
@@ -52,7 +52,7 @@ private:
             HRESULT hr = GpuDevice::Instance( ).GetDevice( )->CreateDescriptorHeap( &desc, __uuidof(ID3D12DescriptorHeap), (void **) &pHeap );
             Debug::Assert( Condition( SUCCEEDED( hr ) ), "Failed to CreateDescriptorHeap (0x%08x)", hr );
 
-            pHeap->SetName( String::ToWideChar( "DescHeap" ) );
+            pHeap->SetName( String::ToWideChar(pName) );
 
             descHandleIncSize = GpuDevice::Instance( ).GetDevice( )->GetDescriptorHandleIncrementSize( type );
             
@@ -292,12 +292,6 @@ public:
         GpuResource *pResource
     );
 
-    ShaderResourceView *CreateSrvRange(
-        const D3D12_SHADER_RESOURCE_VIEW_DESC *pDescs,
-        GpuResource *pResources[],
-        uint32 numResources
-    );
-
     void CreateSrv(
         const D3D12_SHADER_RESOURCE_VIEW_DESC &desc,
         GpuResource *pResource,
@@ -307,12 +301,6 @@ public:
     UnorderedAccessView *CreateUav(
         const D3D12_UNORDERED_ACCESS_VIEW_DESC &desc,
         GpuResource *pResource
-    );
-
-    UnorderedAccessView *CreateUavRange(
-        const D3D12_UNORDERED_ACCESS_VIEW_DESC *pDescs,
-        GpuResource *pResources[],
-        uint32 numResources
     );
 
     void CreateUav(
@@ -398,6 +386,7 @@ private:
 private:
     FrameResources m_FrameResources[FrameCount];
     DescHeap m_ShaderDescHeap;
+    DescHeap m_UploadDescHeap;
     DescHeap m_RtvDesc;
     DescHeap m_DsvDesc;
 

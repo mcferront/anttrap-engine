@@ -438,7 +438,7 @@ public:
             constantBuffer.pResource->Release( );
 
          GpuDevice::Instance( ).DestroyCbv( constantBuffer.pCBV );
-         GpuDevice::Instance( ).DestroySrv( pSRVs );
+         GpuDevice::Instance( ).FreeViewHandles( &viewHandles );
       }
 
       struct Header
@@ -492,7 +492,7 @@ public:
       Float4 *pFloat4s;
       Texture *pTextures;
       Matrix4 *pMatrix4s;
-      GpuDevice::ShaderResourceView *pSRVs;
+      GpuDevice::ViewHandle viewHandles;
 
       D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc;
 

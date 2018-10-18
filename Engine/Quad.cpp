@@ -234,6 +234,7 @@ void Quad::Render(
       (void **) &pVertexBuffer
       );
    Debug::Assert( Condition( SUCCEEDED( hr ) ), "CreateCommittedResource: 0x%08x", hr );
+   pVertexBuffer->SetName( L"QuadVB" );
 
    // Copy the triangle data to the vertex buffer.
    void **pMappedData;
@@ -258,6 +259,7 @@ void Quad::Render(
       (void **) &pIndexBuffer
       );
    Debug::Assert( Condition( SUCCEEDED( hr ) ), "CreateCommittedResource: 0x%08x", hr );
+   pIndexBuffer->SetName( L"QuadIB" );
 
    hr = pIndexBuffer->Map( 0, &readRange, reinterpret_cast<void**>( &pMappedData ) );
    Debug::Assert( Condition( SUCCEEDED( hr ) ), "pIndexBuffer->Map: 0x%08x", hr );
