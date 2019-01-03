@@ -37,3 +37,8 @@ Camera can be translated via W,A,S,D and rotated with Left Click + Mouse
 
 ### Thx to Nvidia and Amazon for the Bistro
 https://developer.nvidia.com/orca
+
+
+Here's a couple of examples:
+![alt text](http://www.trapzz.com/wp-content/uploads/2018/09/bokeh_20.png) 
+![alt text](http://www.trapzz.com/wp-content/uploads/2018/09/plant_3.png)
