@@ -546,6 +546,13 @@ int WINAPI WinMain( HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLin
       return 0;
    }
 
+   int VS_UAV_ELEMENT_SIZE = 16;
+
+   //std::string s;
+   //s += (std::string("#define VS_UAV_ELEMENT_SIZE ") + std::to_string(unsigned int(VS_UAV_ELEMENT_SIZE)) + std::string(" %u\n"));
+
+
+
    LOG( "Creating App" );
 
    App::Instance( ).Create( g_Window );

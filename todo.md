@@ -20,7 +20,7 @@
 * hdr blur flickers
 * evaluate renderworld locks
 * AddToScene
-** Compnents need a local SetActive (which they have) so they can stay out of a scene if a node is added
+** Components need a local SetActive (which they have) so they can stay out of a scene if a node is added
 *** Maybe only Node can call AddTo/RemoveFrom scene on the components, no one else - everyone else is forced to use SetActive method
 **** this solves the AddTo/RemoveFrom confusion, and unifies SetActive - I like this
 * Make sure thread specific lists (and other data) are padded out to a cacheline so we don't get false sharing

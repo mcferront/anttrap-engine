@@ -20,3 +20,8 @@ Practical Edge Preserving DOF: https://github.com/mcferront/anttrap-engine/tree/
 ## Todos
 Finally, as I mentioned this is a big work in progress - you can see the todo list (which is my random spam of things which need to get done) at todo.md
 
+Here's some examples of it:
+![alt text](http://www.trapzz.com/wp-content/uploads/2018/09/bokeh_20.png) 
+![alt text](http://www.trapzz.com/wp-content/uploads/2018/09/plant_3.png)
+![alt text](http://www.trapzz.com/wp-content/uploads/2019/01/mw.png)
+![alt text](http://www.trapzz.com/wp-content/uploads/2019/01/se.png)
