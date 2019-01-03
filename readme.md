@@ -25,3 +25,6 @@ Here's some examples of it:
 ![alt text](http://www.trapzz.com/wp-content/uploads/2018/09/plant_3.png)
 ![alt text](http://www.trapzz.com/wp-content/uploads/2019/01/mw.png)
 ![alt text](http://www.trapzz.com/wp-content/uploads/2019/01/se.png)
+
+### Thx to Nvidia and Amazon for the Bistro
+https://developer.nvidia.com/orca
