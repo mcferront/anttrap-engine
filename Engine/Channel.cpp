@@ -369,6 +369,8 @@ void Channel::QueueEvent(
 
    QueuedEvent *pQueuedEvent = m_EventPool.Alloc( );
    
+   pEvent = StringRef(pEvent);
+
    if ( m_EventListeners.Get(pEvent, &pEventList) )
    {
       pQueuedEvent->pListeners = pEventList;

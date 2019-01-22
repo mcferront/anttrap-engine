@@ -12,15 +12,6 @@ struct VertexElementDesc
    uint32 numElementDescs;
 };
 
-struct ConstantBuffer
-{
-   Id id;
-   ID3D12Resource *pResource;
-   D3D12_CONSTANT_BUFFER_VIEW_DESC desc;
-   GpuDevice::ConstantBufferView *pCBV;
-   byte   *pData;
-};
-
 class ComputeMaterial
 {
    friend class ComputeMaterialObject;
@@ -40,7 +31,6 @@ public:
    public:
       PassData( void )
       {
-          constantBuffer.id = Id::Create( );
       }
 
       const char *GetName( void ) const { return pName; }
@@ -157,10 +147,8 @@ public:
          delete[ ] pMatrix4s;
          delete[ ] pBuffers;
 
-         if ( NULL != constantBuffer.pResource )
-            constantBuffer.pResource->Release( );
+         free( constantBuffer.pData );
 
-         GpuDevice::Instance( ).DestroyCbv( constantBuffer.pCBV );
          GpuDevice::Instance( ).FreeViewHandles( &viewHandles );
       }
 
@@ -275,8 +263,7 @@ public:
       Float4 *pFloat4s;
       Matrix4 *pMatrix4s;
 
-      ConstantBuffer constantBuffer;
-
+      GpuDevice::ConstantBuffer constantBuffer;
       GpuDevice::ViewHandle viewHandles;
    };
 
@@ -304,7 +291,6 @@ public:
    public:
       PassData( void ) 
       {
-         constantBuffer.id = Id::Create( );
       }
 
       int GetMatrixMacroIndex(
@@ -434,10 +420,8 @@ public:
          delete[ ] pMatrix4s;
          delete[ ] pTextures;
 
-         if ( NULL != constantBuffer.pResource )
-            constantBuffer.pResource->Release( );
+         free( constantBuffer.pData );
 
-         GpuDevice::Instance( ).DestroyCbv( constantBuffer.pCBV );
          GpuDevice::Instance( ).FreeViewHandles( &viewHandles );
       }
 
@@ -484,7 +468,7 @@ public:
          int offset;
       };
 
-      ConstantBuffer constantBuffer;
+      GpuDevice::ConstantBuffer constantBuffer;
 
       Header header;
       ResourceHandle shader;
@@ -505,7 +489,7 @@ private:
 
 public:
    static bool CreateConstantBuffer(
-      ConstantBuffer *pBuffer,
+      GpuDevice::ConstantBuffer *pBuffer,
       uint32 sizeInBytes
    );
 };

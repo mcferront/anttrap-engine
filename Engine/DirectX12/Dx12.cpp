@@ -147,13 +147,6 @@ bool GpuDevice::Create(
 
     m_ProgrammableSamplePositionsSupport = false;
 
-    for ( uint32 i = 0; i < FrameCount; i++ )
-    {
-        m_FrameResources[i].resources.Create( );
-        m_FrameResources[i].numGraphicsCommandLists = 0;
-        m_FrameResources[i].numComputeCommandLists = 0;
-    }
-
     memset( m_pGraphicsPool, 0, sizeof( m_pGraphicsPool ) );
     memset( m_pComputePool, 0, sizeof( m_pComputePool ) );
     memset( m_pRenderTargets, 0, sizeof( m_pRenderTargets ) );
@@ -280,6 +273,49 @@ bool GpuDevice::Create(
         m_GraphicsFenceEvent = CreateEvent( nullptr, FALSE, FALSE, nullptr );
         m_ComputeFenceEvent = CreateEvent( nullptr, FALSE, FALSE, nullptr );
 
+        for ( i = 0; i < FrameCount; i++ )
+        {
+            m_FrameResources[i].resources.Create( );
+            m_FrameResources[i].numGraphicsCommandLists = 0;
+            m_FrameResources[i].numComputeCommandLists = 0;
+
+            // TODO: this is messy
+            {
+                D3D12_HEAP_PROPERTIES heapProperties = { };
+                heapProperties.Type = D3D12_HEAP_TYPE_UPLOAD;
+                heapProperties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+                heapProperties.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+                heapProperties.CreationNodeMask = 1;
+                heapProperties.VisibleNodeMask = 1;
+
+                D3D12_RESOURCE_DESC resourceDesc = { };
+                resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+                resourceDesc.Width = FrameConstantBufferSize;
+                resourceDesc.Height = 1;
+                resourceDesc.DepthOrArraySize = 1;
+                resourceDesc.MipLevels = 1;
+                resourceDesc.Format = DXGI_FORMAT_UNKNOWN;
+                resourceDesc.SampleDesc.Count = 1;
+                resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+                resourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
+
+                hr = m_pDevice->CreateCommittedResource(
+                    &heapProperties,
+                    D3D12_HEAP_FLAG_NONE,
+                    &resourceDesc,
+                    D3D12_RESOURCE_STATE_GENERIC_READ,
+                    NULL,
+                    __uuidof( ID3D12Resource ),
+                    (void **) &m_FrameResources[i].pConstantBuffer );
+            }
+
+            Debug::Assert( Condition(SUCCEEDED(hr)), "Failed to create frame constant buffer" );
+            BreakIf( FAILED(hr) );
+
+            m_FrameResources[i].cbOffset = 0;
+        }
+        BreakIf( i < FrameCount );
+
 
     } while ( false );
 
@@ -304,6 +340,8 @@ void GpuDevice::Destroy( void )
     {
         FreePerFrameResources( i );
         m_FrameResources[i].resources.Destroy( );
+
+        m_FrameResources[i].pConstantBuffer->Release( );
     }
 
     if ( NULL != m_pFactory )
@@ -391,6 +429,8 @@ void GpuDevice::AppShutdown( void )
 
 void GpuDevice::BeginRender( void )
 {
+    m_FrameResources[m_FrameIndex].pConstantBuffer->Map( 0, nullptr, (void **) &m_FrameResources[m_FrameIndex].pConstantData );
+    m_FrameResources[m_FrameIndex].cbOffset = 0;
 }
 
 void GpuDevice::EndRender( void )
@@ -400,6 +440,10 @@ void GpuDevice::EndRender( void )
     CommandList *pCommandList = AllocPerFrameGraphicsCommandList( );
 
     GetResource( m_BackBuffer, GpuBuffer )->TransitionTo( pCommandList, GpuBuffer::State::Present );
+
+    D3D12_RANGE range = { 0, m_FrameResources[m_FrameIndex].cbOffset };
+    m_FrameResources[m_FrameIndex].pConstantBuffer->Unmap( 0, &range );
+    m_FrameResources[m_FrameIndex].pConstantData = nullptr;
 
     pCommandList->pList->OMSetRenderTargets( 1, &m_Rtvs[m_FrameIndex], FALSE, NULL );
     ExecuteCommandLists( &pCommandList, 1 );
@@ -691,16 +735,17 @@ void GpuDevice::ExecuteCommandLists(
     }
 }
 
-GpuDevice::ConstantBufferView *GpuDevice::CreateCbv(
-    const D3D12_CONSTANT_BUFFER_VIEW_DESC &desc
+D3D12_GPU_VIRTUAL_ADDRESS GpuDevice::UpdateCbv(
+    const GpuDevice::ConstantBuffer &cb
 )
 {
-    GpuDevice::ConstantBufferView *pCBV = new GpuDevice::ConstantBufferView;
-    pCBV->view.pHeap = m_ShaderDescHeap.Alloc( &pCBV->view.cpuHandle, &pCBV->view.gpuHandle );
+    size_t size = Align(cb.size, 256);
 
-    m_pDevice->CreateConstantBufferView( &desc, pCBV->view.cpuHandle );
+    uint32 offset = AtomicAdd( &m_FrameResources[m_FrameIndex].cbOffset, size );
+    Debug::Assert( Condition(offset + size <= FrameConstantBufferSize), "Frame Constant Buffer is too small" );
 
-    return pCBV;
+    memcpy( m_FrameResources[m_FrameIndex].pConstantData + offset, cb.pData, cb.size );
+    return m_FrameResources[m_FrameIndex].pConstantBuffer->GetGPUVirtualAddress() + offset;
 }
 
 GpuDevice::ShaderResourceView *GpuDevice::CreateSrv(
@@ -781,17 +826,6 @@ void GpuDevice::AllocShaderDescRange(
 )
 {
     pHandles->pHeap = m_ShaderDescHeap.Alloc( &pHandles->cpuHandle, &pHandles->gpuHandle, count );
-}
-
-void GpuDevice::DestroyCbv(
-    ConstantBufferView *pCBV
-)
-{
-    //TODO: DX12 should be able to determine the offset
-    // from the handle - heap->basehandle and the range
-    // and the heap can keep a free list
-
-    delete pCBV;
 }
 
 void GpuDevice::DestroySrv(

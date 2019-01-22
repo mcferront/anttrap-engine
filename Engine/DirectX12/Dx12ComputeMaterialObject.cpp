@@ -213,8 +213,11 @@ void ComputeMaterialObject::Pass::SetComputeData(
 
     int rootIndex = 0;
 
-    if ( pData->constantBuffer.pCBV )
-        pCommandList->pList->SetComputeRootConstantBufferView( rootIndex++, pData->constantBuffer.pResource->GetGPUVirtualAddress() ); //shader constants
+    if ( pData->constantBuffer.pData )
+    {
+        D3D12_GPU_VIRTUAL_ADDRESS gpuAddress = GpuDevice::Instance( ).UpdateCbv( pData->constantBuffer );
+        pCommandList->pList->SetComputeRootConstantBufferView( rootIndex++, gpuAddress );
+    }
 
     if ( pData->viewHandles.pHeap )
         pCommandList->pList->SetComputeRootDescriptorTable( rootIndex++, pData->viewHandles.gpuHandle );

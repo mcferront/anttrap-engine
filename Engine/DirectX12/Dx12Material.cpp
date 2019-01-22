@@ -95,14 +95,11 @@ void ComputeMaterial::PassData::CloneTo(
             }
         }
     }
-
-    GraphicsMaterial::CreateConstantBuffer( &pPassData->constantBuffer, constantBuffer.desc.SizeInBytes );
+    
+    GraphicsMaterial::CreateConstantBuffer( &pPassData->constantBuffer, constantBuffer.size );
 
     if ( NULL != pPassData->constantBuffer.pData )
-    {
         memcpy( pPassData->constantBuffer.pData, constantBuffer.pData, sizeof( Vector ) * pPassData->header.totalFloat4s );
-        pPassData->constantBuffer.pCBV = GpuDevice::Instance( ).CreateCbv( pPassData->constantBuffer.desc );     
-    }
 }
 
 GraphicsMaterial::~GraphicsMaterial( void )
@@ -164,96 +161,30 @@ void GraphicsMaterial::PassData::CloneTo(
         pPassData->pMatrix4s[ c ].offset = pMatrix4s[ c ].offset;
     }
 
-    GraphicsMaterial::CreateConstantBuffer( &pPassData->constantBuffer, constantBuffer.desc.SizeInBytes );
+    GraphicsMaterial::CreateConstantBuffer( &pPassData->constantBuffer, constantBuffer.size );
 
     if ( NULL != pPassData->constantBuffer.pData )
-    {
         memcpy( pPassData->constantBuffer.pData, constantBuffer.pData, sizeof( Matrix ) * pPassData->header.totalMatrix4s + sizeof( Vector ) * pPassData->header.totalFloat4s );
-        pPassData->constantBuffer.pCBV = GpuDevice::Instance( ).CreateCbv( pPassData->constantBuffer.desc );     
-    }
 
     pPassData->psoDesc = psoDesc;
     pPassData->pName = StringRef( pName );
 }
 
 bool GraphicsMaterial::CreateConstantBuffer(
-    ConstantBuffer *pBuffer,
+    GpuDevice::ConstantBuffer *pBuffer,
     uint32 size
 )
 {
-    byte *pConstantData;
-    ID3D12Resource *pConstantBuffer;
-    HRESULT hr;
-
-    pBuffer->pResource = NULL;
     pBuffer->pData = NULL;
-    pBuffer->pCBV = NULL;
-    pBuffer->desc.SizeInBytes = 0;
-
+    pBuffer->size = 0;
+    
     if ( 0 == size )
         return true;
 
-    // Create the constant buffer.
-    D3D12_HEAP_PROPERTIES heapProperties = { };
-    heapProperties.Type = D3D12_HEAP_TYPE_UPLOAD;
-    heapProperties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
-    heapProperties.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
-    heapProperties.CreationNodeMask = 1;
-    heapProperties.VisibleNodeMask = 1;
+    pBuffer->size = size;
+    pBuffer->pData = (byte *) malloc( size );
 
-    D3D12_RESOURCE_DESC resourceDesc = { };
-    resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-    resourceDesc.Alignment = 0;
-    resourceDesc.Width = Align( size, 256 );
-    resourceDesc.Height = 1;
-    resourceDesc.DepthOrArraySize = 1;
-    resourceDesc.MipLevels = 1;
-    resourceDesc.Format = DXGI_FORMAT_UNKNOWN;
-    resourceDesc.SampleDesc.Count = 1;
-    resourceDesc.SampleDesc.Quality = 0;
-    resourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-    resourceDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
-
-    do
-    {
-        hr = GpuDevice::Instance( ).GetDevice( )->CreateCommittedResource(
-            &heapProperties,
-            D3D12_HEAP_FLAG_NONE,
-            &resourceDesc,
-            D3D12_RESOURCE_STATE_GENERIC_READ,
-            NULL,
-            __uuidof( ID3D12Resource ),
-            (void **) &pConstantBuffer );
-
-        //LOG( "CreateCommittedResource - ConstantBuffer" );
-        Debug::Assert( Condition( SUCCEEDED( hr ) ), "Failed to CreateCommittedResource (ConstantBuffer) (0x%08x)", hr );
-        BreakIf( FAILED( hr ) );
-
-        pConstantBuffer->SetName( L"ConstantBuffer" );
-
-        // Initialize and map the constant buffers. We don't unmap this until the
-        // app closes. Keeping things mapped for the lifetime of the resource is okay.
-        D3D12_RANGE readRange = { };
-        hr = pConstantBuffer->Map( 0, &readRange, (void **) &pConstantData );
-        //LOG( "CreateCommittedResource - ConstantBuffer" );
-        Debug::Assert( Condition( SUCCEEDED( hr ) ), "Failed to pConstantBuffer->Map (0x%08x)", hr );
-        BreakIf( FAILED( hr ) );
-
-        D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = {};
-        cbvDesc.BufferLocation = pConstantBuffer->GetGPUVirtualAddress( );
-        cbvDesc.SizeInBytes = Align( size, 256 );	// CB size is required to be 256-byte aligned.
-
-        pBuffer->pResource = pConstantBuffer;
-        pBuffer->pData = pConstantData;
-        pBuffer->desc = cbvDesc;
-
-        pBuffer->pResource->SetName( String::ToWideChar(pBuffer->id.ToString()) );
-
-        return true;
-
-    } while ( 0 );
-
-    return false;
+    return true;
 }
 
 ISerializable *MaterialSerializer::Deserialize(
@@ -315,8 +246,7 @@ ISerializable *MaterialSerializer::DeserializeComputeMaterial(
         pPass->pFloat4s = NULL;
         pPass->pMatrix4s = NULL;
         pPass->constantBuffer.pData = NULL;
-        pPass->constantBuffer.pResource = NULL;
-        pPass->constantBuffer.pCBV = NULL;
+        pPass->constantBuffer.size = 0;
         pPass->viewHandles.pHeap = NULL;
 
         pSerializer->GetInputStream( )->Read( &pPass->header, sizeof( pPass->header ) );
@@ -589,9 +519,8 @@ ISerializable *MaterialSerializer::DeserializeGraphicsMaterial(
         pPass->pMatrix4s = NULL;
         pPass->pTextures = NULL;
         pPass->viewHandles.pHeap = NULL;
-        pPass->constantBuffer.pCBV = NULL;
         pPass->constantBuffer.pData = NULL;
-        pPass->constantBuffer.pResource = NULL;
+        pPass->constantBuffer.size = 0;
 
         pSerializer->GetInputStream( )->Read( &pPass->header, sizeof( pPass->header ) );
 

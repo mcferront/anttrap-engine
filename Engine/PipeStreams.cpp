@@ -104,7 +104,7 @@ void *PipeRecvStream::GetRawMessage( void )
 
 bool PipeRecvStream::HasInvalidPacket( void )
 {
-   if ( true == m_RawPackets )
+   if ( false == m_RawPackets )
    {
       //verify we have enough data
       //to parse a Pipe header

@@ -81,6 +81,7 @@ private:
     
 public:
     static const int FrameCount = 2;
+    static const uint32 FrameConstantBufferSize = 2 * 1024 * 1024;
 
     struct Support
     {
@@ -151,6 +152,12 @@ public:
         ViewHandle view;
     };
 
+    struct ConstantBuffer
+    {
+        byte   *pData;
+        size_t size;
+    };
+
     struct SwapChain
     {
         HWND hWnd;
@@ -202,6 +209,10 @@ public:
         int numComputeCommandLists;
 
         List<ID3D12Resource*> resources;
+
+        ID3D12Resource *pConstantBuffer;
+        byte *pConstantData;
+        uint32 cbOffset;
     };
 
 public:
@@ -283,9 +294,11 @@ public:
         bool waitForCompletion = false
     );
 
-    ConstantBufferView *CreateCbv(
-        const D3D12_CONSTANT_BUFFER_VIEW_DESC &desc
+    D3D12_GPU_VIRTUAL_ADDRESS UpdateCbv(
+        const ConstantBuffer &cb
     );
+
+    //ConstantBufferView *CreateCbv( void );
 
     ShaderResourceView *CreateSrv(
         const D3D12_SHADER_RESOURCE_VIEW_DESC &desc,
@@ -322,10 +335,6 @@ public:
     void AllocShaderDescRange(
         ViewHandle *pHandles,
         uint32 count
-    );
-
-    void DestroyCbv(
-        ConstantBufferView *pCBV
     );
 
     void DestroySrv(

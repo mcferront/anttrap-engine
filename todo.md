@@ -2,6 +2,7 @@
 * up next:
 ** get rid of asset type
 ** what resources aren't being released?
+* core assets (gpubuffer, etc.) should not be resources - they should be wrapped in resources
 * ssr writeup
 * remove ConvertTo nodes?
 * work around for none UAV read 11_11_10 support?

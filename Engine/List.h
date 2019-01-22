@@ -136,6 +136,8 @@ public:
       uint32 index
    ) const;
 
+   t_item operator [] (int index) const { return GetAt(index); }
+
    t_item *GetPointer(
       uint32 index
    ) const;
