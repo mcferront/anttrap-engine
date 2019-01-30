@@ -89,6 +89,10 @@ void TcpIpSocket::Create(
     m_ReadBufferSize = 64 * 1024;
     m_pReadBuffer = malloc( m_ReadBufferSize );
 
+    //set to non blocking
+    u_long nonBlocking = 1;
+    ioctlsocket( m_Socket, FIONBIO, &nonBlocking );
+
     memcpy( &m_Address, &address, sizeof(m_Address) );
 }
 

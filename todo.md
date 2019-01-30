@@ -3,6 +3,7 @@
 ** get rid of asset type
 ** what resources aren't being released?
 * core assets (gpubuffer, etc.) should not be resources - they should be wrapped in resources
+** e.g. texture is a resource which has a gpubuffer
 * ssr writeup
 * remove ConvertTo nodes?
 * work around for none UAV read 11_11_10 support?
@@ -26,7 +27,7 @@
 **** this solves the AddTo/RemoveFrom confusion, and unifies SetActive - I like this
 * Make sure thread specific lists (and other data) are padded out to a cacheline so we don't get false sharing
 * change string pool to string handle and return string pointers as int64s
-* Upgraded to 64 bit
+* Upgrade to 64 bit
 * Should InputSystem be a Resource?
 * InputSystem needs to send input messages in tick, not send up/down events outside of tick
 * Don’t convert bones to matrices then to transforms - save them as transforms?

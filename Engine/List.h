@@ -146,6 +146,8 @@ public:
       t_item item
    ) const;
    
+   t_item *GetBuffer( void ) const { return m_pItems; }
+
    List<t_item> & operator = (const List<t_item> &rhs);
 
    bool Contains(
