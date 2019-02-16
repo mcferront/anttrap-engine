@@ -960,8 +960,7 @@ void App::Update( void )
     static float mark;
 
     float deltaSeconds;
-    float leftover = 0;
-
+    
     static float screen_shot_pending = false;
 
     //m_EditorConnection.Update( );

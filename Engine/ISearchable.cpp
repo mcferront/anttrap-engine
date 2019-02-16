@@ -3,25 +3,24 @@
 #include "ISearchable.h"
 
 bool BoxAbovePlane(
-   const Vector &plane,
-   const Matrix &rotateWorldToLocal,
-   const Vector &worldCenter,
+   const Vector &worldPlane,
+   const Matrix &worldToLocal,
+   const Vector &center,
    const Vector &half
 )
 {
    Vector localPlane;
-   Math::Rotate( &localPlane, plane, rotateWorldToLocal );
 
-   //keep the distance
-   localPlane.w = plane.w;
-   
+   Math::TransformPlane( &localPlane, worldPlane, worldToLocal );
+   Math::NormalizePlane( &localPlane, localPlane );
+
    Vector closestAxisToPlane = localPlane * half;
    Math::Abs( &closestAxisToPlane, closestAxisToPlane );
 
    //r == farthest distance (based on the extents) to the plane (extents projected on the plane normal)
    //b == distance from the box center to the plane
    float r = closestAxisToPlane.x + closestAxisToPlane.y + closestAxisToPlane.z;
-   float b = Math::DotProduct4( plane, worldCenter );
+   float b = Math::DotProduct( localPlane, center ) + localPlane.w;
 
    bool result = ( b >= -r );
 
@@ -42,21 +41,17 @@ bool SphereAbovePlane(
 }
 
 bool BoxInFrustum(
-   const Vector &localCenter,
+   const Vector &center,
    const Vector &half,
    const Transform &worldTransform,
    const Frustum &frustum
 )
 {
-   Vector center;
-   Math::TransformPosition( &center, localCenter, worldTransform );
-
-   Matrix worldToLocal;
-
    //To transform a plane into world space you multiply it by the
    //inverse transpose of the world matrix.  However we want to go into local space
    //which means we'd invert it first and then do invert/transpose
    //the two inverts cancel each other out
+   Matrix worldToLocal;
    Math::Transpose( &worldToLocal, worldTransform.ToMatrix(true) );
 
    bool result;   

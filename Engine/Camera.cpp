@@ -247,7 +247,7 @@ void Camera::GetFrustum(
          Math::TransformPlane( &f.rightPlane, Vector( -1, 0, 0, 1 ), invTransposed );
          Math::TransformPlane( &f.topPlane, Vector( 0, -1, 0, 1 ), invTransposed );
          Math::TransformPlane( &f.bottomPlane, Vector( 0, 1, 0, 1 ), invTransposed );
-         Math::TransformPlane( &f.nearPlane, Vector( 0, 0, 1, 1 ), invTransposed );
+         Math::TransformPlane( &f.nearPlane, Vector( 0, 0, 0, 1 ), invTransposed );
          Math::TransformPlane( &f.farPlane, Vector( 0, 0, -1, 1 ), invTransposed );
 
          Math::NormalizePlane( &f.leftPlane, f.leftPlane );

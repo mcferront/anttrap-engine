@@ -118,7 +118,9 @@ bool FrameGrabRenderer::SaveFile(
       {
          for ( int x = 0; x < m_Width; x++ )
          {
-            color c = *(color *) &pSourceData[ y * Align(m_Width * 4, 256) + (x * 4) ];
+             // TODO: DX12 we shouldn't assume D3D12_TEXTURE_DATA_PITCH_ALIGNMENT
+             // instead we should call pHelper->GetDevice()->GetCopyableFootprints and look at the pitch layout
+             color c = *(color *) &pSourceData[ y * Align(m_Width * 4, D3D12_TEXTURE_DATA_PITCH_ALIGNMENT) + (x * 4) ];
 
             pConverted[ 0 ] = (byte) c.r;
             pConverted[ 1 ] = (byte) c.g;
