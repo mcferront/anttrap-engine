@@ -157,6 +157,10 @@ public:
 
    const Transform *GetWorldTransform( void ) const { return &m_WorldTransform; }
 
+   void SetNearClip( float nearClip ) { m_NearZ = nearClip; m_ProjectionDirty = true; m_FrustumDirty = true; }
+   void SetFovX( float fov ) { m_FovX = fov; m_ProjectionDirty = true; m_FrustumDirty = true; }
+   void SetFarClip( float farClip) { m_FarZ = farClip; m_ProjectionDirty = true; m_FrustumDirty = true; }
+
    bool  IsPerspective( void ) const { return m_IsPerspective; }
    float GetWidth( void ) const { return m_Width; }
    float GetHeight( void ) const { return m_Height; }

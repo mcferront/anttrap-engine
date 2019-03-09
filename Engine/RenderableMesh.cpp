@@ -210,7 +210,7 @@ void RenderableMesh::RenderableSurface::GetRenderData(
    uint32 light_mask = 0;
 
    static const char *pLightMask = StringRef( "$RESSCALE_LIGHTMASK" );
-   if ( m_pMaterial->GetPassData(pDesc->pPass)->GetVectorMacroIndex(pLightMask) >= 0 )
+   if ( m_pMaterial->GetPassData(pDesc->pPass)->GetFloat4MacroIndex(pLightMask) >= 0 )
    {
       const Mesh *pMesh = GetResource( model, Mesh );
       
@@ -308,28 +308,28 @@ void RenderableMesh::RenderableSurface::Render(
    static const char *pCameraParams = StringRef( "$CAMERA_PARAMS" );
    static const char *pPWVP = StringRef( "$PWVP_MATRIX" );
 
-   pPass->GetData()->SetMacro( pWorld, &transform.ToMatrix( true ), 1 );
-   pPass->GetData()->SetMacro( pView, &viewTransform.ToMatrix( true ), 1 );
-   pPass->GetData()->SetMacro( pProjection, &projection, 1 );
-   pPass->GetData()->SetMacro( pCameraWorld, &cameraWorldTransform.ToMatrix( true ), 1 );
-   pPass->GetData()->SetMacro( pCameraParams, &cameraParams, 1 );
+   pPass->GetData()->SetFloat4x4s( pWorld, &transform.ToMatrix( true ), 1 );
+   pPass->GetData()->SetFloat4x4s( pView, &viewTransform.ToMatrix( true ), 1 );
+   pPass->GetData()->SetFloat4x4s( pProjection, &projection, 1 );
+   pPass->GetData()->SetFloat4x4s( pCameraWorld, &cameraWorldTransform.ToMatrix( true ), 1 );
+   pPass->GetData()->SetFloat4s( pCameraParams, &cameraParams, 1 );
 
    Vector resScaleLightMask;
    desc.pViewport->GetRenderScale( (Vector2 *) &resScaleLightMask );
    resScaleLightMask.z = *(float *) (uint32 *) &light_mask;
-   pPass->GetData()->SetMacro( pResScaleLightMask, &resScaleLightMask, 1 );
+   pPass->GetData()->SetFloat4s( pResScaleLightMask, &resScaleLightMask, 1 );
    
    Matrix pwvp;
    desc.pViewport->GetCamera( )->GetPrevVProjection( &pwvp );
 
    Math::Multiply( &pwvp, prevTransform.ToMatrix(true), pwvp );
-   pPass->GetData()->SetMacro( pPWVP, &pwvp, 1 );
+   pPass->GetData()->SetFloat4x4s( pPWVP, &pwvp, 1 );
 
    Matrix vp;
    Math::Multiply( &vp, viewTransform.ToMatrix(true), projection );
-   pPass->GetData()->SetMacro( pVP, &vp, 1 );
+   pPass->GetData()->SetFloat4x4s( pVP, &vp, 1 );
 
-   int res_scale_light_mask_index = pPass->GetData()->GetVectorMacroIndex(pResScaleLightMask);
+   int res_scale_light_mask_index = pPass->GetData()->GetFloat4MacroIndex(pResScaleLightMask);
 
    if ( res_scale_light_mask_index >= 0 )
    {
@@ -345,15 +345,15 @@ void RenderableMesh::RenderableSurface::Render(
       
       if ( light_mask != 0 )
       {
-         pPass->GetData()->SetMacro( pLightsDir, pLights->light_dir, sizeof(pLights->light_dir) / sizeof(pLights->light_dir[0]) );
-         pPass->GetData()->SetMacro( pLightsColor, pLights->light_color, sizeof(pLights->light_color) / sizeof(pLights->light_color[0]) );
-         pPass->GetData()->SetMacro( pLightsAtten, pLights->light_atten, sizeof(pLights->light_atten) / sizeof(pLights->light_atten[0]) );
-         pPass->GetData()->SetMacro( pLightsPosType, pLights->light_pos_type, sizeof(pLights->light_pos_type) / sizeof(pLights->light_pos_type[0]) );
+         pPass->GetData()->SetFloat4s( pLightsDir, pLights->light_dir, sizeof(pLights->light_dir) / sizeof(pLights->light_dir[0]) );
+         pPass->GetData()->SetFloat4s( pLightsColor, pLights->light_color, sizeof(pLights->light_color) / sizeof(pLights->light_color[0]) );
+         pPass->GetData()->SetFloat4s( pLightsAtten, pLights->light_atten, sizeof(pLights->light_atten) / sizeof(pLights->light_atten[0]) );
+         pPass->GetData()->SetFloat4s( pLightsPosType, pLights->light_pos_type, sizeof(pLights->light_pos_type) / sizeof(pLights->light_pos_type[0]) );
       }
 
-      pPass->GetData()->SetMacro( pLightAmbient, &pLights->ambient, 1 );
-      pPass->GetData()->SetMacro( pShadowProj, &pLights->shadowProjMatrix, 1 );
-      pPass->GetData()->SetMacro( pShadowView, &pLights->shadowViewMatrix, 1 );
+      pPass->GetData()->SetFloat4s( pLightAmbient, &pLights->ambient, 1 );
+      pPass->GetData()->SetFloat4x4s( pShadowProj, &pLights->shadowProjMatrix, 1 );
+      pPass->GetData()->SetFloat4x4s( pShadowView, &pLights->shadowViewMatrix, 1 );
    }
 
    if ( NULL != pSkeleton )
@@ -365,7 +365,7 @@ void RenderableMesh::RenderableSurface::Render(
       pSurface->ComputeSkin( matrices, transform, pMesh->GetInvSkeleton( )->GetBones( ), pMatrices, numBones );
 
       static const char *pSkin = StringRef( "$SKIN" );
-      pPass->GetData()->SetMacro( pSkin, matrices, numBones );
+      pPass->GetData()->SetFloat4x4s( pSkin, matrices, numBones );
    }
 
    pMaterial->SetRenderData( pPass, desc.pCommandList );

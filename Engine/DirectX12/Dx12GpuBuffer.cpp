@@ -106,18 +106,36 @@ void GpuBuffer::Create(
         {
             GpuBuffer *pUpload = new GpuBuffer;
 
+            // 128MB max - I was getting upload resource creation failing at larger sizes
+            uint32_t size = width * height;
+            const uint32_t copySize = Math::Min( size, 128 * 1024 * 1024 ); 
+
+            uint32_t blocks = size / copySize;
+            uint32_t remain = size % copySize;
+
             pUpload->Create( Heap::Upload, GpuResource::State::GenericRead, GpuResource::Flags::None,
-                GpuResource::Format::Unknown, width * height, 1, 1, 0, 1, true, NULL, pInitialData );
+                GpuResource::Format::Unknown, copySize, 1, 1, 0, 1, true, NULL, NULL );
             {
-                GpuDevice::CommandList *pCommandList = GpuDevice::Instance( ).AllocThreadCommandList( );
+                for ( uint32_t i = 0; i <= blocks; i++ )
+                {
+                    if ( i == blocks && remain == 0 )
+                        break;
 
-                this->TransitionTo( pCommandList, GpuResource::State::CopyDest );
+                    // last iteration just copy remaining
+                    uint32_t num_bytes = i < blocks ? copySize : remain;
 
-                GpuDevice::Instance( ).CopyResource( pCommandList, this, pUpload );
+                    void *pMappedData = pUpload->Map( );                    
+                        memcpy( pMappedData, (byte *) pInitialData + blocks * i, num_bytes );
+                    pUpload->Unmap( );
 
-                this->TransitionTo( pCommandList, state );
+                    GpuDevice::CommandList *pCommandList = GpuDevice::Instance( ).AllocThreadCommandList( );
 
-                GpuDevice::Instance( ).ExecuteCommandLists( &pCommandList, 1, true );
+                    this->TransitionTo( pCommandList, GpuResource::State::CopyDest );
+                    GpuDevice::Instance( ).CopyRegion( pCommandList, this, blocks * i, pUpload, 0, num_bytes );
+                    this->TransitionTo( pCommandList, state );
+
+                    GpuDevice::Instance( ).ExecuteCommandLists( &pCommandList, 1, true );
+                }
             }
             pUpload->Destroy( );
 

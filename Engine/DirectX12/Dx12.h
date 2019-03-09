@@ -247,6 +247,15 @@ public:
         GpuResource *pSource
     );
 
+    static void CopyRegion(
+        CommandList *pList,
+        GpuResource *pDest,
+        uint32 destOffset,
+        GpuResource *pSource,
+        uint32 sourceOffset,
+        size_t numBytes
+    );
+
 public:
     bool Create(
         HWND hwnd,

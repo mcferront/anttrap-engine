@@ -58,11 +58,11 @@ function Bistro:_Create()
    -- AMBIENT LIGHT
    local nits = .25;
    
-    color = Vector_Create();
-    color.x = 1.0;
-    color.y = 0.5;
-    color.z = 0.5;
-    color.w = 1;
+   color = Vector_Create();
+   color.x = 1.0;
+   color.y = 0.5;
+   color.z = 0.5;
+   color.w = 1;
 
    light = Node_Create(Id_Create(), "Ambient Light");
    light_properties  = light:AddComponent(Id_Create(), "AmbientLightComponent");

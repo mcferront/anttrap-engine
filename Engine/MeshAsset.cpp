@@ -186,7 +186,7 @@ void SurfaceSerializer::Read(
     pSurface->m_NumTransforms = header.numTransforms;
 
     void *pVertices = malloc( header.vertexBufferSize );
-    void *pIndices  = malloc( header.numIndices * sizeof(uint16) );
+    void *pIndices  = malloc( header.numIndices * sizeof(uint32) );
 
     if ( pSurface->m_NumTransforms )
     {
@@ -198,14 +198,14 @@ void SurfaceSerializer::Read(
         pSurface->m_pTransformPalette = NULL;
     }
 
-    pSerializer->GetInputStream( )->Read( pIndices,  header.numIndices * sizeof(uint16), NULL );
+    pSerializer->GetInputStream( )->Read( pIndices,  header.numIndices * sizeof(uint32), NULL );
     pSerializer->GetInputStream( )->Read( pVertices, header.vertexBufferSize, NULL );
 
     pSurface->m_pVertexBuffer = new VertexBuffer;
 
     pSurface->m_pVertexBuffer->Create( );
     pSurface->m_pVertexBuffer->SetVertices( pVertices, header.vertexBufferSize );
-    pSurface->m_pVertexBuffer->SetIndices ( pIndices, header.numIndices * sizeof(unsigned short), StreamDecl::UShort, header.numIndices );
+    pSurface->m_pVertexBuffer->SetIndices ( pIndices, header.numIndices * sizeof(uint32), StreamDecl::UInt, header.numIndices );
 
     if ( header.positionDecl.numElements > 0 )   pSurface->m_pVertexBuffer->AddAttributes( StreamDecl::Positions, header.positionDecl );
     if ( header.normalDecl.numElements > 0 )     pSurface->m_pVertexBuffer->AddAttributes( StreamDecl::Normals, header.normalDecl );

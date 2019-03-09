@@ -383,5 +383,7 @@ void Camera::UpdateProjection( void ) const
       Math::Invert( &m_InvProjection, m_Projection );
 
       m_ProjectionDirty = false;
+
+      m_FrustumDirty = true;
    }
 }

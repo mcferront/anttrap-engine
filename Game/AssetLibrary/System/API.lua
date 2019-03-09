@@ -186,6 +186,18 @@ function CoroutineObj_Internal()
 end
 end
 
+function Transform_Set(v, q)
+    return Math.Transform(q, v, Math.Vector(1,1,1,1));
+end
+
+function Quaternion_Set(x, y, z, w)
+    return Math.Quaternion(x, y, z, w);
+end
+
+function Vector_Set(x, y, z)
+    return Math.Vector(x, y, z, 1);
+end
+
 function Vector_Create()
     return Math.Vector();
 end
@@ -291,6 +303,7 @@ function CreateNode(native)
    local newObject = {};
    setmetatable(newObject, LuaNode);
    newObject._native = native;
+   newObject._components = {};
    return newObject;
 end
 
@@ -327,8 +340,12 @@ function LuaNode:AddComponent(id, type)
 end
 
 function LuaNode:GetComponent(type)
-   local c = self._native:GetComponent(type);
-   return CreateComponent(self, c);
+    if nil == self._components[type] then
+        local c = self._native:GetComponent(type);
+        self._components[type] = CreateComponent(self, c);
+   end
+   
+   return self._components[type];   
 end
 
 function LuaNode:DeleteComponent(id)
@@ -623,6 +640,34 @@ function SpotLightComponent:Destroy()
     self._native = nil;
 end
 
+--CameraComponent Component
+if (CameraComponent == nil) then 
+    CameraComponent = LuaComponent:New{};
+    CameraComponent.__index = CameraComponent;
+end
+
+function CreateCameraComponent(node, native_component)
+    local newObject = { }; 	
+    setmetatable(newObject, CameraComponent); 	
+
+    newObject._native = Core.ToCameraComponent(native_component);
+    newObject._node =  node;
+    
+    return newObject; 
+end
+
+function CameraComponent:SetFov(fov)
+    self._native:GetCamera():SetFovX(fov);
+end
+
+function CameraComponent:SetNearClip(nearClip)
+    self._native:GetCamera():SetNearClip(nearClip);
+end
+
+function CameraComponent:SetFarClip(farClip)
+    self._native:GetCamera():SetFarClip(farClip);
+end
+
 --AmbientLightComponent Component
 if (AmbientLightComponent == nil) then 
     AmbientLightComponent = LuaComponent:New{};
@@ -720,6 +765,8 @@ function CreateComponent(node, native)
         return CreateSpotLightComponent(node, native);
     elseif (stype == "AmbientLightComponent") then
         return CreateAmbientLightComponent(node, native);
+    elseif (stype == "CameraComponent") then
+        return CreateCameraComponent(node, native);
     else
         OnError("Component type unknown: "..stype)
     end

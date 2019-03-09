@@ -23,3 +23,6 @@ Game/AssetLibrary/_Platform/
 *.cache
 
 3rdParty/zlib/zlib-1.2.5/contrib/vstudio/vc10/x86/
+
+
+Game/AssetLibrary/_Resources/Dragon.win.resources

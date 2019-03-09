@@ -522,15 +522,15 @@ void DebugGraphics::RenderSphere(
    if ( NULL == pPass )
       return;
 
-   int worldIndex = pPass->GetData()->GetMatrixMacroIndex( pWorld );
-   int colorIndex = pPass->GetData()->GetVectorMacroIndex( pColor );
+   int worldIndex = pPass->GetData()->GetFloat4x4MacroIndex( pWorld );
+   int colorIndex = pPass->GetData()->GetFloat4MacroIndex( pColor );
 
-   pPass->GetData()->SetMacro( pVP, &vp, 1 );
+   pPass->GetData()->SetFloat4x4s( pVP, &vp, 1 );
 
    transform.SetScale( Vector( radius * 2, radius * 2, radius * 2, 1 ) );
 
-   pPass->GetData()->SetMacro( colorIndex, &color, 1 );
-   pPass->GetData()->SetMacro( worldIndex, &transform.ToMatrix( true ), 1 );
+   pPass->GetData()->SetFloat4s( colorIndex, &color, 1 );
+   pPass->GetData()->SetFloat4x4s( worldIndex, &transform.ToMatrix( true ), 1 );
 
    pMaterial->SetRenderData( pPass, desc.pCommandList );
 

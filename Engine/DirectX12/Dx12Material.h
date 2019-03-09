@@ -7,542 +7,614 @@
 
 struct VertexElementDesc
 {
-   D3D12_PRIMITIVE_TOPOLOGY_TYPE topology;
-   D3D12_INPUT_ELEMENT_DESC *pElementDescs;
-   uint32 numElementDescs;
+    D3D12_PRIMITIVE_TOPOLOGY_TYPE topology;
+    D3D12_INPUT_ELEMENT_DESC *pElementDescs;
+    uint32 numElementDescs;
 };
 
 class ComputeMaterial
 {
-   friend class ComputeMaterialObject;
-   friend class MaterialSerializer;
-   friend class Material;
+    friend class ComputeMaterialObject;
+    friend class MaterialSerializer;
+    friend class Material;
 
 private:
-   ~ComputeMaterial( void );
+    ~ComputeMaterial( void );
 
 public:
-   class PassData
-   { 
-      friend class ComputeMaterial;
-      friend class ComputeMaterialObject;
-      friend class MaterialSerializer;
+    class PassData
+    {
+        friend class ComputeMaterial;
+        friend class ComputeMaterialObject;
+        friend class MaterialSerializer;
 
-   public:
-      PassData( void )
-      {
-      }
+    public:
+        PassData( void )
+        {
+        }
 
-      const char *GetName( void ) const { return pName; }
+        const char *GetName( void ) const { return pName; }
 
-      void SetMacro(
-         const char *pMacro,
-         const Vector *pVectors,
-         int numVectors
-      )
-      {
-         for ( int i = 0; i < header.numFloat4Names; i++ )
-         {
-            if ( StringRefEqual( pFloat4s[ i ].pRef, pMacro ) )
+        void SetMacro(
+            const char *pMacro,
+            const Vector *pVectors,
+            int numVectors
+        )
+        {
+            for ( int i = 0; i < header.numFloat4Names; i++ )
             {
-               SetMacro( i, pVectors, numVectors );
-               break;
+                if ( StringRefEqual( pFloat4s[i].pRef, pMacro ) )
+                {
+                    SetMacro( i, pVectors, numVectors );
+                    break;
+                }
             }
-         }
 
-         static const char *pGroupDiv = StringRef("GroupDiv");
+            static const char *pGroupDiv = StringRef( "GroupDiv" );
 
-         if ( pMacro == pGroupDiv && numVectors == 1 )
-         {
-            header.div.x = (int) pVectors[0].x;
-            header.div.y = (int) pVectors[0].y;
-         }
-      }
-
-      void SetMacro(
-         const char *pMacro,
-         const Matrix *pMatrices,
-         int numMatrices
-      )
-      {
-         for ( int i = 0; i < header.numMatrix4Names; i++ )
-         {
-            if ( StringRefEqual( pMatrix4s[ i ].pRef, pMacro ) )
+            if ( pMacro == pGroupDiv && numVectors == 1 )
             {
-               SetMacro( i, pMatrices, numMatrices );
-               break;
+                header.div.x = (int) pVectors[0].x;
+                header.div.y = (int) pVectors[0].y;
             }
-         }
-      }
+        }
 
-      void SetMacro(
-         const char *pMacro,
-         ResourceHandle rh
-      )
-      {
-         for ( int i = 0; i < header.numBuffers; i++ )
-         {
-            if ( StringRefEqual(pBuffers[i].pName, pMacro) )
+        void SetMacro(
+            const char *pMacro,
+            const Matrix *pMatrices,
+            int numMatrices
+        )
+        {
+            for ( int i = 0; i < header.numMatrix4Names; i++ )
             {
-               pBuffers[i].buffer = rh;
-               break;
+                if ( StringRefEqual( pMatrix4s[i].pRef, pMacro ) )
+                {
+                    SetMacro( i, pMatrices, numMatrices );
+                    break;
+                }
             }
-         }
+        }
 
-         static const char *pGroupRef = StringRef("GroupSizeTarget");
+        void SetMacro(
+            const char *pMacro,
+            ResourceHandle rh
+        )
+        {
+            for ( int i = 0; i < header.numBuffers; i++ )
+            {
+                if ( StringRefEqual( pBuffers[i].pName, pMacro ) )
+                {
+                    pBuffers[i].buffer = rh;
+                    break;
+                }
+            }
 
-         if ( pMacro == pGroupRef )
-            groupSizeTarget = rh;
-      }
+            static const char *pGroupRef = StringRef( "GroupSizeTarget" );
 
-      void SetMacro(
-         int index,
-         const Vector *pVectors,
-         int numVectors
-      )
-      {
-         Debug::Assert( Condition( index >= 0 && index < header.numFloat4Names ), "Invalid Index" );
-         memcpy( constantBuffer.pData + pFloat4s[ index ].offset, pVectors, sizeof( Vector ) * numVectors );
-      }
+            if ( pMacro == pGroupRef )
+                groupSizeTarget = rh;
+        }
 
-      void SetMacro(
-         int index,
-         const Matrix *pMatrices,
-         int numMatrices
-      )
-      {
-         Debug::Assert( Condition( index >= 0 && index < header.numMatrix4Names ), "Invalid Index" );
-         
-         Matrix *pPassMatrices = (Matrix *) (constantBuffer.pData + pMatrix4s[ index ].offset);
+        void SetMacro(
+            int index,
+            const Vector *pVectors,
+            int numVectors
+        )
+        {
+            Debug::Assert( Condition( index >= 0 && index < header.numFloat4Names ), "Invalid Index" );
+            memcpy( constantBuffer.pData + pFloat4s[index].offset, pVectors, sizeof( Vector ) * numVectors );
+        }
 
-         for ( int i = 0; i < numMatrices; i++ )
-            Math::Transpose( &pPassMatrices[ i ], pMatrices[ i ] );
-      }
+        void SetMacro(
+            int index,
+            const Matrix *pMatrices,
+            int numMatrices
+        )
+        {
+            Debug::Assert( Condition( index >= 0 && index < header.numMatrix4Names ), "Invalid Index" );
 
-   private:
-      ~PassData( void )
-      {
-         shader = NullHandle;
-         groupSizeTarget = NullHandle;
+            Matrix *pPassMatrices = (Matrix *) (constantBuffer.pData + pMatrix4s[index].offset);
 
-         for ( int c = 0; c < header.numBuffers; c++ )
-         {
-            pBuffers[ c ].buffer = NullHandle;
-            StringRel( pBuffers[ c ].pName );
-         }
+            for ( int i = 0; i < numMatrices; i++ )
+                Math::Transpose( &pPassMatrices[i], pMatrices[i] );
+        }
 
-         for ( int c = 0; c < header.numFloat4Names; c++ )
-         {
-            StringRel( pFloat4s[ c ].pName );
-            StringRel( pFloat4s[ c ].pRef );
-         }
+    private:
+        ~PassData( void )
+        {
+            shader = NullHandle;
+            groupSizeTarget = NullHandle;
 
-         for ( int c = 0; c < header.numMatrix4Names; c++ )
-         {
-            StringRel( pMatrix4s[ c ].pName );
-            StringRel( pMatrix4s[ c ].pRef );
-         }
+            for ( int c = 0; c < header.numBuffers; c++ )
+            {
+                pBuffers[c].buffer = NullHandle;
+                StringRel( pBuffers[c].pName );
+            }
 
-         delete[ ] pFloat4s;
-         delete[ ] pMatrix4s;
-         delete[ ] pBuffers;
+            for ( int c = 0; c < header.numFloat4Names; c++ )
+            {
+                StringRel( pFloat4s[c].pName );
+                StringRel( pFloat4s[c].pRef );
+            }
 
-         free( constantBuffer.pData );
+            for ( int c = 0; c < header.numMatrix4Names; c++ )
+            {
+                StringRel( pMatrix4s[c].pName );
+                StringRel( pMatrix4s[c].pRef );
+            }
 
-         GpuDevice::Instance( ).FreeViewHandles( &viewHandles );
-      }
+            delete[] pFloat4s;
+            delete[] pMatrix4s;
+            delete[] pBuffers;
 
-      void CloneTo( 
-         PassData *pPassData 
-      ) const;
+            free( constantBuffer.pData );
 
-      int GetVectorMacroIndex(
-         const char *pMacro
-      ) const
-      {
-         int i;
+            GpuDevice::Instance( ).FreeViewHandles( &viewHandles );
+        }
 
-         for ( i = 0; i < header.numFloat4Names; i++ )
-         {
-            if ( StringRefEqual( pFloat4s[ i ].pRef, pMacro ) )
-               return i;
-         }
+        void CloneTo(
+            PassData *pPassData
+        ) const;
 
-         return -1;
-      }
+        int GetVectorMacroIndex(
+            const char *pMacro
+        ) const
+        {
+            int i;
 
-      int GetMatrixMacroIndex(
-         const char *pMacro
-      ) const
-      {
-         int i;
+            for ( i = 0; i < header.numFloat4Names; i++ )
+            {
+                if ( StringRefEqual( pFloat4s[i].pRef, pMacro ) )
+                    return i;
+            }
 
-         for ( i = 0; i < header.numMatrix4Names; i++ )
-         {
-            if ( StringRefEqual( pMatrix4s[ i ].pRef, pMacro ) )
-               return i;
-         }
+            return -1;
+        }
 
-         return -1;
-      }
+        int GetMatrixMacroIndex(
+            const char *pMacro
+        ) const
+        {
+            int i;
 
-      struct Header
-      {
-         struct _group
-         {
-            byte x;
-            byte y;
-            byte z;
-         };
+            for ( i = 0; i < header.numMatrix4Names; i++ )
+            {
+                if ( StringRefEqual( pMatrix4s[i].pRef, pMacro ) )
+                    return i;
+            }
 
-         struct _div
-         {
-            byte x;
-            byte y;
-         };
+            return -1;
+        }
 
-         byte dyn_group;
+        struct Header
+        {
+            struct _group
+            {
+                byte x;
+                byte y;
+                byte z;
+            };
 
-         union
-         {
-            _group group;
-            _div div;
-         };
+            struct _div
+            {
+                byte x;
+                byte y;
+            };
 
-         byte numFloat4Names;
-         byte totalFloat4s;
-         byte numMatrix4Names;
-         byte totalMatrix4s;
-         byte numBuffers;
-      };
+            byte dyn_group;
 
-      struct Buffer
-      {
-         enum Type
-         {
-            SRV,
-            UAV,
-         };
+            union
+            {
+                _group group;
+                _div div;
+            };
 
-         struct Header
-         {
-            byte hasSampler;
-            byte address;
-            byte filter;
-            byte type;
-         };
+            byte numFloat4Names;
+            byte totalFloat4s;
+            byte numMatrix4Names;
+            byte totalMatrix4s;
+            byte numBuffers;
+        };
 
-         const char *pName;
-         Header header;
-         ResourceHandle buffer;
-      };
+        struct Buffer
+        {
+            enum Type
+            {
+                SRV,
+                UAV,
+            };
 
-      struct Float4
-      {
-         const char *pName;
-         const char *pRef;
-         int offset;
-      };
+            struct Header
+            {
+                byte hasSampler;
+                byte address;
+                byte filter;
+                byte type;
+            };
 
-      struct Matrix4
-      {
-         const char *pName;
-         const char *pRef;
-         int offset;
-      };
+            const char *pName;
+            Header header;
+            ResourceHandle buffer;
+        };
 
-   private:
-      Header header;
-      ResourceHandle shader;
-      ResourceHandle groupSizeTarget;
-      
-      D3D12_COMPUTE_PIPELINE_STATE_DESC psoDesc;
+        struct Float4
+        {
+            const char *pName;
+            const char *pRef;
+            int offset;
+        };
 
-      const char *pName;
-      Buffer *pBuffers;
-      Float4 *pFloat4s;
-      Matrix4 *pMatrix4s;
+        struct Matrix4
+        {
+            const char *pName;
+            const char *pRef;
+            int offset;
+        };
 
-      GpuDevice::ConstantBuffer constantBuffer;
-      GpuDevice::ViewHandle viewHandles;
-   };
+    private:
+        Header header;
+        ResourceHandle shader;
+        ResourceHandle groupSizeTarget;
+
+        D3D12_COMPUTE_PIPELINE_STATE_DESC psoDesc;
+
+        const char *pName;
+        Buffer *pBuffers;
+        Float4 *pFloat4s;
+        Matrix4 *pMatrix4s;
+
+        GpuDevice::ConstantBuffer constantBuffer;
+        GpuDevice::ViewHandle viewHandles;
+    };
 
 private:
-   PassData *m_pPassDatas;
-   int m_NumPasses;
+    PassData *m_pPassDatas;
+    int m_NumPasses;
 };
 
 class GraphicsMaterial
 {
-   friend class GraphicsMaterialObject;
-   friend class MaterialSerializer;
-   friend class Material;
+    friend class GraphicsMaterialObject;
+    friend class MaterialSerializer;
+    friend class Material;
 
 private:
-   ~GraphicsMaterial( void );
+    ~GraphicsMaterial( void );
 
 public:
-   class PassData
-   {
-      friend class GraphicsMaterial;
-      friend class GraphicsMaterialObject;
-      friend class MaterialSerializer;
+    class PassData
+    {
+        friend class GraphicsMaterial;
+        friend class GraphicsMaterialObject;
+        friend class MaterialSerializer;
 
-   public:
-      PassData( void ) 
-      {
-      }
+    public:
+        PassData( void )
+        {
+        }
 
-      int GetMatrixMacroIndex(
-         const char *pMacro
-      ) const
-      {
-         int i;
+        int GetFloat4x4MacroIndex(
+            const char *pMacro
+        ) const
+        {
+            int i;
 
-         for ( i = 0; i < header.numMatrix4Names; i++ )
-         {
-            if ( StringRefEqual( pMatrix4s[ i ].pRef, pMacro ) )
-               return i;
-         }
-
-         return -1;
-      }
-
-      void SetMacro(
-         const char *pMacro,
-         const Matrix *pMatrices,
-         int numMatrices
-      )
-      {
-         for ( int i = 0; i < header.numMatrix4Names; i++ )
-         {
-            if ( StringRefEqual( pMatrix4s[ i ].pRef, pMacro ) )
+            for ( i = 0; i < header.numMatrix4Names; i++ )
             {
-               SetMacro( i, pMatrices, numMatrices );
-               break;
+                if ( StringRefEqual( pMatrix4s[i].pRef, pMacro ) )
+                    return i;
             }
-         }
-      }
 
-      void SetMacro(
-         int index,
-         const Matrix *pMatrices,
-         int numMatrices
-      )
-      {
-         Debug::Assert( Condition( index >= 0 && index < header.numMatrix4Names ), "Invalid Index" );
+            return -1;
+        }
 
-         Matrix *pPassMatrices = (Matrix *) (constantBuffer.pData + pMatrix4s[ index ].offset);
-
-         for ( int i = 0; i < numMatrices; i++ )
-            Math::Transpose( &pPassMatrices[ i ], pMatrices[ i ] );
-      }
-
-      int GetVectorMacroIndex(
-         const char *pMacro
-      ) const
-      {
-         int i;
-
-         for ( i = 0; i < header.numFloat4Names; i++ )
-         {
-            if ( StringRefEqual( pFloat4s[ i ].pRef, pMacro ) )
-               return i;
-         }
-
-         return -1;
-      }
-
-      void SetMacro(
-         const char *pMacro,
-         const Vector *pVectors,
-         int numVectors
-      )
-      {
-         for ( int i = 0; i < header.numFloat4Names; i++ )
-         {
-            if ( StringRefEqual( pFloat4s[ i ].pRef, pMacro ) )
+        void SetFloat4x4s(
+            const char *pMacro,
+            const Matrix *pMatrices,
+            int numMatrices
+        )
+        {
+            for ( int i = 0; i < header.numMatrix4Names; i++ )
             {
-               SetMacro( i, pVectors, numVectors );
-               break;
+                if ( StringRefEqual( pMatrix4s[i].pRef, pMacro ) )
+                {
+                    SetFloat4x4s( i, pMatrices, numMatrices );
+                    break;
+                }
             }
-         }
-      }
+        }
 
-      void SetMacro(
-         int index,
-         const Vector *pVectors,
-         int numVectors
-      )
-      {
-         Debug::Assert( Condition( index >= 0 && index < header.numFloat4Names ), "Invalid Index" );
-         memcpy( constantBuffer.pData + pFloat4s[ index ].offset, pVectors, sizeof( Vector ) * numVectors );
-      }
+        void SetFloat4x4s(
+            int index,
+            const Matrix *pMatrices,
+            int numMatrices
+        )
+        {
+            Debug::Assert( Condition( index >= 0 && index < header.numMatrix4Names ), "Invalid Index" );
 
-      ResourceHandle GetTexture(
-         int index
-      ) const
-      {
-         if ( index < header.numTextures )
-            return pTextures[ 0 ].texture;
-         else
-            return NullHandle;
-      }
+            Matrix *pPassMatrices = (Matrix *) (constantBuffer.pData + pMatrix4s[index].offset);
 
-   private:
-      void CloneTo( 
-         PassData *pPassData 
-      ) const;
+            for ( int i = 0; i < numMatrices; i++ )
+                Math::Transpose( &pPassMatrices[i], pMatrices[i] );
+        }
 
-      ~PassData( void )
-      {
-         shader = NullHandle;
+        int GetFloat4MacroIndex(
+            const char *pMacro
+        ) const
+        {
+            int i;
 
-         for ( int c = 0; c < header.numTextures; c++ )
-         {
-            pTextures[ c ].texture = NullHandle;
-            StringRel( pTextures[ c ].pName );
-         }
+            for ( i = 0; i < header.numFloat4Names; i++ )
+            {
+                if ( StringRefEqual( pFloat4s[i].pRef, pMacro ) )
+                    return i;
+            }
 
-         for ( int c = 0; c < header.numFloat4Names; c++ )
-         {
-            StringRel( pFloat4s[ c ].pName );
-            StringRel( pFloat4s[ c ].pRef );
-         }
+            return -1;
+        }
 
-         for ( int c = 0; c < header.numMatrix4Names; c++ )
-         {
-            StringRel( pMatrix4s[ c ].pName );
-            StringRel( pMatrix4s[ c ].pRef );
-         }
+        void SetFloats(
+            const char *pMacro,
+            const float *_pFloats,
+            int numFloats
+        )
+        {
+            for ( int i = 0; i < header.numFloatNames; i++ )
+            {
+                if ( StringRefEqual( pFloats[i].pRef, pMacro ) )
+                {
+                    SetFloats( i, _pFloats, numFloats );
+                    break;
+                }
+            }
+        }
 
-         delete[ ] pFloat4s;
-         delete[ ] pMatrix4s;
-         delete[ ] pTextures;
+        void SetFloat3s(
+            const char *pMacro,
+            const float *_pFloat3s,
+            int numFloat3s
+        )
+        {
+            for ( int i = 0; i < header.numFloat3Names; i++ )
+            {
+                if ( StringRefEqual( pFloat3s[i].pRef, pMacro ) )
+                {
+                    SetFloat3s( i, _pFloat3s, numFloat3s );
+                    break;
+                }
+            }
+        }
 
-         free( constantBuffer.pData );
+        void SetFloat4s(
+            const char *pMacro,
+            const Vector *pVectors,
+            int numVectors
+        )
+        {
+            for ( int i = 0; i < header.numFloat4Names; i++ )
+            {
+                if ( StringRefEqual( pFloat4s[i].pRef, pMacro ) )
+                {
+                    SetFloat4s( i, pVectors, numVectors );
+                    break;
+                }
+            }
+        }
 
-         GpuDevice::Instance( ).FreeViewHandles( &viewHandles );
-      }
+        void SetFloat4s(
+            int index,
+            const Vector *pVectors,
+            int numVectors
+        )
+        {
+            Debug::Assert( Condition( index >= 0 && index < header.numFloat4Names ), "Invalid Index" );
+            memcpy( constantBuffer.pData + pFloat4s[index].offset, pVectors, sizeof( Vector ) * numVectors );
+        }
 
-      struct Header
-      {
-         byte numFloat4Names;
-         byte totalFloat4s;
-         byte numMatrix4Names;
-         byte totalMatrix4s;
-         byte numTextures;
-         byte depthTest;
-         byte depthWrite;
-         byte depthFunc;
-         byte cullMode;
-         byte sourceBlend;
-         byte destBlend;
-         byte blendEnable;
-      };
+        void SetFloats(
+            int index,
+            const float *_pFloats,
+            int numFloats
+        )
+        {
+            Debug::Assert( Condition( index >= 0 && index < header.numFloatNames ), "Invalid Index" );
+            memcpy( constantBuffer.pData + pFloats[index].offset, _pFloats, sizeof(float) * numFloats );
+        }
 
-      struct Texture
-      {
-         struct Header
-         {
-            int address;
-            int filter;
-         };
+        void SetFloat3s(
+            int index,
+            const float *_pFloat3s,
+            int numFloat3s
+        )
+        {
+            Debug::Assert( Condition( index >= 0 && index < header.numFloat3Names ), "Invalid Index" );
+            memcpy( constantBuffer.pData + pFloat3s[index].offset, _pFloat3s, sizeof(float[3]) * numFloat3s );
+        }
 
-         const char *pName;
-         Header header;
-         ResourceHandle texture;
-      };
+        ResourceHandle GetTexture(
+            int index
+        ) const
+        {
+            if ( index < header.numTextures )
+                return pTextures[0].texture;
+            else
+                return NullHandle;
+        }
 
-      struct Float4
-      {
-         const char *pName;
-         const char *pRef;
-         int offset;
-      };
+    private:
+        void CloneTo(
+            PassData *pPassData
+        ) const;
 
-      struct Matrix4
-      {
-         const char *pName;
-         const char *pRef;
-         int offset;
-      };
+        ~PassData( void )
+        {
+            shader = NullHandle;
 
-      GpuDevice::ConstantBuffer constantBuffer;
+            for ( int c = 0; c < header.numTextures; c++ )
+            {
+                pTextures[c].texture = NullHandle;
+                StringRel( pTextures[c].pName );
+            }
 
-      Header header;
-      ResourceHandle shader;
+            for ( int c = 0; c < header.numFloat4Names; c++ )
+            {
+                StringRel( pFloat4s[c].pName );
+                StringRel( pFloat4s[c].pRef );
+            }
 
-      Float4 *pFloat4s;
-      Texture *pTextures;
-      Matrix4 *pMatrix4s;
-      GpuDevice::ViewHandle viewHandles;
+            for ( int c = 0; c < header.numMatrix4Names; c++ )
+            {
+                StringRel( pMatrix4s[c].pName );
+                StringRel( pMatrix4s[c].pRef );
+            }
 
-      D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc;
+            delete[] pFloat4s;
+            delete[] pMatrix4s;
+            delete[] pTextures;
 
-      const char *pName;
-   };
+            free( constantBuffer.pData );
+
+            GpuDevice::Instance( ).FreeViewHandles( &viewHandles );
+        }
+
+        struct Header
+        {
+            byte numFloatNames;
+            byte totalFloats;
+            byte numFloat3Names;
+            byte totalFloat3s;
+            byte numFloat4Names;
+            byte totalFloat4s;
+            byte numMatrix4Names;
+            byte totalMatrix4s;
+            byte numTextures;
+            byte depthTest;
+            byte depthWrite;
+            byte depthFunc;
+            byte cullMode;
+            byte sourceBlend;
+            byte destBlend;
+            byte blendEnable;
+        };
+
+        struct Texture
+        {
+            struct Header
+            {
+                int address;
+                int filter;
+            };
+
+            const char *pName;
+            Header header;
+            ResourceHandle texture;
+        };
+
+        struct Float
+        {
+            const char *pName;
+            const char *pRef;
+            int offset;
+        };
+
+        struct Float3
+        {
+            const char *pName;
+            const char *pRef;
+            int offset;
+        };
+
+        struct Float4
+        {
+            const char *pName;
+            const char *pRef;
+            int offset;
+        };
+
+        struct Matrix4
+        {
+            const char *pName;
+            const char *pRef;
+            int offset;
+        };
+
+        GpuDevice::ConstantBuffer constantBuffer;
+
+        Header header;
+        ResourceHandle shader;
+
+        Float *pFloats;
+        Float3 *pFloat3s;
+        Float4 *pFloat4s;
+        Texture *pTextures;
+        Matrix4 *pMatrix4s;
+        GpuDevice::ViewHandle viewHandles;
+
+        D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc;
+
+        const char *pName;
+    };
 
 private:
-   PassData *m_pPassDatas;
-   int m_NumPasses;
+    PassData *m_pPassDatas;
+    int m_NumPasses;
 
 public:
-   static bool CreateConstantBuffer(
-      GpuDevice::ConstantBuffer *pBuffer,
-      uint32 sizeInBytes
-   );
+    static bool CreateConstantBuffer(
+        GpuDevice::ConstantBuffer *pBuffer,
+        uint32 sizeInBytes
+    );
 };
 
 class Material : public Asset
 {
-   friend class MaterialSerializer;
+    friend class MaterialSerializer;
 
 public:
-   DeclareResourceType( Material );
+    DeclareResourceType( Material );
 
 public:
-   GraphicsMaterial *GetGraphicsMaterial( void ) const { return m_pGraphicsMaterial; }
-   ComputeMaterial *GetComputeMaterial( void ) const { return m_pComputeMaterial; }
+    GraphicsMaterial *GetGraphicsMaterial( void ) const { return m_pGraphicsMaterial; }
+    ComputeMaterial *GetComputeMaterial( void ) const { return m_pComputeMaterial; }
 
-   void Destroy( void );
+    void Destroy( void );
 
 private:
-   GraphicsMaterial *m_pGraphicsMaterial;
-   ComputeMaterial *m_pComputeMaterial;
+    GraphicsMaterial *m_pGraphicsMaterial;
+    ComputeMaterial *m_pComputeMaterial;
 };
 
 
 class MaterialSerializer : public ISerializer
 {
 public:
-   virtual bool Serialize(
-      Serializer *pSerializer,
-      const ISerializable *pSerializable
-      )
-   {
-      return false;
-   }
+    virtual bool Serialize(
+        Serializer *pSerializer,
+        const ISerializable *pSerializable
+    )
+    {
+        return false;
+    }
 
-   virtual ISerializable *Deserialize(
-      Serializer *pSerializer,
-      ISerializable *pSerializable
-      );
+    virtual ISerializable *Deserialize(
+        Serializer *pSerializer,
+        ISerializable *pSerializable
+    );
 
-   virtual ISerializable *Instantiate( ) const { return new Material; }
+    virtual ISerializable *Instantiate( ) const { return new Material; }
 
-   virtual const SerializableType &GetSerializableType( void ) const { return Material::StaticSerializableType( ); }
+    virtual const SerializableType &GetSerializableType( void ) const { return Material::StaticSerializableType( ); }
 
-   virtual uint32 GetVersion( void ) const { return 1; }
+    virtual uint32 GetVersion( void ) const { return 1; }
 
 private:
-   ISerializable *DeserializeGraphicsMaterial(
-      Serializer *pSerializer,
-      ISerializable *pSerializable
-   );
+    ISerializable *DeserializeGraphicsMaterial(
+        Serializer *pSerializer,
+        ISerializable *pSerializable
+    );
 
-   ISerializable *DeserializeComputeMaterial(
-      Serializer *pSerializer,
-      ISerializable *pSerializable
-   );
+    ISerializable *DeserializeComputeMaterial(
+        Serializer *pSerializer,
+        ISerializable *pSerializable
+    );
 };

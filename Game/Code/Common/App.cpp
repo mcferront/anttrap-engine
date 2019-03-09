@@ -87,7 +87,7 @@ const float FarClip = 10000.0f;
 
 bool g_typed_uav_load_support;
 float g_resolution_scale;
-const Color ClearColor( 0, 0, 0, 0 );
+const Color ClearColor( 0, 0, 1, 0 );
 float DeltaSeconds;
 
 int g_frameIndex;

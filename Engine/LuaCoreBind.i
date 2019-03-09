@@ -76,6 +76,20 @@ public:
     ArgList *GetList( );
 };
 
+class Camera
+{
+public:
+   void SetNearClip( float nearClip );
+   void SetFovX( float fov );
+   void SetFarClip( float farClip);
+};
+
+class CameraComponent
+{
+public:
+   Camera *GetCamera( void );
+};
+
 class Resource
 {
 public:

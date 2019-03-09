@@ -118,9 +118,19 @@ void GpuDevice::CopyResource(
     GpuResource *pSource
 )
 {
-    D3D12_RESOURCE_DESC desc = pDest->GetApiResource( )->GetDesc();
-    D3D12_RESOURCE_DESC source_desc = pSource->GetApiResource( )->GetDesc();
     pList->pList->CopyResource( pDest->GetApiResource( ), pSource->GetApiResource( ) );
+}
+
+void GpuDevice::CopyRegion(
+    CommandList *pList,
+    GpuResource *pDest,
+    uint32 destOffset,
+    GpuResource *pSource,
+    uint32 sourceOffset,
+    size_t numBytes
+)
+{
+    pList->pList->CopyBufferRegion( pDest->GetApiResource( ), destOffset, pSource->GetApiResource( ), sourceOffset, numBytes );
 }
 
 bool GpuDevice::Create(
@@ -215,6 +225,20 @@ bool GpuDevice::Create(
         }
 
         BreakIf( NULL == m_pDevice );
+
+#if defined(_DEBUG)
+        ID3D12InfoQueue *pQueueInfo;
+        
+        hr = m_pDevice->QueryInterface( __uuidof(ID3D12InfoQueue), (void **) &pQueueInfo );
+        Debug::Assert( Condition( SUCCEEDED( hr ) ), "Failed to get ID3D12InfoQueue (0x%08x)", hr );
+        BreakIf( FAILED( hr ) );
+
+        pQueueInfo->SetBreakOnSeverity( D3D12_MESSAGE_SEVERITY_CORRUPTION, true );
+        pQueueInfo->SetBreakOnSeverity( D3D12_MESSAGE_SEVERITY_ERROR, true );
+        pQueueInfo->SetBreakOnSeverity( D3D12_MESSAGE_SEVERITY_WARNING, true );
+
+        pQueueInfo->Release();
+#endif
 
         D3D12_COMMAND_QUEUE_DESC queueDesc = { };
         queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;

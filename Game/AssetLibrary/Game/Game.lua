@@ -1,4 +1,4 @@
-local STARTUP = "Bistro";
+local STARTUP = "dragon";
 
 if (Game == nil) then
    Game = LuaComponent:New{};

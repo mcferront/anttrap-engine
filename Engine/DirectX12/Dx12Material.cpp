@@ -99,7 +99,7 @@ void ComputeMaterial::PassData::CloneTo(
     GraphicsMaterial::CreateConstantBuffer( &pPassData->constantBuffer, constantBuffer.size );
 
     if ( NULL != pPassData->constantBuffer.pData )
-        memcpy( pPassData->constantBuffer.pData, constantBuffer.pData, sizeof( Vector ) * pPassData->header.totalFloat4s );
+        memcpy( pPassData->constantBuffer.pData, constantBuffer.pData, constantBuffer.size );
 }
 
 GraphicsMaterial::~GraphicsMaterial( void )
@@ -113,10 +113,14 @@ void GraphicsMaterial::PassData::CloneTo(
     pPassData->header = header;
     pPassData->shader = shader;
 
+    pPassData->pFloats = NULL;
+    pPassData->pFloat3s = NULL;
     pPassData->pFloat4s = NULL;
     pPassData->pMatrix4s = NULL;
     pPassData->pTextures = NULL;
 
+    pPassData->pFloats = new GraphicsMaterial::PassData::Float[ pPassData->header.numFloatNames ];
+    pPassData->pFloat3s = new GraphicsMaterial::PassData::Float3[ pPassData->header.numFloat3Names ];
     pPassData->pFloat4s = new GraphicsMaterial::PassData::Float4[ pPassData->header.numFloat4Names ];
     pPassData->pMatrix4s = new GraphicsMaterial::PassData::Matrix4[ pPassData->header.numMatrix4Names ];
     pPassData->pTextures = new GraphicsMaterial::PassData::Texture[ pPassData->header.numTextures ];
@@ -147,6 +151,20 @@ void GraphicsMaterial::PassData::CloneTo(
         }
     }
 
+    for ( int c = 0; c < pPassData->header.numFloatNames; c++ )
+    {
+        pPassData->pFloats[ c ].pName = StringRef( pFloats[ c ].pName );
+        pPassData->pFloats[ c ].pRef = StringRef( pFloats[ c ].pRef );
+        pPassData->pFloats[ c ].offset = pFloats[ c ].offset;
+    }
+
+    for ( int c = 0; c < pPassData->header.numFloat3Names; c++ )
+    {
+        pPassData->pFloat3s[ c ].pName = StringRef( pFloat3s[ c ].pName );
+        pPassData->pFloat3s[ c ].pRef = StringRef( pFloat3s[ c ].pRef );
+        pPassData->pFloat3s[ c ].offset = pFloat3s[ c ].offset;
+    }
+
     for ( int c = 0; c < pPassData->header.numFloat4Names; c++ )
     {
         pPassData->pFloat4s[ c ].pName = StringRef( pFloat4s[ c ].pName );
@@ -164,7 +182,7 @@ void GraphicsMaterial::PassData::CloneTo(
     GraphicsMaterial::CreateConstantBuffer( &pPassData->constantBuffer, constantBuffer.size );
 
     if ( NULL != pPassData->constantBuffer.pData )
-        memcpy( pPassData->constantBuffer.pData, constantBuffer.pData, sizeof( Matrix ) * pPassData->header.totalMatrix4s + sizeof( Vector ) * pPassData->header.totalFloat4s );
+        memcpy( pPassData->constantBuffer.pData, constantBuffer.pData, constantBuffer.size );
 
     pPassData->psoDesc = psoDesc;
     pPassData->pName = StringRef( pName );
@@ -192,7 +210,7 @@ ISerializable *MaterialSerializer::Deserialize(
     ISerializable *pSerializable
 )
 {
-    const byte Version = 2;
+    const byte Version = 4;
 
     struct Header
     {
@@ -515,6 +533,8 @@ ISerializable *MaterialSerializer::DeserializeGraphicsMaterial(
     {
         GraphicsMaterial::PassData *pPass = &pPasses[ i ];
 
+        pPass->pFloats = NULL;
+        pPass->pFloat3s = NULL;
         pPass->pFloat4s = NULL;
         pPass->pMatrix4s = NULL;
         pPass->pTextures = NULL;
@@ -528,8 +548,16 @@ ISerializable *MaterialSerializer::DeserializeGraphicsMaterial(
         pPass->shader = ResourceHandle( Id::Deserialize( pSerializer->GetInputStream( ) ) );
 
         uint32 constantBufferSize =
-            sizeof( Vector ) * pPass->header.totalFloat4s +
-            sizeof( Matrix ) * pPass->header.totalMatrix4s;
+            sizeof(float) * pPass->header.totalFloats +
+            sizeof(float[3]) * pPass->header.totalFloat3s +
+            sizeof(Vector) * pPass->header.totalFloat4s +
+            sizeof(Matrix) * pPass->header.totalMatrix4s;
+
+        if ( pPass->header.numFloatNames )
+            pPass->pFloats = new GraphicsMaterial::PassData::Float[ pPass->header.numFloatNames ];
+
+        if ( pPass->header.numFloat3Names )
+            pPass->pFloat3s = new GraphicsMaterial::PassData::Float3[ pPass->header.numFloat3Names ];
 
         if ( pPass->header.numFloat4Names )
             pPass->pFloat4s = new GraphicsMaterial::PassData::Float4[ pPass->header.numFloat4Names ];
@@ -550,7 +578,7 @@ ISerializable *MaterialSerializer::DeserializeGraphicsMaterial(
         bool result = GraphicsMaterial::CreateConstantBuffer( &pPass->constantBuffer, constantBufferSize );
         BreakIf( false == result );
 
-        int float4ValueOffset = 0;
+        int offset = 0;
 
         for ( int c = 0; c < pPass->header.numFloat4Names; c++ )
         {
@@ -560,15 +588,45 @@ ISerializable *MaterialSerializer::DeserializeGraphicsMaterial(
             int amount;
             pSerializer->GetInputStream( )->Read( &amount, sizeof( amount ) );
 
-            pPass->pFloat4s[ c ].offset = float4ValueOffset;
-            float4ValueOffset += amount * sizeof( Vector );
+            pPass->pFloat4s[ c ].offset = offset;
+            offset += amount * sizeof( Vector );
 
             pPass->pFloat4s[ c ].pName = pName;
             pPass->pFloat4s[ c ].pRef = pRef;
             pSerializer->GetInputStream( )->Read( pPass->constantBuffer.pData + pPass->pFloat4s[ c ].offset, sizeof( Vector ) );
         }
 
-        int matrix4ValueOffset = 0;
+        for ( int c = 0; c < pPass->header.numFloat3Names; c++ )
+        {
+            const char *pName = StringPool::Deserialize( pSerializer->GetInputStream( ) );
+            const char *pRef = StringPool::Deserialize( pSerializer->GetInputStream( ) );
+
+            int amount;
+            pSerializer->GetInputStream( )->Read( &amount, sizeof( amount ) );
+
+            pPass->pFloat3s[ c ].offset = offset;
+            offset += amount * sizeof(float[3]);
+
+            pPass->pFloat3s[ c ].pName = pName;
+            pPass->pFloat3s[ c ].pRef = pRef;
+            pSerializer->GetInputStream( )->Read( pPass->constantBuffer.pData + pPass->pFloat3s[ c ].offset, sizeof(float[3]) );
+        }
+
+        for ( int c = 0; c < pPass->header.numFloatNames; c++ )
+        {
+            const char *pName = StringPool::Deserialize( pSerializer->GetInputStream( ) );
+            const char *pRef = StringPool::Deserialize( pSerializer->GetInputStream( ) );
+
+            int amount;
+            pSerializer->GetInputStream( )->Read( &amount, sizeof( amount ) );
+
+            pPass->pFloats[ c ].offset = offset;
+            offset += amount * sizeof(float);
+
+            pPass->pFloats[ c ].pName = pName;
+            pPass->pFloats[ c ].pRef = pRef;
+            pSerializer->GetInputStream( )->Read( pPass->constantBuffer.pData + pPass->pFloats[ c ].offset, sizeof(float) );
+        }
 
         for ( int c = 0; c < pPass->header.numMatrix4Names; c++ )
         {
@@ -578,8 +636,8 @@ ISerializable *MaterialSerializer::DeserializeGraphicsMaterial(
             int amount;
             pSerializer->GetInputStream( )->Read( &amount, sizeof( amount ) );
 
-            pPass->pMatrix4s[ c ].offset = matrix4ValueOffset + float4ValueOffset;
-            matrix4ValueOffset += amount * sizeof( Matrix );
+            pPass->pMatrix4s[ c ].offset = offset;
+            offset += amount * sizeof( Matrix );
 
             pPass->pMatrix4s[ c ].pName = pName;
             pPass->pMatrix4s[ c ].pRef = pRef;

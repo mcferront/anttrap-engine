@@ -151,8 +151,8 @@ void Quad::Render(
 
    Matrix vp;
    Math::Multiply( &vp, viewTransform.ToMatrix(true), projection );
-   pPass->GetData()->SetMacro( pVP, &vp, 1 );
-   pPass->GetData()->SetMacro( pWorld, &transform.ToMatrix( true ), 1 );
+   pPass->GetData()->SetFloat4x4s( pVP, &vp, 1 );
+   pPass->GetData()->SetFloat4x4s( pWorld, &transform.ToMatrix( true ), 1 );
 
    desc.pDesc->pMaterial->SetRenderData( pPass, desc.pCommandList );
 

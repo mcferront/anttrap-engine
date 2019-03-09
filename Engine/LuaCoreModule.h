@@ -15,6 +15,7 @@
 #include "Raycast.h"
 #include "InputSystem.h"
 #include "RegistryWorld.h"
+#include "CameraComponent.h"
 
 static Component *GetContextComponent( )
 {
@@ -459,10 +460,16 @@ static MeshRendererComponent *ToMeshRendererComponent( Component *pComponent )
     return (MeshRendererComponent *) pComponent;
 }
 
+static CameraComponent *ToCameraComponent( Component *pComponent )
+{
+   Debug::Assert( Condition( pComponent->GetType( ) == CameraComponent::StaticType( ) ), "Cannot cast %s to CameraComponent", pComponent->GetType( ).ToString( ) );
+   return (CameraComponent *) pComponent;
+}
+
 static AmbientLightComponent *ToAmbientLightComponent( Component *pComponent )
 {
-   Debug::Assert( Condition( pComponent->GetType( ) == AmbientLightComponent::StaticType( ) ), "Cannot cast %s to AmbientLightComponent", pComponent->GetType( ).ToString( ) );
-   return (AmbientLightComponent *) pComponent;
+    Debug::Assert( Condition( pComponent->GetType( ) == AmbientLightComponent::StaticType( ) ), "Cannot cast %s to AmbientLightComponent", pComponent->GetType( ).ToString( ) );
+    return (AmbientLightComponent *) pComponent;
 }
 
 static DirectionalLightComponent *ToDirectionalLightComponent( Component *pComponent )

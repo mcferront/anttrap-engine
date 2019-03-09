@@ -1514,35 +1514,37 @@ SWIG_Lua_dostring(lua_State *L, const char* str) {
 #define SWIGTYPE_p_ArgList swig_types[2]
 #define SWIGTYPE_p_Asset swig_types[3]
 #define SWIGTYPE_p_ButtonComponent swig_types[4]
-#define SWIGTYPE_p_Channel swig_types[5]
-#define SWIGTYPE_p_Component swig_types[6]
-#define SWIGTYPE_p_ComponentType swig_types[7]
-#define SWIGTYPE_p_DirectionalLightComponent swig_types[8]
-#define SWIGTYPE_p_Id swig_types[9]
-#define SWIGTYPE_p_IdList swig_types[10]
-#define SWIGTYPE_p_InputMap swig_types[11]
-#define SWIGTYPE_p_LabelComponent swig_types[12]
-#define SWIGTYPE_p_LightComponent swig_types[13]
-#define SWIGTYPE_p_LuaArgList swig_types[14]
-#define SWIGTYPE_p_MeshRendererComponent swig_types[15]
-#define SWIGTYPE_p_Node swig_types[16]
-#define SWIGTYPE_p_NodeList swig_types[17]
-#define SWIGTYPE_p_PointLightComponent swig_types[18]
-#define SWIGTYPE_p_Quaternion swig_types[19]
-#define SWIGTYPE_p_RaycastResult swig_types[20]
-#define SWIGTYPE_p_Resource swig_types[21]
-#define SWIGTYPE_p_ResourceHandle swig_types[22]
-#define SWIGTYPE_p_ResourceHandleList swig_types[23]
-#define SWIGTYPE_p_Scene swig_types[24]
-#define SWIGTYPE_p_ScriptComponent swig_types[25]
-#define SWIGTYPE_p_SplineComponent swig_types[26]
-#define SWIGTYPE_p_SpotLightComponent swig_types[27]
-#define SWIGTYPE_p_TextArea swig_types[28]
-#define SWIGTYPE_p_Transform swig_types[29]
-#define SWIGTYPE_p_Vector swig_types[30]
-#define SWIGTYPE_p_Vector2 swig_types[31]
-static swig_type_info *swig_types[33];
-static swig_module_info swig_module = {swig_types, 32, 0, 0, 0, 0};
+#define SWIGTYPE_p_Camera swig_types[5]
+#define SWIGTYPE_p_CameraComponent swig_types[6]
+#define SWIGTYPE_p_Channel swig_types[7]
+#define SWIGTYPE_p_Component swig_types[8]
+#define SWIGTYPE_p_ComponentType swig_types[9]
+#define SWIGTYPE_p_DirectionalLightComponent swig_types[10]
+#define SWIGTYPE_p_Id swig_types[11]
+#define SWIGTYPE_p_IdList swig_types[12]
+#define SWIGTYPE_p_InputMap swig_types[13]
+#define SWIGTYPE_p_LabelComponent swig_types[14]
+#define SWIGTYPE_p_LightComponent swig_types[15]
+#define SWIGTYPE_p_LuaArgList swig_types[16]
+#define SWIGTYPE_p_MeshRendererComponent swig_types[17]
+#define SWIGTYPE_p_Node swig_types[18]
+#define SWIGTYPE_p_NodeList swig_types[19]
+#define SWIGTYPE_p_PointLightComponent swig_types[20]
+#define SWIGTYPE_p_Quaternion swig_types[21]
+#define SWIGTYPE_p_RaycastResult swig_types[22]
+#define SWIGTYPE_p_Resource swig_types[23]
+#define SWIGTYPE_p_ResourceHandle swig_types[24]
+#define SWIGTYPE_p_ResourceHandleList swig_types[25]
+#define SWIGTYPE_p_Scene swig_types[26]
+#define SWIGTYPE_p_ScriptComponent swig_types[27]
+#define SWIGTYPE_p_SplineComponent swig_types[28]
+#define SWIGTYPE_p_SpotLightComponent swig_types[29]
+#define SWIGTYPE_p_TextArea swig_types[30]
+#define SWIGTYPE_p_Transform swig_types[31]
+#define SWIGTYPE_p_Vector swig_types[32]
+#define SWIGTYPE_p_Vector2 swig_types[33]
+static swig_type_info *swig_types[35];
+static swig_module_info swig_module = {swig_types, 34, 0, 0, 0, 0};
 #define SWIG_TypeQuery(name) SWIG_TypeQueryModule(&swig_module, &swig_module, name)
 #define SWIG_MangledTypeQuery(name) SWIG_MangledTypeQueryModule(&swig_module, &swig_module, name)
 
@@ -2274,6 +2276,30 @@ static int _wrap_ToMeshRendererComponent(lua_State* L) {
   
   result = (MeshRendererComponent *)ToMeshRendererComponent(arg1);
   SWIG_NewPointerObj(L,result,SWIGTYPE_p_MeshRendererComponent,0); SWIG_arg++; 
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_ToCameraComponent(lua_State* L) {
+  int SWIG_arg = 0;
+  Component *arg1 = (Component *) 0 ;
+  CameraComponent *result = 0 ;
+  
+  SWIG_check_num_args("ToCameraComponent",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("ToCameraComponent",1,"Component *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_Component,0))){
+    SWIG_fail_ptr("ToCameraComponent",1,SWIGTYPE_p_Component);
+  }
+  
+  result = (CameraComponent *)ToCameraComponent(arg1);
+  SWIG_NewPointerObj(L,result,SWIGTYPE_p_CameraComponent,0); SWIG_arg++; 
   return SWIG_arg;
   
   if(0) SWIG_fail;
@@ -3161,6 +3187,140 @@ static swig_lua_attribute swig_LuaArgList_attributes[] = {
 static swig_lua_class *swig_LuaArgList_bases[] = {0};
 static const char *swig_LuaArgList_base_names[] = {0};
 static swig_lua_class _wrap_class_LuaArgList = { "LuaArgList", &SWIGTYPE_p_LuaArgList,_wrap_new_LuaArgList, swig_delete_LuaArgList, swig_LuaArgList_methods, swig_LuaArgList_attributes, swig_LuaArgList_bases, swig_LuaArgList_base_names };
+
+static int _wrap_Camera_SetNearClip(lua_State* L) {
+  int SWIG_arg = 0;
+  Camera *arg1 = (Camera *) 0 ;
+  float arg2 ;
+  
+  SWIG_check_num_args("SetNearClip",2,2)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("SetNearClip",1,"Camera *");
+  if(!lua_isnumber(L,2)) SWIG_fail_arg("SetNearClip",2,"float");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_Camera,0))){
+    SWIG_fail_ptr("Camera_SetNearClip",1,SWIGTYPE_p_Camera);
+  }
+  
+  arg2 = (float)lua_tonumber(L, 2);
+  (arg1)->SetNearClip(arg2);
+  
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_Camera_SetFovX(lua_State* L) {
+  int SWIG_arg = 0;
+  Camera *arg1 = (Camera *) 0 ;
+  float arg2 ;
+  
+  SWIG_check_num_args("SetFovX",2,2)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("SetFovX",1,"Camera *");
+  if(!lua_isnumber(L,2)) SWIG_fail_arg("SetFovX",2,"float");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_Camera,0))){
+    SWIG_fail_ptr("Camera_SetFovX",1,SWIGTYPE_p_Camera);
+  }
+  
+  arg2 = (float)lua_tonumber(L, 2);
+  (arg1)->SetFovX(arg2);
+  
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static int _wrap_Camera_SetFarClip(lua_State* L) {
+  int SWIG_arg = 0;
+  Camera *arg1 = (Camera *) 0 ;
+  float arg2 ;
+  
+  SWIG_check_num_args("SetFarClip",2,2)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("SetFarClip",1,"Camera *");
+  if(!lua_isnumber(L,2)) SWIG_fail_arg("SetFarClip",2,"float");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_Camera,0))){
+    SWIG_fail_ptr("Camera_SetFarClip",1,SWIGTYPE_p_Camera);
+  }
+  
+  arg2 = (float)lua_tonumber(L, 2);
+  (arg1)->SetFarClip(arg2);
+  
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static void swig_delete_Camera(void *obj) {
+Camera *arg1 = (Camera *) obj;
+delete arg1;
+}
+static swig_lua_method swig_Camera_methods[] = {
+    {"SetNearClip", _wrap_Camera_SetNearClip}, 
+    {"SetFovX", _wrap_Camera_SetFovX}, 
+    {"SetFarClip", _wrap_Camera_SetFarClip}, 
+    {0,0}
+};
+static swig_lua_attribute swig_Camera_attributes[] = {
+    {0,0,0}
+};
+static swig_lua_class *swig_Camera_bases[] = {0};
+static const char *swig_Camera_base_names[] = {0};
+static swig_lua_class _wrap_class_Camera = { "Camera", &SWIGTYPE_p_Camera,0, swig_delete_Camera, swig_Camera_methods, swig_Camera_attributes, swig_Camera_bases, swig_Camera_base_names };
+
+static int _wrap_CameraComponent_GetCamera(lua_State* L) {
+  int SWIG_arg = 0;
+  CameraComponent *arg1 = (CameraComponent *) 0 ;
+  Camera *result = 0 ;
+  
+  SWIG_check_num_args("GetCamera",1,1)
+  if(!SWIG_isptrtype(L,1)) SWIG_fail_arg("GetCamera",1,"CameraComponent *");
+  
+  if (!SWIG_IsOK(SWIG_ConvertPtr(L,1,(void**)&arg1,SWIGTYPE_p_CameraComponent,0))){
+    SWIG_fail_ptr("CameraComponent_GetCamera",1,SWIGTYPE_p_CameraComponent);
+  }
+  
+  result = (Camera *)(arg1)->GetCamera();
+  SWIG_NewPointerObj(L,result,SWIGTYPE_p_Camera,0); SWIG_arg++; 
+  return SWIG_arg;
+  
+  if(0) SWIG_fail;
+  
+fail:
+  lua_error(L);
+  return SWIG_arg;
+}
+
+
+static void swig_delete_CameraComponent(void *obj) {
+CameraComponent *arg1 = (CameraComponent *) obj;
+delete arg1;
+}
+static swig_lua_method swig_CameraComponent_methods[] = {
+    {"GetCamera", _wrap_CameraComponent_GetCamera}, 
+    {0,0}
+};
+static swig_lua_attribute swig_CameraComponent_attributes[] = {
+    {0,0,0}
+};
+static swig_lua_class *swig_CameraComponent_bases[] = {0};
+static const char *swig_CameraComponent_base_names[] = {0};
+static swig_lua_class _wrap_class_CameraComponent = { "CameraComponent", &SWIGTYPE_p_CameraComponent,0, swig_delete_CameraComponent, swig_CameraComponent_methods, swig_CameraComponent_attributes, swig_CameraComponent_bases, swig_CameraComponent_base_names };
 
 static int _wrap_Resource_GetHandle(lua_State* L) {
   int SWIG_arg = 0;
@@ -6285,6 +6445,7 @@ static const struct luaL_reg swig_commands[] = {
     { "ToButtonComponent", _wrap_ToButtonComponent},
     { "ToSplineComponent", _wrap_ToSplineComponent},
     { "ToMeshRendererComponent", _wrap_ToMeshRendererComponent},
+    { "ToCameraComponent", _wrap_ToCameraComponent},
     { "ToAmbientLightComponent", _wrap_ToAmbientLightComponent},
     { "ToDirectionalLightComponent", _wrap_ToDirectionalLightComponent},
     { "ToPointLightComponent", _wrap_ToPointLightComponent},
@@ -6385,6 +6546,8 @@ static swig_type_info _swigt__p_AnimationComponent = {"_p_AnimationComponent", "
 static swig_type_info _swigt__p_ArgList = {"_p_ArgList", "ArgList *", 0, 0, (void*)0, 0};
 static swig_type_info _swigt__p_Asset = {"_p_Asset", "Asset *", 0, 0, (void*)&_wrap_class_Asset, 0};
 static swig_type_info _swigt__p_ButtonComponent = {"_p_ButtonComponent", "ButtonComponent *", 0, 0, (void*)&_wrap_class_ButtonComponent, 0};
+static swig_type_info _swigt__p_Camera = {"_p_Camera", "Camera *", 0, 0, (void*)&_wrap_class_Camera, 0};
+static swig_type_info _swigt__p_CameraComponent = {"_p_CameraComponent", "CameraComponent *", 0, 0, (void*)&_wrap_class_CameraComponent, 0};
 static swig_type_info _swigt__p_Channel = {"_p_Channel", "Channel *", 0, 0, (void*)&_wrap_class_Channel, 0};
 static swig_type_info _swigt__p_Component = {"_p_Component", "Component *", 0, 0, (void*)&_wrap_class_Component, 0};
 static swig_type_info _swigt__p_ComponentType = {"_p_ComponentType", "ComponentType *", 0, 0, (void*)&_wrap_class_ComponentType, 0};
@@ -6419,6 +6582,8 @@ static swig_type_info *swig_type_initial[] = {
   &_swigt__p_ArgList,
   &_swigt__p_Asset,
   &_swigt__p_ButtonComponent,
+  &_swigt__p_Camera,
+  &_swigt__p_CameraComponent,
   &_swigt__p_Channel,
   &_swigt__p_Component,
   &_swigt__p_ComponentType,
@@ -6453,6 +6618,8 @@ static swig_cast_info _swigc__p_AnimationComponent[] = {  {&_swigt__p_AnimationC
 static swig_cast_info _swigc__p_ArgList[] = {  {&_swigt__p_ArgList, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_Asset[] = {  {&_swigt__p_Asset, 0, 0, 0},  {&_swigt__p_Scene, _p_SceneTo_p_Asset, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_ButtonComponent[] = {  {&_swigt__p_ButtonComponent, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_Camera[] = {  {&_swigt__p_Camera, 0, 0, 0},{0, 0, 0, 0}};
+static swig_cast_info _swigc__p_CameraComponent[] = {  {&_swigt__p_CameraComponent, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_Channel[] = {  {&_swigt__p_Channel, 0, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_Component[] = {  {&_swigt__p_Component, 0, 0, 0},  {&_swigt__p_ButtonComponent, _p_ButtonComponentTo_p_Component, 0, 0},  {&_swigt__p_SplineComponent, _p_SplineComponentTo_p_Component, 0, 0},  {&_swigt__p_ScriptComponent, _p_ScriptComponentTo_p_Component, 0, 0},  {&_swigt__p_LabelComponent, _p_LabelComponentTo_p_Component, 0, 0},  {&_swigt__p_LightComponent, _p_LightComponentTo_p_Component, 0, 0},  {&_swigt__p_PointLightComponent, _p_PointLightComponentTo_p_Component, 0, 0},  {&_swigt__p_SpotLightComponent, _p_SpotLightComponentTo_p_Component, 0, 0},  {&_swigt__p_DirectionalLightComponent, _p_DirectionalLightComponentTo_p_Component, 0, 0},  {&_swigt__p_AmbientLightComponent, _p_AmbientLightComponentTo_p_Component, 0, 0},  {&_swigt__p_MeshRendererComponent, _p_MeshRendererComponentTo_p_Component, 0, 0},  {&_swigt__p_AnimationComponent, _p_AnimationComponentTo_p_Component, 0, 0},{0, 0, 0, 0}};
 static swig_cast_info _swigc__p_ComponentType[] = {  {&_swigt__p_ComponentType, 0, 0, 0},{0, 0, 0, 0}};
@@ -6487,6 +6654,8 @@ static swig_cast_info *swig_cast_initial[] = {
   _swigc__p_ArgList,
   _swigc__p_Asset,
   _swigc__p_ButtonComponent,
+  _swigc__p_Camera,
+  _swigc__p_CameraComponent,
   _swigc__p_Channel,
   _swigc__p_Component,
   _swigc__p_ComponentType,

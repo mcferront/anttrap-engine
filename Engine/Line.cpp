@@ -91,14 +91,14 @@ void Line::Render(
    static const char *pProjection = StringRef( "$PROJECTION_MATRIX" );
    static const char *pColor = StringRef( "$COLOR" );
 
-   pPass->GetData()->SetMacro( pWorld, &transform.ToMatrix( true ), 1 );
-   pPass->GetData()->SetMacro( pView, &viewTransform.ToMatrix( true ), 1 );
-   pPass->GetData()->SetMacro( pProjection, &projection, 1 );
-   pPass->GetData()->SetMacro( pColor, &Math::OneVector( ), 1 );
+   pPass->GetData()->SetFloat4x4s( pWorld, &transform.ToMatrix( true ), 1 );
+   pPass->GetData()->SetFloat4x4s( pView, &viewTransform.ToMatrix( true ), 1 );
+   pPass->GetData()->SetFloat4x4s( pProjection, &projection, 1 );
+   pPass->GetData()->SetFloat4s( pColor, &Math::OneVector( ), 1 );
 
    Matrix vp;
    Math::Multiply( &vp, viewTransform.ToMatrix(true), projection );
-   pPass->GetData()->SetMacro( pVP, &vp, 1 );
+   pPass->GetData()->SetFloat4x4s( pVP, &vp, 1 );
 
    pMaterial->SetRenderData( pPass, desc.pCommandList );
 
@@ -294,7 +294,7 @@ void Triangle::Render(
 
    GraphicsMaterialObject::Pass *pPass = pMaterial->GetPass( desc.pDesc->renderContext );
 
-   pPass->GetData()->SetMacro( "$WORLD_MATRIX", &transform.ToMatrix( true ), 1 );
+   pPass->GetData()->SetFloat4x4s( "$WORLD_MATRIX", &transform.ToMatrix( true ), 1 );
    pMaterial->SetRenderData( pPass, desc.pCommandList );
 
 #ifdef OPENGL
