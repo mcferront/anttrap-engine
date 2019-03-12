@@ -39,10 +39,10 @@ void SSAOProc(
 
         static const char *pParams1 = StringRef( "$PARAMS1" );
 
-        static RegistryFloat radius( StringRef( "SSAO/world_radius" ), 4.0f );
-        static RegistryFloat zScale( StringRef( "SSAO/z_scale" ), 0.00f );
-        static RegistryFloat intensity( StringRef( "SSAO/ao_intensity" ), 2.0f );
-        static RegistryFloat compression( StringRef( "SSAO/ao_compression" ), 1.0f );
+        static RegistryFloat radius( StringRef( "ssao.world_radius" ), 4.0f );
+        static RegistryFloat zScale( StringRef( "ssao.z_scale" ), 0.00f );
+        static RegistryFloat intensity( StringRef( "ssao.ao_intensity" ), 2.0f );
+        static RegistryFloat compression( StringRef( "ssao.ao_compression" ), 1.0f );
 
         float ref_size_value = hdr_width.GetValue( ) / pCamera->GetFovX( );
 
@@ -73,8 +73,8 @@ void SSAOProc(
     }
     else if ( pPass->GetData( )->GetName( ) == pSSAOHBlur )
     {
-        static RegistryFloat edgeSharpness( StringRef( "SSAO/edge_sharpness" ), 1.0f );
-        static RegistryFloat blurScale( StringRef( "SSAO/blur_scale" ), 2.0f );
+        static RegistryFloat edgeSharpness( StringRef( "ssao.edge_sharpness" ), 1.0f );
+        static RegistryFloat blurScale( StringRef( "ssao.blur_scale" ), 2.0f );
 
         uint32 bitFlags = 0;
         bitFlags |= 0x01; //horizontal
@@ -84,8 +84,8 @@ void SSAOProc(
     }
     else if ( pPass->GetData( )->GetName( ) == pSSAOVBlur )
     {
-        static RegistryFloat edgeSharpness( StringRef( "SSAO/edge_sharpness" ), 1.0f );
-        static RegistryFloat blurScale( StringRef( "SSAO/blur_scale" ), 2.0f );
+        static RegistryFloat edgeSharpness( StringRef( "ssao.edge_sharpness" ), 1.0f );
+        static RegistryFloat blurScale( StringRef( "ssao.blur_scale" ), 2.0f );
 
         uint32 bitFlags = 0;
         bitFlags |= 0x00; //vertical
@@ -137,8 +137,8 @@ void SSRProc(
 
     if ( pPass->GetData( )->GetName( ) == pSSRPass )
     {
-        static RegistryInt ssr_iterations = RegistryInt( "SSR/iterations" );
-        static RegistryFloat ssr_offset_bias = RegistryFloat( "SSR/offset_bias", 0.0001f );
+        static RegistryInt ssr_iterations = RegistryInt( "ssr.iterations" );
+        static RegistryFloat ssr_offset_bias = RegistryFloat( "ssr.offset_bias", 0.0001f );
 
         ResourceHandle hCamera = ResourceHandle::FromAlias( pMainCam );
         Node *pNode = GetResource( hCamera, Node );
@@ -173,10 +173,10 @@ void SSRProc(
     }
     else if ( pPass->GetData( )->GetName( ) == pCompositePass )
     {
-        static RegistryBool ssr_composite_show_mip = RegistryBool( "SSR/composite_show_mip", false );
-        static RegistryBool ssr_composite_force_mip = RegistryBool( "SSR/composite_force_mip", false );
-        static RegistryBool ssr_composite_show_z = RegistryBool( "SSR/composite_show_z", false );
-        static RegistryInt ssr_composite_mip = RegistryInt( "SSR/composite_mip", 0 );
+        static RegistryBool ssr_composite_show_mip = RegistryBool( "ssr.composite_show_mip", false );
+        static RegistryBool ssr_composite_force_mip = RegistryBool( "ssr.composite_force_mip", false );
+        static RegistryBool ssr_composite_show_z = RegistryBool( "ssr.composite_show_z", false );
+        static RegistryInt ssr_composite_mip = RegistryInt( "ssr.composite_mip", 0 );
 
         GpuBuffer *pImage = GetResource( ResourceHandle( "PropertiesRT" ), GpuBuffer );
 
@@ -244,8 +244,8 @@ void SpecBloomProc(
 
     ComputeMaterialObject::Pass *pPass = pCompute->GetPass( renderContext );
 
-    static RegistryFloat bloom_min( "SpecBloom/min", 0.05f );
-    static RegistryFloat bloom_grad( "SpecBloom/gradient", 4.0f );
+    static RegistryFloat bloom_min( "specbloom.min", 0.05f );
+    static RegistryFloat bloom_grad( "specbloom.gradient", 4.0f );
 
     Vector params( bloom_min.GetValue( ), bloom_grad.GetValue(), 0 );
     pPass->GetData( )->SetMacro( pParams, &params, 1 );

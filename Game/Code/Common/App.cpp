@@ -87,7 +87,7 @@ const float FarClip = 10000.0f;
 
 bool g_typed_uav_load_support;
 float g_resolution_scale;
-const Color ClearColor( 0, 0, 1, 0 );
+const Color ClearColor( 0, 0, 0, 0 );
 float DeltaSeconds;
 
 int g_frameIndex;
@@ -164,9 +164,9 @@ void TonemapProc(
 
     static const char *pTechnique = StringRef( "$TONEMAP" );
 
-    static RegistryInt method( "Tonemap/method" );
-    static RegistryFloat exposure( "Tonemap/target_exposure", .1f );
-    static RegistryFloat filter( "Tonemap/filter", .05f );
+    static RegistryInt method( "tonemap.method" );
+    static RegistryFloat exposure( "tonemap.target_exposure", .1f );
+    static RegistryFloat filter( "tonemap.filter", .05f );
 
     Vector params( (float) method.GetValue( ), exposure.GetValue( ), filter.GetValue( ), 0.0f );
     pPass->GetData( )->SetMacro( pTechnique, &params, 1 );
@@ -191,8 +191,8 @@ void HdrToLdrProc(
     ComputeMaterialObject::Pass *pPass = pCompute->GetPass( renderContext );
 
     static const char *pParams = StringRef( "$PARAMS" );
-    static RegistryFloat tonemap_a( "Tonemap/a", 1.25f );
-    static RegistryFloat tonemap_b( "Tonemap/b", 1.5f );
+    static RegistryFloat tonemap_a( "tonemap.a", 1.25f );
+    static RegistryFloat tonemap_b( "tonemap.b", 1.5f );
 
     Vector params( tonemap_a.GetValue( ), tonemap_b.GetValue( ), 0, 0 );
     pPass->GetData( )->SetMacro( pParams, &params, 1 );
@@ -731,17 +731,17 @@ void App::Create(
 
     RegistryBool deferred( "Render/deferred", false, RebuildRenderer );
     RegistryBool depth_prepass( "Render/depth_prepass", true, RebuildRenderer );
-    RegistryInt method( "Tonemap/method", 0 );
+    RegistryInt method( "tonemap.method", 1 );
 
     RegistryInt hdr_width( "Render/hdr_width", 0, -INT_MAX, INT_MAX, RebuildRenderer );
     RegistryInt hdr_height( "Render/hdr_height", 0, -INT_MAX, INT_MAX, RebuildRenderer );
 
     RegistryBool dof_enable = RegistryBool( "dof.enable", true, RebuildRenderer );
-    RegistryBool spec_bloom_enable = RegistryBool( "SpecBloom/enable", true, RebuildRenderer );
-    RegistryBool ssao_enable = RegistryBool( "SSAO/enable", true, RebuildRenderer );
-    RegistryBool ssr_enable = RegistryBool( "SSR/enable", true, RebuildRenderer );
+    RegistryBool spec_bloom_enable = RegistryBool( "specbloom.enable", true, RebuildRenderer );
+    RegistryBool ssao_enable = RegistryBool( "ssao.enable", true, RebuildRenderer );
+    RegistryBool ssr_enable = RegistryBool( "ssr.enable", true, RebuildRenderer );
 
-    RegistryInt ssr_iterations = RegistryInt( "SSR/iterations", 128 );
+    RegistryInt ssr_iterations = RegistryInt( "ssr.iterations", 128 );
 
     LOG( "Creating Renderers" );
     {
@@ -1606,9 +1606,9 @@ void App::SetupDeferredRenderer( void )
     RegistryBool depth_prepass = RegistryBool( "Render/depth_prepass" );
 
     RegistryBool dof_enable = RegistryBool( "dof.enable" );
-    RegistryBool spec_bloom_enable = RegistryBool( "SpecBloom/enable" );
-    RegistryBool ssr_enable = RegistryBool( "SSR/enable" );
-    RegistryBool ssao_enable = RegistryBool( "SSAO/enable" );
+    RegistryBool spec_bloom_enable = RegistryBool( "specbloom.enable" );
+    RegistryBool ssr_enable = RegistryBool( "ssr.enable" );
+    RegistryBool ssao_enable = RegistryBool( "ssao.enable" );
 
     // g buffer should resolve to MainHDRTarget so it can still do luminance, etc.
     ResourceHandle hdrTarget = ResourceHandle( Id::Id( "MainHDRTarget" ) );
@@ -1863,10 +1863,10 @@ void App::SetupForwardRenderer( void )
     int windowWidth = GpuDevice::Instance( ).GetSwapChain( )->width;
     int windowHeight = GpuDevice::Instance( ).GetSwapChain( )->height;
 
-    RegistryBool ssr_enable = RegistryBool( "SSR/enable" );
+    RegistryBool ssr_enable = RegistryBool( "ssr.enable" );
     RegistryBool dof_enable = RegistryBool( "dof.enable" );
-    RegistryBool ssao_enable = RegistryBool( "SSAO/enable" );
-    RegistryBool spec_bloom_enable = RegistryBool( "SpecBloom/enable" );
+    RegistryBool ssao_enable = RegistryBool( "ssao.enable" );
+    RegistryBool spec_bloom_enable = RegistryBool( "specbloom.enable" );
 
     sampleCount = 1;
 
@@ -2170,7 +2170,7 @@ void App::TeardownRenderers( void )
 
 void ShowHemisphere( void )
 {
-    RegistryInt method( "Tonemap/method" );
+    RegistryInt method( "tonemap.method" );
     method.SetValue(1);
 
     RegistryBool dof_enable = RegistryBool( "dof.enable" );

@@ -28,10 +28,10 @@ matProperties<SrvBuffer>=PropertiesRT
 normalRt<SrvBuffer>=NormalRT
 outTexture<UavBuffer>=SSRTarget
 
-params<float4>=$PARAMS
 invProj<float4x4>=$INV_PROJ
 proj<float4x4>=$PROJ
 view<float4x4>=$VIEW
+params<float4>=$PARAMS
 
 GroupSizeTarget=MainHDRTarget
 GroupDiv=8,8

@@ -22,6 +22,9 @@ Game/AssetLibrary/_Platform/
 *.idb
 *.cache
 
+*.blend
+*.blend1
+
 3rdParty/zlib/zlib-1.2.5/contrib/vstudio/vc10/x86/
 
 

@@ -34,7 +34,7 @@ void cs_main(uint3 dispatchThreadId : SV_DispatchThreadID )
    {
       output.rgb = g_inTexture[ d_pixel ].rgb;
 
-      if ( method == 0 )
+      if ( method == 1 )
          output.rgb = Sigmoidal(output.rgb);
    }
    output.a = 1.0;

@@ -1,1 +1,1 @@
-Pass=TransparencyShader=99DADE0D-EE4F-46C6-BDC1-F4F01E1C03F7 #Color.shadercolor<float4>=0,1,1,1world<float4x4>=$WORLD_MATRIXvp<float4x4>=$VP_MATRIXDepthTest=TrueDepthFunc=GreaterEqualDepthWrite=FalseAlphaBlend=TrueCullMode=BackSourceBlend=SourceAlphaDestBlend=InvSourceAlpha
+Pass=TransparencyShader=99DADE0D-EE4F-46C6-BDC1-F4F01E1C03F7 #Color.shaderworld<float4x4>=$WORLD_MATRIXvp<float4x4>=$VP_MATRIXcolor<float4>=0,1,1,1DepthTest=TrueDepthFunc=GreaterEqualDepthWrite=FalseAlphaBlend=TrueCullMode=BackSourceBlend=SourceAlphaDestBlend=InvSourceAlpha

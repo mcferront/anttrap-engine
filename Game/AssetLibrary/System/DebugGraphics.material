@@ -1,8 +1,10 @@
 Pass=Transparency
 Shader=E942E930-B863-4EC0-9248-965DEC531671                 #DebugGraphics.shader
-color<float4>=$COLOR
+
 world<float4x4>=$WORLD_MATRIX
 vp<float4x4>=$VP_MATRIX
+color<float4>=$COLOR
+
 DepthTest=True
 DepthFunc=GreaterEqual
 DepthWrite=True

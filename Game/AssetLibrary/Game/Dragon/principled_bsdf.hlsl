@@ -14,31 +14,27 @@ cbuffer cb0 : register(b0)
 	float4x4 cb_view_proj;
 
     float4 cb_base_color;
-
-    float cb_subsurface;
-    float3 cb_subsurface_radius;
-
     float4 cb_subsurface_color;
 
+    float3 cb_subsurface_radius;
+    float3 cb_normal;
+    float3 cb_clearcoat_normal;
+    float3 cb_tangent;
+
+    float cb_subsurface;
     float cb_metallic;
     float cb_specular;
     float cb_specular_tint;
     float cb_roughness;
-
     float cb_anisotropic;
     float cb_anisotropic_rotation;
     float cb_sheen;
     float cb_sheen_tint;
-
     float cb_clearcoat;
     float cb_clearcoat_roughness;
     float cb_ior;
     float cb_transmission;
-
     float cb_transmission_roughness;
-    float cb_normal;
-    float3 cb_clearcoat_normal;
-    float3 cb_tangent;
 }
 
 VS_OUTPUT vs_main(VS_INPUT input)    

@@ -9,10 +9,11 @@ RWTexture2D<uint2> g_output : register(u0);
 
 cbuffer cb0 : register(b0)
 {
-   float4 g_params;
    float4x4 g_inv_proj;
    float4x4 g_proj;
    float4x4 g_view;
+
+   float4 g_params;
 };
 
 #define THREADS_X 8

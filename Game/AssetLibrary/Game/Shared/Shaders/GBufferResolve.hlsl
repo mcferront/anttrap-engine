@@ -18,15 +18,16 @@ SamplerState g_ssao_sampler : register(s1);
 
 cbuffer cb0 : register(b0)
 {
+   float4x4 g_inv_view_proj;
+   float4x4 g_shadow_view_matrix;
+   float4x4 g_shadow_proj_matrix;
+
    float4 g_world_camera_view;   //0
    float4 g_ambient_light;       //16
    float4 g_light_dir[ MaxLights ];    //48
    float4 g_light_pos_type[ MaxLights ];
 	float4 g_light_color[ MaxLights ]; 
 	float4 g_light_inner_outer_range__[ MaxLights ]; 
-   float4x4 g_inv_view_proj;
-   float4x4 g_shadow_view_matrix;
-   float4x4 g_shadow_proj_matrix;
 }	
 
 #include "Lighting.hlsl"

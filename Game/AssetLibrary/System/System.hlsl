@@ -14,9 +14,9 @@ struct VS_OUTPUT
 
 cbuffer cb : register(b0)
 {
-	float4 color; 
 	float4x4 world; 
 	float4x4 vp;
+	float4 color; 
 };
 
 VS_OUTPUT vs_main(VS_INPUT input)    

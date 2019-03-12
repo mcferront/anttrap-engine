@@ -1,8 +1,8 @@
 Pass=UI_Backers
 Shader=99DADE0D-EE4F-46C6-BDC1-F4F01E1C03F7 #Color.shader
-color<float4>=.25,.25,.25,.75
 world<float4x4>=$WORLD_MATRIX
 vp<float4x4>=$VP_MATRIX
+color<float4>=.25,.25,.25,.75
 DepthTest=True
 DepthFunc=GreaterEqual
 DepthWrite=False

@@ -5,9 +5,9 @@ import uuid;
 g_pass = "Forward"
 g_shader = "36B48296-CF38-4FA1-8F5E-9B53AD69C75F #blender_principled_bsdf"
 
-g_scene_template_file = "C:\\Users\\trapper.mcferron\\Desktop\\pbr\\template.lua"
-g_material_template_file = "C:\\Users\\trapper.mcferron\\Desktop\\pbr\\template.material"
-g_output_path = "C:\\Users\\trapper.mcferron\\Desktop\\pbr\\"
+g_scene_template_file = "E:\\git\\mcferront\\anttrap-engine\\Game\\AssetLibrary\\Game\\Dragon\\blender\\template.lua"
+g_material_template_file = "E:\\git\\mcferront\\anttrap-engine\\Game\\AssetLibrary\\Game\\Dragon\\blender\\template.material"
+g_output_path = "E:\\git\\mcferront\\anttrap-engine\\Game\\AssetLibrary\\Game\\Dragon\\"
 g_scene_name = "dragon"			
 
 g_scene = bpy.context.scene
@@ -18,8 +18,8 @@ at_materials = {}
 
 def create_engine_transform(v, q):
 	output = "Transform_Set(Vector_Set("
-	output += str(v[0]) + "," + str(v[1]) + "," + str(v[2]) + "), Quaternion_Set("
-	output += str(q[3]) + "," + str(q[0]) + "," + str(q[1]) + "," + str(q[2]) + "))"
+	output += str(v[0]) + "," + str(v[2]) + "," + str(v[1]) + "), Quaternion_Set("
+	output += str(q[1]) + "," + str(q[2]) + "," + str(q[3]) + "," + str(q[0]) + "))"
 	return output
 	
 def parse_type(t):
@@ -103,6 +103,10 @@ class AT_Camera:
 		camera_blob += "   camera:SetFov(" + str(self.camera.data.angle) + ");\n"
 		camera_blob += "   camera:SetNearClip(" + str(self.camera.data.clip_start) + ");\n"
 		camera_blob += "   camera:SetFarClip(" + str(self.camera.data.clip_end) + ");\n"
+
+		camera_blob += "   script = node:AddComponent(Id_Create(), \"ScriptComponent\");\n"
+		camera_blob += "   script:Create(\"FirstPersonController.lua\");\n"
+   
 		camera_blob += "   node:SetParent(self._node);\n"
 		camera_blob += "   node:AddToScene();\n"
 		camera_blob += "   node:Bind();\n"

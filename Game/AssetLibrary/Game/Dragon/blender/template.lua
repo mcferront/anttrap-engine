@@ -21,7 +21,7 @@ $CAMERA
 $LIGHTS
 
 $MESHES
-   
+
    self._node:AddToScene();
 end
 

@@ -580,6 +580,22 @@ ISerializable *MaterialSerializer::DeserializeGraphicsMaterial(
 
         int offset = 0;
 
+        for ( int c = 0; c < pPass->header.numMatrix4Names; c++ )
+        {
+            const char *pName = StringPool::Deserialize( pSerializer->GetInputStream( ) );
+            const char *pRef = StringPool::Deserialize( pSerializer->GetInputStream( ) );
+
+            int amount;
+            pSerializer->GetInputStream( )->Read( &amount, sizeof( amount ) );
+
+            pPass->pMatrix4s[ c ].offset = offset;
+            offset += amount * sizeof( Matrix );
+
+            pPass->pMatrix4s[ c ].pName = pName;
+            pPass->pMatrix4s[ c ].pRef = pRef;
+            pSerializer->GetInputStream( )->Read( pPass->constantBuffer.pData + pPass->pMatrix4s[ c ].offset, sizeof( Matrix ) );
+        }
+
         for ( int c = 0; c < pPass->header.numFloat4Names; c++ )
         {
             const char *pName = StringPool::Deserialize( pSerializer->GetInputStream( ) );
@@ -627,23 +643,6 @@ ISerializable *MaterialSerializer::DeserializeGraphicsMaterial(
             pPass->pFloats[ c ].pRef = pRef;
             pSerializer->GetInputStream( )->Read( pPass->constantBuffer.pData + pPass->pFloats[ c ].offset, sizeof(float) );
         }
-
-        for ( int c = 0; c < pPass->header.numMatrix4Names; c++ )
-        {
-            const char *pName = StringPool::Deserialize( pSerializer->GetInputStream( ) );
-            const char *pRef = StringPool::Deserialize( pSerializer->GetInputStream( ) );
-
-            int amount;
-            pSerializer->GetInputStream( )->Read( &amount, sizeof( amount ) );
-
-            pPass->pMatrix4s[ c ].offset = offset;
-            offset += amount * sizeof( Matrix );
-
-            pPass->pMatrix4s[ c ].pName = pName;
-            pPass->pMatrix4s[ c ].pRef = pRef;
-            pSerializer->GetInputStream( )->Read( pPass->constantBuffer.pData + pPass->pMatrix4s[ c ].offset, sizeof( Matrix ) );
-        }
-
 
         const int MaxTextures = 16;
 

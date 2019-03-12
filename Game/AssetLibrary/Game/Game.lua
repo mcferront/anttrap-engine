@@ -26,6 +26,14 @@ function Game:_Create()
       self.scene:AddToScene();
       self.scene:Bind();
    end
+   
+      
+   SetRegistryInt("tonemap.method", 0);
+   SetRegistryBool("dof.enable", false);
+   SetRegistryBool("specbloom.enable", false);
+   SetRegistryBool("ssao.enable", false);
+   SetRegistryBool("ssr.enable", false);
+
 end
 
 function Game:_Destroy()
