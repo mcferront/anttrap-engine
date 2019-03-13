@@ -17,7 +17,7 @@ function dragon:_Create()
    self._node:RemoveFromScene();
 
    node = Node_Get("MainCamera");
-   node:SetWorldTransform(Transform_Set(Vector_Set(0.0,8.605681419372559,-32.0), Quaternion_Set(0.0,0.0,0.0,1.0)));
+   node:SetWorldTransform(Transform_Set(Vector_Set(1.1539392471313477,7.7523579597473145,-54.99597930908203), Quaternion_Set(0.0,0.0,0.0,1.0)));
    camera = node:GetComponent("CameraComponent");
    camera:SetFov(0.8575560450553894);
    camera:SetNearClip(0.10000000149011612);
@@ -27,6 +27,9 @@ function dragon:_Create()
    node:SetParent(self._node);
    node:AddToScene();
    node:Bind();
+   script:GetScript().pitch = -0.00;
+   script:GetScript().yaw = -0.00;
+   script:GetScript().roll = -0.00;
 
 
    node = Node_Create(Id_Create(), "Sun");
@@ -46,6 +49,8 @@ function dragon:_Create()
    node:SetParent(self._node);
    node:AddToScene();
    node:Bind();
+
+
 
    self._node:AddToScene();
 end

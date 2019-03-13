@@ -17,6 +17,7 @@ function FirstPersonController:New()
     newObject._parent = CreateNode(newObject._native:GetParent());
     newObject.yaw = 0;
     newObject.pitch = 0;
+    newObject.roll = 0;
     return newObject;
 end
 
@@ -37,6 +38,7 @@ local transform = Transform_Create();
 local position = Vector_Create();
 local delta_position = Vector_Create();
 local yaw_transform = Transform_Create();
+local roll_transform = Transform_Create();
 local pitch_transform = Transform_Create();
 function FirstPersonController:Tick(delta_seconds)
    if (nil == pos_z_map) then
@@ -117,10 +119,12 @@ function FirstPersonController:Tick(delta_seconds)
     
     position = transform:GetTranslation();
 
-    Math.Math_RotateY(yaw_transform, self.yaw);
     Math.Math_RotateX(pitch_transform, self.pitch);
+    Math.Math_RotateY(yaw_transform, self.yaw);
+    Math.Math_RotateZ(roll_transform, self.roll);
 
-    Math.Math_Multiply(transform, pitch_transform, yaw_transform);
+    Math.Math_Multiply(transform, pitch_transform, roll_transform);
+    Math.Math_Multiply(transform, transform, yaw_transform );
     Math.Math_Rotate(delta_position, delta_position, transform);
 
     position.x = position.x + delta_position.x;

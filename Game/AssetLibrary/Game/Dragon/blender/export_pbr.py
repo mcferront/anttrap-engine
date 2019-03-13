@@ -2,6 +2,9 @@ import bpy
 import os
 import uuid;
 
+import mathutils
+from math import radians
+
 g_pass = "Forward"
 g_shader = "36B48296-CF38-4FA1-8F5E-9B53AD69C75F #blender_principled_bsdf"
 
@@ -106,16 +109,22 @@ class AT_Camera:
 
 		camera_blob += "   script = node:AddComponent(Id_Create(), \"ScriptComponent\");\n"
 		camera_blob += "   script:Create(\"FirstPersonController.lua\");\n"
-   
+
 		camera_blob += "   node:SetParent(self._node);\n"
 		camera_blob += "   node:AddToScene();\n"
 		camera_blob += "   node:Bind();\n"
+
+		camera_blob += "   script:GetScript().pitch = {:.2f}".format(radians(90)  - self.camera.rotation_euler[0]) + ";\n"
+		camera_blob += "   script:GetScript().yaw = {:.2f}".format(- self.camera.rotation_euler[2]) + ";\n"
+		camera_blob += "   script:GetScript().roll = {:.2f}".format(- self.camera.rotation_euler[1]) + ";\n"
+   
 		return camera_blob;
 		
 	def print_desc(self):
 		print(self.camera.name + "(" + self.camera.type + ")...");
 		print("\tpos: " + str(self.camera.location));
 		print("\trot: " + str(self.camera.rotation_quaternion));
+		print("\teul: " + str(self.camera.rotation_euler)); 
 		print("\tfov: " + str(self.camera.data.angle));
 		print("\tnear: " + str(self.camera.data.clip_start));
 		print("\tfar: " + str(self.camera.data.clip_end));
@@ -162,6 +171,7 @@ def gather_hierarchies(path, root):
 			at_object = AT_Camera(path, root)
 
 		if at_object is not None:
+			at_object.print_desc();
 			at_objects.append(at_object);
 		
 			if isinstance(at_object, AT_Mesh):
