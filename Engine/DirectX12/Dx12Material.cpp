@@ -210,7 +210,7 @@ ISerializable *MaterialSerializer::Deserialize(
     ISerializable *pSerializable
 )
 {
-    const byte Version = 4;
+    const byte Version = 5;
 
     struct Header
     {

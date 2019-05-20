@@ -33,7 +33,7 @@ function dragon:_Create()
 
 
    node = Node_Create(Id_Create(), "Sun");
-   node:SetWorldTransform(Transform_Set(Vector_Set(35.35108947753906,34.549835205078125,14.000901222229004), Quaternion_Set(0.0,0.0,0.0,1.0)));
+   node:SetWorldTransform(Transform_Set(Vector_Set(1.0,7.0,-55.0), Quaternion_Set(0.0,0.0,0.0,1.0)));
    light = node:AddComponent(Id_Create(), "DirectionalLightComponent");
    light:Create("Geometry", Vector_Set(1.0,1.0,1.0),1.0);
    node:SetParent(self._node);
@@ -42,6 +42,14 @@ function dragon:_Create()
 
 
 
+   node = Node_Create(Id_Create(), "Sphere");
+   node:SetWorldTransform(Transform_Set(Vector_Set(0.0,10.0,0.0), Quaternion_Set(0.0,0.0,0.0,1.0)));
+   mesh = node:AddComponent(Id_Create(), "MeshRendererComponent");
+   mesh:Create("brdf_sphere.mesh","brdf_sphere.material", "Geometry");
+   node:SetParent(self._node);
+   node:AddToScene();
+   node:Bind();
+--[[
    node = Node_Create(Id_Create(), "dragon_vrip");
    node:SetWorldTransform(Transform_Set(Vector_Set(0.0,0.0,0.0), Quaternion_Set(0.0,0.0,0.0,1.0)));
    mesh = node:AddComponent(Id_Create(), "MeshRendererComponent");
@@ -49,7 +57,7 @@ function dragon:_Create()
    node:SetParent(self._node);
    node:AddToScene();
    node:Bind();
-
+]]
 
 
    self._node:AddToScene();
