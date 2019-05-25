@@ -1,0 +1,12 @@
+Type=Compute   #global for the full material
+
+Pass=LinearZ
+Shader=19B40E34-17EC-49F1-A2D2-4DEDDB44BEED #LinearZ.shader
+
+depthMapEven<SrvBuffer>=DSBuffer
+outTexture<UavBuffer>=LinearZ
+
+params<float4>=$PARAMS
+
+GroupSizeTarget=DSBuffer
+GroupDiv=8,8

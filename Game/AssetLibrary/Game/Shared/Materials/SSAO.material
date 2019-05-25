@@ -1,16 +1,5 @@
 Type=Compute   #global for the full material
 
-Pass=LinearZ
-Shader=19B40E34-17EC-49F1-A2D2-4DEDDB44BEED #SSAOHiZ.shader
-
-depthMapEven<SrvBuffer>=DSBuffer
-outTexture<UavBuffer>=LinearZ
-
-params<float4>=$PARAMS
-
-GroupSizeTarget=DSBuffer
-GroupDiv=8,8
-
 Pass=SSAO
 Shader=5282D043-0FD8-4234-B4B7-C177C5828E82 #SSAO.shader
 

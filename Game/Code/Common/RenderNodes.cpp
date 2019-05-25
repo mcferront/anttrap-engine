@@ -650,11 +650,11 @@ void AddLinearZ(
     )
 {
 
-    ResourceHandle ssaoMaterial( "11574890-6025-46E4-A2C5-87F37DFABA7F" );
+    ResourceHandle linearZ( "FF0399B3-43F7-4867-AE08-6D47D991DD08" );
 
     ResourceHandle computeMaterials[ ] =
     {
-        ssaoMaterial,
+        linearZ,
         NullHandle,
     };
 

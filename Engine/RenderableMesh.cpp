@@ -209,8 +209,8 @@ void RenderableMesh::RenderableSurface::GetRenderData(
 
    uint32 light_mask = 0;
 
-   static const char *pLightMask = StringRef( "$RESSCALE_LIGHTMASK" );
-   if ( m_pMaterial->GetPassData(pDesc->pPass)->GetFloat4MacroIndex(pLightMask) >= 0 )
+   static const char *pHasLights = StringRef( "$LIGHT_DIR" );
+   if ( m_pMaterial->GetPassData(pDesc->pPass)->GetFloat4MacroIndex(pHasLights) >= 0 )
    {
       const Mesh *pMesh = GetResource( model, Mesh );
       
@@ -329,11 +329,10 @@ void RenderableMesh::RenderableSurface::Render(
    Math::Multiply( &vp, viewTransform.ToMatrix(true), projection );
    pPass->GetData()->SetFloat4x4s( pVP, &vp, 1 );
 
-   int res_scale_light_mask_index = pPass->GetData()->GetFloat4MacroIndex(pResScaleLightMask);
+   static const char *pLightsDir = StringRef( "$LIGHT_DIR" );
 
-   if ( res_scale_light_mask_index >= 0 )
+   if ( nullptr != pLightsDir )
    {
-      static const char *pLightsDir = StringRef( "$LIGHT_DIR" );
       static const char *pLightsColor = StringRef( "$LIGHT_COLOR" );
       static const char *pLightsPosType = StringRef( "$LIGHT_POS_TYPE" );
       static const char *pLightsAtten = StringRef( "$LIGHT_ATTEN" );
@@ -342,7 +341,7 @@ void RenderableMesh::RenderableSurface::Render(
       static const char *pShadowView = StringRef( "$SHADOW_VIEW_MATRIX" );
 
       PackedLights *pLights = (PackedLights *) desc.pDesc->buffer.Read( index++ );
-      
+
       if ( light_mask != 0 )
       {
          pPass->GetData()->SetFloat4s( pLightsDir, pLights->light_dir, sizeof(pLights->light_dir) / sizeof(pLights->light_dir[0]) );

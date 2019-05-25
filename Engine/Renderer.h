@@ -159,10 +159,10 @@ struct PackedLights
 {
    Matrix shadowProjMatrix;
    Matrix shadowViewMatrix;
-   Vector light_dir[ 16 ];
-   Vector light_color[ 16 ];
-   Vector light_pos_type[ 16 ];
-   Vector light_atten[ 16 ];
+   Vector light_dir[ 1 ];
+   Vector light_color[ 1 ];
+   Vector light_pos_type[ 1 ];
+   Vector light_atten[ 1 ];
    Vector ambient;
    uint32 num_lights;
 };
