@@ -549,7 +549,7 @@ ISerializable *MaterialSerializer::DeserializeGraphicsMaterial(
 
         uint32 constantBufferSize =
             sizeof(float) * pPass->header.totalFloats +
-            sizeof(float[3]) * pPass->header.totalFloat3s +
+            sizeof(float[4]) * pPass->header.totalFloat3s +
             sizeof(Vector) * pPass->header.totalFloat4s +
             sizeof(Matrix) * pPass->header.totalMatrix4s;
 
@@ -621,7 +621,9 @@ ISerializable *MaterialSerializer::DeserializeGraphicsMaterial(
             pSerializer->GetInputStream( )->Read( &amount, sizeof( amount ) );
 
             pPass->pFloat3s[ c ].offset = offset;
-            offset += amount * sizeof(float[3]);
+            // if it's the last float3 arg, we can set the offset to float3 because the scalar floats following it
+            // will be correctly aligned
+            offset += amount * (c == pPass->header.numFloat3Names - 1) ? sizeof(float[3]) : sizeof(float[4]);
 
             pPass->pFloat3s[ c ].pName = pName;
             pPass->pFloat3s[ c ].pRef = pRef;

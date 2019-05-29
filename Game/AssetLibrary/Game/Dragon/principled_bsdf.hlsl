@@ -59,7 +59,7 @@ PS_INPUT vs_main(VS_INPUT input)
     output.position = position;
     output.normal = mul( float4(input.normal, 0), cb_world ).xyz;
     output.view = normalize(world_pos.xyz - cb_camera_world[3].xyz);
-    
+
     return output;
 }
 
@@ -158,8 +158,8 @@ float3 light_pixel(PS_INPUT input)
     float n_dot_h = saturate(dot(normal, half_vector));
     float v_dot_h = saturate(dot(view_vector, half_vector));
 
-    float roughness = 0.25;//cb_roughness;
-    float specular = .5 / 15;//cb_specular;
+    float roughness = cb_roughness;
+    float specular = cb_specular / 15;
     
     float fresnel = schlick_fresnel(specular, l_dot_h);
     float fD = custom_diffuse_brdf(roughness, n_dot_l);
