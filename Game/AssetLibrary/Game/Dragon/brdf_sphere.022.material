@@ -8,7 +8,7 @@ cb_view_proj<float4x4>=$VP_MATRIX
 cb_camera_world<float4x4>=$CAMERA_WORLD_MATRIX
 
 cb_base_color<float4>=0.800000011920929,0.800000011920929,0.800000011920929,1.0
-cb_subsurface_color<float4>=0.699999988079071,0.10000000149011612,0.10000000149011612,1.0
+cb_subsurface_color<float4>=0.800000011920929,0.800000011920929,0.800000011920929,1.0
 
 cb_light_dir<float4,1>=$LIGHT_DIR
 
@@ -18,9 +18,9 @@ cb_clearcoat_normal<float3>=0.0,0.0,0.0
 cb_tangent<float3>=0.0,0.0,0.0
 
 cb_subsurface<float>=0.0
-cb_metallic<float>=0.0
-cb_specular<float>=0.0
-cb_specular_tint<float>=0.0
+cb_metallic<float>=1.0
+cb_specular<float>=1.0
+cb_specular_tint<float>=1.0
 cb_roughness<float>=0.5
 cb_anisotropic<float>=0.0
 cb_anisotropic_rotation<float>=0.0

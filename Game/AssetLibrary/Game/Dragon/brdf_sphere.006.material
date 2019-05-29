@@ -1,7 +1,7 @@
 # based on blender's principled bsdf #https://docs.blender.org/manual/en/latest/render/cycles/nodes/types/shaders/principled.html
 
 Pass=Forward
-Shader=36B48296-CF38-4FA1-8F5E-9B53AD69C75F #blender_principled_bsdf
+Shader=36B48296-CF38-4FA1-8F5E-9B53AD69C75F
 
 cb_world<float4x4>=$WORLD_MATRIX
 cb_view_proj<float4x4>=$VP_MATRIX

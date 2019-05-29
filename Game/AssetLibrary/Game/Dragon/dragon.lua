@@ -17,7 +17,7 @@ function dragon:_Create()
    self._node:RemoveFromScene();
 
    node = Node_Get("MainCamera");
-   node:SetWorldTransform(Transform_Set(Vector_Set(35.664039611816406,58.84408187866211,-260.0981140136719), Quaternion_Set(0.0,0.0,0.0,1.0)));
+   node:SetWorldTransform(Transform_Set(Vector_Set(35.664039611816406,50.99458312988281,-290.7057189941406), Quaternion_Set(0.0,0.0,0.0,1.0)));
    camera = node:GetComponent("CameraComponent");
    camera:SetFov(0.8575560450553894);
    camera:SetNearClip(0.10000000149011612);
@@ -40,6 +40,47 @@ function dragon:_Create()
    node:AddToScene();
    node:Bind();
 
+
+
+   node = Node_Create(Id_Create(), "brdf_sphere.024");
+   node:SetWorldTransform(Transform_Set(Vector_Set(-18.293560028076172,-9.32406997680664,0.0), Quaternion_Set(0.0,0.0,0.0,1.0)));
+   mesh = node:AddComponent(Id_Create(), "MeshRendererComponent");
+   mesh:Create("brdf_sphere.mesh","brdf_sphere.011.material", "Geometry");
+   node:SetParent(self._node);
+   node:AddToScene();
+   node:Bind();
+
+   node = Node_Create(Id_Create(), "brdf_sphere.023");
+   node:SetWorldTransform(Transform_Set(Vector_Set(7.529406547546387,-9.32406997680664,0.0), Quaternion_Set(0.0,0.0,0.0,1.0)));
+   mesh = node:AddComponent(Id_Create(), "MeshRendererComponent");
+   mesh:Create("brdf_sphere.mesh","brdf_sphere.012.material", "Geometry");
+   node:SetParent(self._node);
+   node:AddToScene();
+   node:Bind();
+
+   node = Node_Create(Id_Create(), "brdf_sphere.012");
+   node:SetWorldTransform(Transform_Set(Vector_Set(32.887184143066406,-9.32406997680664,0.0), Quaternion_Set(0.0,0.0,0.0,1.0)));
+   mesh = node:AddComponent(Id_Create(), "MeshRendererComponent");
+   mesh:Create("brdf_sphere.mesh","brdf_sphere.022.material", "Geometry");
+   node:SetParent(self._node);
+   node:AddToScene();
+   node:Bind();
+
+   node = Node_Create(Id_Create(), "brdf_sphere.011");
+   node:SetWorldTransform(Transform_Set(Vector_Set(58.16260528564453,-9.32406997680664,0.0), Quaternion_Set(0.0,0.0,0.0,1.0)));
+   mesh = node:AddComponent(Id_Create(), "MeshRendererComponent");
+   mesh:Create("brdf_sphere.mesh","brdf_sphere.023.material", "Geometry");
+   node:SetParent(self._node);
+   node:AddToScene();
+   node:Bind();
+
+   node = Node_Create(Id_Create(), "brdf_sphere.001");
+   node:SetWorldTransform(Transform_Set(Vector_Set(83.97831726074219,-9.32406997680664,0.0), Quaternion_Set(0.0,0.0,0.0,1.0)));
+   mesh = node:AddComponent(Id_Create(), "MeshRendererComponent");
+   mesh:Create("brdf_sphere.mesh","brdf_sphere.029.material", "Geometry");
+   node:SetParent(self._node);
+   node:AddToScene();
+   node:Bind();
 
    node = Node_Create(Id_Create(), "brdf_sphere.029");
    node:SetWorldTransform(Transform_Set(Vector_Set(83.97831726074219,110.16429138183594,0.0), Quaternion_Set(0.0,0.0,0.0,1.0)));
@@ -233,22 +274,14 @@ function dragon:_Create()
    node:AddToScene();
    node:Bind();
 
-   node = Node_Create(Id_Create(), "brdf_sphere.001");
+   node = Node_Create(Id_Create(), "brdf_sphere");
    node:SetWorldTransform(Transform_Set(Vector_Set(-18.293560028076172,13.96291732788086,0.0), Quaternion_Set(0.0,0.0,0.0,1.0)));
    mesh = node:AddComponent(Id_Create(), "MeshRendererComponent");
    mesh:Create("brdf_sphere.mesh","brdf_sphere.material", "Geometry");
    node:SetParent(self._node);
    node:AddToScene();
    node:Bind();
---[[
-   node = Node_Create(Id_Create(), "dragon_vrip");
-   node:SetWorldTransform(Transform_Set(Vector_Set(0.0,0.0,0.0), Quaternion_Set(0.0,0.0,0.0,1.0)));
-   mesh = node:AddComponent(Id_Create(), "MeshRendererComponent");
-   mesh:Create("dragon_vrip.mesh","dragon_mat.material", "Geometry");
-   node:SetParent(self._node);
-   node:AddToScene();
-   node:Bind();
-]]
+
 
 
    self._node:AddToScene();

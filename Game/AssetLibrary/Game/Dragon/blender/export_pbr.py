@@ -6,12 +6,12 @@ import mathutils
 from math import radians
 
 g_pass = "Forward"
-g_shader = "36B48296-CF38-4FA1-8F5E-9B53AD69C75F #blender_principled_bsdf"
+g_shader_guid = "36B48296-CF38-4FA1-8F5E-9B53AD69C75F"
 
 g_scene_template_file = "E:\\git\\mcferront\\anttrap-engine\\Game\\AssetLibrary\\Game\\Dragon\\blender\\template.lua"
 g_material_template_file = "E:\\git\\mcferront\\anttrap-engine\\Game\\AssetLibrary\\Game\\Dragon\\blender\\template.material"
 g_output_path = "E:\\git\\mcferront\\anttrap-engine\\Game\\AssetLibrary\\Game\\Dragon\\"
-g_scene_name = "dragon"			
+g_scene_name = "dragon"
 
 g_scene = bpy.context.scene
 g_objects = bpy.context.scene.objects
@@ -39,12 +39,14 @@ class AT_Material:
 	def __init__(self, _material):
 		self.material = _material;
 		self.name = _material.name;
+		self.guid = str(uuid.uuid4()).upper()
 		
 	def export(self, template):
 		node = self.material.node_tree.nodes["Principled BSDF"]
 		template = template.replace("$PASS", g_pass)
-		template = template.replace("$SHADER", g_shader)
+		template = template.replace("$SHADER", g_shader_guid)
 		for input in node.inputs:
+			#print(input.name.upper().replace(" ", "_"));
 			macro_name = "$" + input.name.upper().replace(" ", "_") + "\n"
 			template = template.replace(macro_name, parse_type(input) + "\n");
 		return template
@@ -76,7 +78,7 @@ class AT_Mesh:
 		mesh_blob  = "   node = Node_Create(Id_Create(), \"" + self.mesh.name + "\");\n"
 		mesh_blob += "   node:SetWorldTransform(" + create_engine_transform(self.mesh.location, self.mesh.rotation_quaternion) + ");\n"
 		mesh_blob += "   mesh = node:AddComponent(Id_Create(), \"MeshRendererComponent\");\n"
-		mesh_blob += "   mesh:Create(\"" + self.mesh.name + ".mesh\",\""
+		mesh_blob += "   mesh:Create(\"" + self.mesh.name.split('.')[0] + ".mesh\",\""
 		for m, material in enumerate(self.mesh.data.materials):
 			mesh_blob += material.name + ".material,"
 		mesh_blob = mesh_blob[:-1]
@@ -163,7 +165,7 @@ def gather_hierarchies(path, root):
 	#print(root.type);
 	if len(root.children) == 0:
 		at_object = None;
-		if root.type == 'MESH':
+		if root.type == 'MESH' and root.hide_render == False:
 			at_object = AT_Mesh(path, root)
 		elif root.type == 'LAMP':
 			at_object = AT_Lamp(path, root)
@@ -171,7 +173,7 @@ def gather_hierarchies(path, root):
 			at_object = AT_Camera(path, root)
 
 		if at_object is not None:
-			at_object.print_desc();
+			#at_object.print_desc();
 			at_objects.append(at_object);
 		
 			if isinstance(at_object, AT_Mesh):
@@ -183,6 +185,7 @@ def gather_hierarchies(path, root):
 							at_materials[material.name] = material
 
 						material = at_materials[material.name]
+						#material.print_desc();
 						at_object.materials.append(material)
 	
 def gather_materials():
@@ -235,6 +238,40 @@ print("writing scene...")
 file = open(g_output_path + g_scene_name + ".lua", "w")
 file.write(scene)
 file.close()
+
+unique_meshes = {}
+for o in at_objects:
+	if isinstance(o, AT_Mesh):
+		root_name = o.mesh.name.split('.')[0] + ".mesh"
+		unique_meshes[root_name] = o;
+
+scene_guid = str(uuid.uuid4()).upper();
+
+print("writing ids...")
+file = open(g_output_path + g_scene_name + ".ids", "w")
+
+for k,v in unique_meshes.items():
+	file.write(v.guid + "," + k + "," + k + "\n")
+
+for k,m in at_materials.items():
+	file.write(m.guid + "," + k + ".material," + k + ".material\n")
+
+file.write(scene_guid + "," + g_scene_name + ".lua" + "," + g_scene_name + ".lua" + "\n")
+file.write(g_shader_guid + ",,principled_bsdf.shader" + "\n")
+file.close()
+
+print("writing packagedesc...")
+file = open(g_output_path + g_scene_name + ".packagedesc", "w")
+file.write(scene_guid + "\t#" + g_scene_name + ".lua" + "\n")
+file.write(g_shader_guid + "\t#principled_bsdf.shader" + "\n")
+
+for k,m in at_materials.items():
+	file.write(m.guid + "\t#" + k + "\n")
+
+for k,v in unique_meshes.items():
+	file.write(v.guid + "\t#" + k + "\n")
+file.close()
+
 
 print("done");
 	

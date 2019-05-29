@@ -78,19 +78,6 @@ float ggx_shadowing(float roughness, float v_dot_h, float v_dot_n)
     return x * 2.0 / (1 + sqrt(1 + y));   
 }
 
-/*
-float disney_distribution(float roughness, float n_dot_h)
-{
-    float c = .00000525;
-    
-    float n_dot_h_2 = n_dot_h * n_dot_h;
-    float a2 = roughness * roughness;
-    float d = a2 * n_dot_h_2 + (1 - n_dot_h_2);
-    
-    return c / (d * d);
-}
-*/
-
 float disney_distribution(float roughness, float n_dot_h)
 {
     float n_dot_h_2 = n_dot_h * n_dot_h;
@@ -164,10 +151,11 @@ float3 light_pixel(PS_INPUT input)
     float fresnel = schlick_fresnel(specular, l_dot_h);
     float fD = custom_diffuse_brdf(roughness, n_dot_l);
     float fS = cook_torrence_brdf(roughness, n_dot_h, n_dot_v, n_dot_l, l_dot_h, v_dot_h);
-
+    float3 specColor = lerp( float3(1, 1, 1), cb_base_color.rgb, cb_specular_tint ) * fresnel;
+    
     //float fD = disney_diffuse_brdf(roughness, n_dot_l, n_dot_v, l_dot_h);
     
-    return (cb_base_color.rgb * fD / PI * (1 - fresnel)) + (fresnel * fS);
+    return (cb_base_color.rgb * fD / PI * (1 - fresnel) * (1 - cb_metallic)) + (fS * specColor);
 }
 
 float4 ps_main(PS_INPUT input) : SV_TARGET
