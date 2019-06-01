@@ -19,9 +19,9 @@ cb_tangent<float3>=0.0,0.0,0.0
 
 cb_subsurface<float>=0.0
 cb_metallic<float>=0.0
-cb_specular<float>=1.0
+cb_specular<float>=0.8999999761581421
 cb_specular_tint<float>=0.0
-cb_roughness<float>=0.75
+cb_roughness<float>=0.4000000059604645
 cb_anisotropic<float>=0.0
 cb_anisotropic_rotation<float>=0.0
 cb_sheen<float>=0.0

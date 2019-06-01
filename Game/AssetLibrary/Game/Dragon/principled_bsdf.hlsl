@@ -68,9 +68,9 @@ float ggx_shadowing(float roughness, float v_dot_h, float v_dot_n)
     float a = .5 + roughness * .5;
     float a2 = a * a;
     
-    float x = (v_dot_h / v_dot_n) > 0 ? 1 : 0;//sign(v_dot_h) == sign(v_dot_n) ? 1 : 0;
+    float x = sign(v_dot_h) == sign(v_dot_n) ? 1 : 0;
 
-    float sec_v = 1.0 / v_dot_n;
+    float sec_v = 1.0 / (v_dot_n + .00001);
     float tan2_v = (sec_v * sec_v) - 1;
     
     float y = a2 * tan2_v;
@@ -121,9 +121,9 @@ float custom_diffuse_brdf(float roughness, float n_dot_l)
 float disney_diffuse_brdf(float roughness, float n_dot_l, float n_dot_v, float l_dot_h)
 {
     //https://disney-animation.s3.amazonaws.com/library/s2012_pbs_disney_brdf_notes_v2.pdf
-    float fL = pow(1 - n_dot_l, 1.8); // disney uses 5 (same as schilck approx) - but blender matches if I do ~1.8
-    float fV = pow(1 - n_dot_v, 1.8); // disney uses 5 (same as schilck approx) - but blender matches if I do ~1.8
-    float fd90 = .0 + 2 * roughness * l_dot_h * l_dot_h;
+    float fL = pow(1 - n_dot_l, 5.0); // disney uses 5 (same as schilck approx) - but blender matches if I do ~1.8
+    float fV = pow(1 - n_dot_v, 5.0); // disney uses 5 (same as schilck approx) - but blender matches if I do ~1.8
+    float fd90 = .5 + 2 * roughness * l_dot_h * l_dot_h;
     float rfL = lerp( 1, fd90, fL );//(1 + (fd90 - 1) * fL);
     float rfV = lerp( 1, fd90, fV );//(1 + (fd90 - 1) * fV);
     
@@ -136,7 +136,8 @@ float3 light_pixel(PS_INPUT input)
 {
     float3 normal = normalize(input.normal);
     float3 light_vector = -cb_light_dir[0].xyz;
-    float3 view_vector = - cb_camera_world[2].xyz; //normalize(input.view);//
+    float3 view_vector = -normalize(input.view);
+    //float3 view_vector = -cb_camera_world[2].xyz;
     float3 half_vector = normalize(light_vector + view_vector);
 
     float l_dot_h = saturate(dot(light_vector, half_vector));
@@ -146,15 +147,19 @@ float3 light_pixel(PS_INPUT input)
     float v_dot_h = saturate(dot(view_vector, half_vector));
 
     float roughness = cb_roughness;
-    float specular = cb_specular / 15;
+    float specular = lerp( cb_specular / 10.0, cb_metallic * cb_specular, cb_metallic );
     
     float fresnel = schlick_fresnel(specular, l_dot_h);
     float fD = custom_diffuse_brdf(roughness, n_dot_l);
     float fS = cook_torrence_brdf(roughness, n_dot_h, n_dot_v, n_dot_l, l_dot_h, v_dot_h);
+
+    // the more metallic, the more we need to incoroprate a specular falloff    
+    fS = lerp( fS, fS * (1 - pow(1 - fD, 2)), cb_metallic );
+    
     float3 specColor = lerp( float3(1, 1, 1), cb_base_color.rgb, cb_specular_tint ) * fresnel;
     
     //float fD = disney_diffuse_brdf(roughness, n_dot_l, n_dot_v, l_dot_h);
-    
+
     return (cb_base_color.rgb * fD / PI * (1 - fresnel) * (1 - cb_metallic)) + (fS * specColor);
 }
 
@@ -164,6 +169,8 @@ float4 ps_main(PS_INPUT input) : SV_TARGET
     return float4( color, 1 );
 
 }
+
+
 /*
 float4 ps_main(PS_INPUT input) : SV_TARGET
 {          
@@ -187,3 +194,38 @@ float ggx_distribution(float n_dot_h)
 }
  
 */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

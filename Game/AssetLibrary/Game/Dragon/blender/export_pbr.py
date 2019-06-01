@@ -105,7 +105,7 @@ class AT_Camera:
 		camera_blob  = "   node = Node_Get(\"MainCamera\");\n"
 		camera_blob += "   node:SetWorldTransform(" + create_engine_transform(self.camera.location, self.camera.rotation_quaternion) + ");\n"
 		camera_blob += "   camera = node:GetComponent(\"CameraComponent\");\n"
-		camera_blob += "   camera:SetFov(" + str(self.camera.data.angle) + ");\n"
+		camera_blob += "   camera:SetFov(" + str(self.camera.data.angle_x) + ");\n"
 		camera_blob += "   camera:SetNearClip(" + str(self.camera.data.clip_start) + ");\n"
 		camera_blob += "   camera:SetFarClip(" + str(self.camera.data.clip_end) + ");\n"
 

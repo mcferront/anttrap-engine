@@ -359,8 +359,16 @@ void Camera::UpdateProjection( void ) const
       //which mimics the behavior of max/maya
       if ( true == m_IsPerspective )
       {
-         Math::PerspectiveWH( &m_Projection, m_Width, m_Height, m_NearZ, m_FarZ );
-         Math::PerspectiveWH( &m_ReverseDepthProjection, m_Width, m_Height, m_FarZ, m_NearZ );
+          if ( m_FovX == 0.0f )
+          {
+             Math::PerspectiveWH( &m_Projection, m_Width, m_Height, m_NearZ, m_FarZ );
+             Math::PerspectiveWH( &m_ReverseDepthProjection, m_Width, m_Height, m_FarZ, m_NearZ );
+          }
+          else
+          {
+              Math::Perspective( &m_Projection, m_FovX, m_Aspect, m_NearZ, m_FarZ );
+              Math::Perspective( &m_ReverseDepthProjection, m_FovX, m_Aspect, m_FarZ, m_NearZ );
+          }
       }
       else
       {

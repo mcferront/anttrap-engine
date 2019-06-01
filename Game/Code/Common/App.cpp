@@ -1443,6 +1443,10 @@ void App::SetupRenderers( void )
             hMainCamera.Bind( "MainCamera", pCameraNode );
             m_hMainCamera = hMainCamera;
 
+            Camera *pCamera = pCameraComponent->GetCamera( );
+            pCamera->CreateAsPerspective( Math::DegreesToRadians( 90.0f ), g_scene_buffer_width / (float) g_scene_buffer_height, 1.0f, FarClip );
+            pCamera->SetViewportRect( Vector( 0, 0, 1, 1 ) );
+
             pCameraNode->AddToScene( );
             pCameraNode->Bind( );
         }
@@ -1632,11 +1636,6 @@ void App::SetupDeferredRenderer( void )
                                                             GpuResource::State::RenderTarget, g_scene_buffer_width, g_scene_buffer_height, 1, &ClearColor );
     
     ResourceHandle hMainCamera = ResourceHandle::FromAlias( "MainCamera" );
-    CameraComponent *pCameraComponent = GetResource( hMainCamera, Node )->GetComponent<CameraComponent>( );
-
-    Camera *pCamera = pCameraComponent->GetCamera( );
-    pCamera->CreateAsPerspective( Math::DegreesToRadians( 90.0f ), g_scene_buffer_width / (float) g_scene_buffer_height, 1.0f, FarClip );
-    pCamera->SetViewportRect( Vector( 0, 0, 1, 1 ) );
 
     RenderWorld::Instance( ).AddRenderGroup( GeometryGroup );
     RenderWorld::Instance( ).AddRenderGroup( DebugGraphicsGroup );
@@ -1884,11 +1883,6 @@ void App::SetupForwardRenderer( void )
                                             GpuResource::State::DepthWriteResource, g_scene_buffer_width, g_scene_buffer_height, 1, &Color(0, 0, 0, 0) );
 
     ResourceHandle hMainCamera = ResourceHandle::FromAlias( "MainCamera" );
-    CameraComponent *pCameraComponent = GetResource( hMainCamera, Node )->GetComponent<CameraComponent>( );
-
-    Camera *pCamera = pCameraComponent->GetCamera( );
-    pCamera->CreateAsPerspective( Math::DegreesToRadians( 90.0f ), g_scene_buffer_width / (float) g_scene_buffer_height, 1.0f, FarClip );
-    pCamera->SetViewportRect( Vector( 0, 0, 1, 1 ) );
 
     // shadowmap pass
     {

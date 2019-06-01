@@ -1406,8 +1406,11 @@ void Math::Perspective(
 
    float h = w / aspect;
 
-   w = (2.0f * nearZ) / w;
-   h = (2.0f * nearZ) / h;
+   // Support reverse depth projection
+   float m = Math::Min( nearZ, farZ );
+
+   w = (2.0f * m) / w;
+   h = (2.0f * m) / h;
 
    float q = farZ / (farZ - nearZ);
 
