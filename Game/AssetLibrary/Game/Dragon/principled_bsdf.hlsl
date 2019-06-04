@@ -64,47 +64,63 @@ PS_INPUT vs_main(VS_INPUT input)
 }
 
 float ggx_shadowing(float roughness, float v_dot_h, float v_dot_n)
-{    
+{
     float a = .5 + roughness * .5;
     float a2 = a * a;
     
-    float x = sign(v_dot_h) == sign(v_dot_n) ? 1 : 0;
-
+    if ( sign(v_dot_h) != sign(v_dot_n) )
+        return 0;
+    
     float sec_v = 1.0 / (v_dot_n + .00001);
     float tan2_v = (sec_v * sec_v) - 1;
     
     float y = a2 * tan2_v;
     
-    return x * 2.0 / (1 + sqrt(1 + y));   
+    return 2.0 / (1 + sqrt(1 + y));
 }
 
-float disney_distribution(float roughness, float n_dot_h)
+float disney_gt2_modified_distribution(float roughness, float n_dot_h)
 {
+    if ( n_dot_h <= 0 )
+        return 0;
+    
     float n_dot_h_2 = n_dot_h * n_dot_h;
     
     float a2 = roughness * roughness;
     
-    float d = a2 * n_dot_h_2 + (1 - n_dot_h_2);
+    // using disney's gt2 but including a .6 coefficient
+    // which keeps some specular at the half vector as roughness increases
+    // https://github.com/wdas/brdf/blob/master/src/brdfs/disney.brdf
+    float d = a2 * n_dot_h_2 * .6 + (1 - n_dot_h_2);
     
-    return a2 / (PI * d * d);
+    return a2 / (d * d * PI);
 }
 
 float cook_torrence_brdf(float roughness, float n_dot_h, float n_dot_v, float n_dot_l, float l_dot_h, float v_dot_h)
 {
     roughness = max(.001, roughness * roughness);
-    float d = disney_distribution(roughness, n_dot_h);
+    float d = disney_gt2_modified_distribution(roughness, n_dot_h);
     
     float g1 = ggx_shadowing(roughness, v_dot_h, n_dot_v);
     float g2 = ggx_shadowing(roughness, l_dot_h, n_dot_l);
 
     float g = g1 * g2;
 
-    return (g * d) / (4 * n_dot_v * n_dot_l);
+    return (g * d) / abs(4 * n_dot_v * n_dot_l);
 }
 
-float schlick_fresnel(float specular, float cu)
+// blender users can input [0, 1+] for specular
+// disney has a modified formula to compute the fresnel approx
+float modified_schlick_fresnel(float specular, float cu)
 {
-    float r0 = specular;
+    float theta = pow( 1 - cu, 5 );
+    return lerp( specular * .08, 1, theta );
+}
+
+float schlick_fresnel(float ior, float cu)
+{
+    float r = (1 - ior) / (1 + ior);
+    float r0 = r * r;
     float theta = pow( 1 - cu, 5 );
     
     return r0 + (1 - r0) * theta;
@@ -118,6 +134,95 @@ float custom_diffuse_brdf(float roughness, float n_dot_l)
     return 1 - pow(1 - n_dot_l, distribution);
 }
 
+float3 light_pixel(PS_INPUT input)
+{
+    float3 normal = normalize(input.normal);
+    float3 light_vector = -cb_light_dir[0].xyz;
+    float3 view_vector = -normalize(input.view);
+    float3 half_vector = normalize(light_vector + view_vector);
+
+    float l_dot_h = dot(light_vector, half_vector);
+    float n_dot_l = dot(normal, light_vector);
+    float n_dot_v = dot(normal, view_vector);
+    float n_dot_h = dot(normal, half_vector);
+    float v_dot_h = dot(view_vector, half_vector);
+
+    float metallic = cb_metallic;
+    float roughness = cb_roughness;
+    float specular = cb_specular;
+    
+    float fresnel = modified_schlick_fresnel(specular, l_dot_h);
+    float fD = custom_diffuse_brdf(roughness, n_dot_l);
+    float fS = cook_torrence_brdf(roughness, n_dot_h, n_dot_v, n_dot_l, l_dot_h, v_dot_h);
+    
+    // now some empirically custom tuned values (mostly for metallic materials)
+    {
+        // prior to fresnel save the overall spec accumulation across the surface
+        // the more rough a metallic material the more
+        // we want to distribute its specular across the image
+        float fA = fS * metallic * roughness;
+        
+        fS = fS * fresnel + fA;
+
+        // clamp if we've added any additional roughness specular
+        fS = saturate( fS );
+        
+        // to improve the specular falloff for metallic materials
+        // I incportate the diffuse falloff into the specular based on the metallic parameter
+        fS = lerp( fS, fS * fD, metallic );
+    }
+    
+    fD = fD / PI;
+    fD *= (1 - metallic) * (1 - fresnel);
+
+    // after all this and our slightly custom spec
+    // it's possible we will have fS + fD > 1
+    // so renormalize the values
+    if ( fD + fS > 1 )
+    {    
+        float x0 = min(fD, fS);
+        float x1 = max(fD, fS);
+        float range = 1.0 / (x1 - x0);
+        
+        fD = (fD - x0) * range;
+        fS = (fS - x0) * range;
+    }
+
+    float3 specColor = lerp( float3(1, 1, 1), cb_base_color.rgb, cb_specular_tint );
+    
+    float3 finalDiffuse = cb_base_color.rgb * fD;
+    float3 finalSpec = fS * specColor;
+    
+    return (finalDiffuse + finalSpec);
+}
+
+float4 ps_main(PS_INPUT input) : SV_TARGET
+{          
+    float3 color = light_pixel(input);
+    return float4( color, 1 );
+
+}
+
+
+/*
+
+
+float ggx_distribution(float roughness, float n_dot_h)
+{
+    if (n_dot_h <= 0) return 0.0;
+    
+    float a2 = roughness * roughness;
+
+    float n_dot_h_2 = n_dot_h * n_dot_h;
+    float n_dot_h_4 = n_dot_h_2 * n_dot_h_2;
+
+    float sec_v = 1.0 / n_dot_h;
+    float tan2_v = (sec_v * sec_v) - 1;
+
+    float d = (a2 + tan2_v);
+    
+    return a2 / (PI * n_dot_h_4 * d * d);
+}
 float disney_diffuse_brdf(float roughness, float n_dot_l, float n_dot_v, float l_dot_h)
 {
     //https://disney-animation.s3.amazonaws.com/library/s2012_pbs_disney_brdf_notes_v2.pdf
@@ -132,46 +237,6 @@ float disney_diffuse_brdf(float roughness, float n_dot_l, float n_dot_v, float l
     return fd;
 }
 
-float3 light_pixel(PS_INPUT input)
-{
-    float3 normal = normalize(input.normal);
-    float3 light_vector = -cb_light_dir[0].xyz;
-    float3 view_vector = -normalize(input.view);
-    //float3 view_vector = -cb_camera_world[2].xyz;
-    float3 half_vector = normalize(light_vector + view_vector);
-
-    float l_dot_h = saturate(dot(light_vector, half_vector));
-    float n_dot_l = saturate(dot(normal, light_vector));
-    float n_dot_v = saturate(dot(normal, view_vector));
-    float n_dot_h = saturate(dot(normal, half_vector));
-    float v_dot_h = saturate(dot(view_vector, half_vector));
-
-    float roughness = cb_roughness;
-    float specular = lerp( cb_specular / 10.0, cb_metallic * cb_specular, cb_metallic );
-    
-    float fresnel = schlick_fresnel(specular, l_dot_h);
-    float fD = custom_diffuse_brdf(roughness, n_dot_l);
-    float fS = cook_torrence_brdf(roughness, n_dot_h, n_dot_v, n_dot_l, l_dot_h, v_dot_h);
-
-    // the more metallic, the more we need to incoroprate a specular falloff    
-    fS = lerp( fS, fS * (1 - pow(1 - fD, 2)), cb_metallic );
-    
-    float3 specColor = lerp( float3(1, 1, 1), cb_base_color.rgb, cb_specular_tint ) * fresnel;
-    
-    //float fD = disney_diffuse_brdf(roughness, n_dot_l, n_dot_v, l_dot_h);
-
-    return (cb_base_color.rgb * fD / PI * (1 - fresnel) * (1 - cb_metallic)) + (fS * specColor);
-}
-
-float4 ps_main(PS_INPUT input) : SV_TARGET
-{          
-    float3 color = light_pixel(input);
-    return float4( color, 1 );
-
-}
-
-
-/*
 float4 ps_main(PS_INPUT input) : SV_TARGET
 {          
     return float4(1,1,1,1);

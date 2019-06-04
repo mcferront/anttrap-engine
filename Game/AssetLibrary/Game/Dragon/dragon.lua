@@ -19,7 +19,7 @@ function dragon:_Create()
    node = Node_Get("MainCamera");
    node:SetWorldTransform(Transform_Set(Vector_Set(102.5252685546875,102.11091613769531,-598.2654418945312), Quaternion_Set(0.0,0.0,0.0,1.0)));
    camera = node:GetComponent("CameraComponent");
-   camera:SetFov(0.8575560450553894 / 16.5);
+   camera:SetFov(0.8575560450553894 / 16);
    camera:SetNearClip(0.10000000149011612);
    camera:SetFarClip(1000.0);
    script = node:AddComponent(Id_Create(), "ScriptComponent");
@@ -125,7 +125,7 @@ function dragon:_Create()
    node = Node_Create(Id_Create(), "brdf_sphere.121");
    node:SetWorldTransform(Transform_Set(Vector_Set(-44.80034637451172,-33.81973648071289,0.0), Quaternion_Set(0.0,0.0,0.0,1.0)));
    mesh = node:AddComponent(Id_Create(), "MeshRendererComponent");
-   mesh:Create("brdf_sphere.mesh","brdf_sphere.011.material", "Geometry");
+   mesh:Create("brdf_sphere.mesh","brdf_sphere.126.material", "Geometry");
    node:SetParent(self._node);
    node:AddToScene();
    node:Bind();
