@@ -88,10 +88,13 @@ float disney_gt2_modified_distribution(float roughness, float n_dot_h)
     
     float a2 = roughness * roughness;
     
-    // using disney's gt2 but including a .6 coefficient
-    // which keeps some specular at the half vector as roughness increases
+    // using disney's gt2 but including a .6 coefficient as roughness increases
+    // which keeps some specular at the half vector as it gets more rough
     // https://github.com/wdas/brdf/blob/master/src/brdfs/disney.brdf
-    float d = a2 * n_dot_h_2 * .6 + (1 - n_dot_h_2);
+    float b = a2 * n_dot_h_2;
+    float d = lerp( b, b * .6, roughness );
+
+    d += (1 - n_dot_h_2);
     
     return a2 / (d * d * PI);
 }
@@ -114,7 +117,7 @@ float cook_torrence_brdf(float roughness, float n_dot_h, float n_dot_v, float n_
 float modified_schlick_fresnel(float specular, float cu)
 {
     float theta = pow( 1 - cu, 5 );
-    return lerp( specular * .08, 1, theta );
+    return lerp( specular, 1, theta );
 }
 
 float schlick_fresnel(float ior, float cu)
@@ -149,28 +152,18 @@ float3 light_pixel(PS_INPUT input)
 
     float metallic = cb_metallic;
     float roughness = cb_roughness;
-    float specular = cb_specular;
     
+    //* .08 matches disney/blender's automatic ior conversion
+    float specular = lerp( cb_specular * .08, 1.0, metallic);
+
     float fresnel = modified_schlick_fresnel(specular, l_dot_h);
     float fD = custom_diffuse_brdf(roughness, n_dot_l);
     float fS = cook_torrence_brdf(roughness, n_dot_h, n_dot_v, n_dot_l, l_dot_h, v_dot_h);
     
-    // now some empirically custom tuned values (mostly for metallic materials)
-    {
-        // prior to fresnel save the overall spec accumulation across the surface
-        // the more rough a metallic material the more
-        // we want to distribute its specular across the image
-        float fA = fS * metallic * roughness;
-        
-        fS = fS * fresnel + fA;
-
-        // clamp if we've added any additional roughness specular
-        fS = saturate( fS );
-        
-        // to improve the specular falloff for metallic materials
-        // I incportate the diffuse falloff into the specular based on the metallic parameter
-        fS = lerp( fS, fS * fD, metallic );
-    }
+    // to improve the specular falloff for metallic materials
+    // I incorporate the diffuse falloff into the specular based on the metallic parameter
+    fS = lerp( fS, fS * fD, metallic );
+    fS = fS * fresnel;
     
     fD = fD / PI;
     fD *= (1 - metallic) * (1 - fresnel);
