@@ -1392,25 +1392,10 @@ void Math::Perspective(
    float farZ
 )
 {
-   float w = Math::Tan(fovX / 2.0f);
-
-   //float range = 0.635f; //meters
-  
-   //using the aspect ratio for the 'distance'
-   //gives a nice result consistent with what
-   //we get back from other libraries
-   float distOnLook = aspect; //meters
-  
-   w *= distOnLook;
-   w *= 2.0f;
-
-   float h = w / aspect;
-
-   // Support reverse depth projection
-   float m = Math::Min( nearZ, farZ );
-
-   w = (2.0f * m) / w;
-   h = (2.0f * m) / h;
+   //thx to https://www.scratchapixel.com/lessons/3d-basic-rendering/perspective-and-orthographic-projection-matrix/building-basic-perspective-projection-matrix
+   // for helping me get this working correctly
+   float w = 1.0f / Math::Tan(fovX / 2.0f);
+   float h = w * aspect;
 
    float q = farZ / (farZ - nearZ);
 
