@@ -1,3 +1,13 @@
+# PBR Step 1 is based on a PBR write up located here:
+https://www.trapzz.com/wp-admin/post.php?post=558&action=edit
+
+Anttrap PBR (for step 1)
+https://www.trapzz.com/wp-content/uploads/2019/06/pbr_anttrap_blog.png
+
+Blender Principled BSDF
+https://www.trapzz.com/wp-content/uploads/2019/06/pbr_blender_blog-1012x1024.png
+
+
 # Anttrap Engine
 http://www.trapzz.com
 
