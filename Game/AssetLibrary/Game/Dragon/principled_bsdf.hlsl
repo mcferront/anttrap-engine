@@ -198,65 +198,6 @@ float4 ps_main(PS_INPUT input) : SV_TARGET
 }
 
 
-/*
-
-
-float ggx_distribution(float roughness, float n_dot_h)
-{
-    if (n_dot_h <= 0) return 0.0;
-    
-    float a2 = roughness * roughness;
-
-    float n_dot_h_2 = n_dot_h * n_dot_h;
-    float n_dot_h_4 = n_dot_h_2 * n_dot_h_2;
-
-    float sec_v = 1.0 / n_dot_h;
-    float tan2_v = (sec_v * sec_v) - 1;
-
-    float d = (a2 + tan2_v);
-    
-    return a2 / (PI * n_dot_h_4 * d * d);
-}
-float disney_diffuse_brdf(float roughness, float n_dot_l, float n_dot_v, float l_dot_h)
-{
-    //https://disney-animation.s3.amazonaws.com/library/s2012_pbs_disney_brdf_notes_v2.pdf
-    float fL = pow(1 - n_dot_l, 5.0); // disney uses 5 (same as schilck approx) - but blender matches if I do ~1.8
-    float fV = pow(1 - n_dot_v, 5.0); // disney uses 5 (same as schilck approx) - but blender matches if I do ~1.8
-    float fd90 = .5 + 2 * roughness * l_dot_h * l_dot_h;
-    float rfL = lerp( 1, fd90, fL );//(1 + (fd90 - 1) * fL);
-    float rfV = lerp( 1, fd90, fV );//(1 + (fd90 - 1) * fV);
-    
-    float fd = rfL * rfV;
-    
-    return fd;
-}
-
-float4 ps_main(PS_INPUT input) : SV_TARGET
-{          
-    return float4(1,1,1,1);
-}
-    
-float ggx_distribution(float n_dot_h)
-{
-    float sec_m = 1.0 / n_dot_h;
-    float tan2_m = (sec_m * sec_m) - 1;
-
-    float a = .5 + cb_roughness * .5; //disney scale
-    float a2 = a * a;
-    
-    float x = n_dot_h > 0 ? 1 : 0;
-
-    float numerator = a2 * x;
-    float denominator = PI * pow(n_dot_h, 4) * pow(a2 + tan2_m, 2);
-    
-    return numerator / denominator;  
-}
- 
-*/
-
-
-
-
 
 
 

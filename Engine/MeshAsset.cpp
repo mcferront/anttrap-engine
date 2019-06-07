@@ -222,3 +222,4 @@ void SurfaceSerializer::Read(
     free( pVertices );
     free( pIndices );
 }
+

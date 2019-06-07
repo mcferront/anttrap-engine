@@ -12,6 +12,18 @@
 class GpuBuffer : public GpuResource
 {
 public:
+    void DoCopy(
+        Heap::Type heapType, 
+        State::Type state,
+        uint32 width,
+        uint32 height,
+        uint32 blocks,
+        uint32 remain,
+        uint32 copySize,
+        GpuBuffer *pUpload,
+        const void *pInitialData
+    );
+
     DeclareResourceType(GpuBuffer);
 
     GpuBuffer( void ) 

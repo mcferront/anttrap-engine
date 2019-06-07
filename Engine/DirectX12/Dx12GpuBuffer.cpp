@@ -58,6 +58,7 @@ void GpuBuffer::Create(
     }
     m_ResourceDesc = resourceDesc;
 
+
     D3D12_CLEAR_VALUE clearValue;
 
     if ( NULL != pClearColor )
@@ -65,10 +66,10 @@ void GpuBuffer::Create(
         if ( flags & Flags::RenderTarget )
         {
             clearValue.Format = resourceDesc.Format;
-            clearValue.Color[ 0 ] = pClearColor->r / 255.0f;
-            clearValue.Color[ 1 ] = pClearColor->g / 255.0f;
-            clearValue.Color[ 2 ] = pClearColor->b / 255.0f;
-            clearValue.Color[ 3 ] = pClearColor->a / 255.0f;
+            clearValue.Color[0] = pClearColor->r / 255.0f;
+            clearValue.Color[1] = pClearColor->g / 255.0f;
+            clearValue.Color[2] = pClearColor->b / 255.0f;
+            clearValue.Color[3] = pClearColor->a / 255.0f;
         }
         else
         {
@@ -83,7 +84,7 @@ void GpuBuffer::Create(
         &resourceDesc,
         (D3D12_RESOURCE_STATES) state,
         pClearColor != NULL ? &clearValue : NULL,
-        __uuidof( ID3D12Resource ),
+        __uuidof(ID3D12Resource),
         (void **) &m_pResource
     );
     Debug::Assert( Condition( SUCCEEDED( hr ) ), "CreateCommittedResource: 0x%08x", hr );
@@ -91,6 +92,7 @@ void GpuBuffer::Create(
 
     m_Stride = stride;
     m_IsBuffer = isBuffer;
+
 
     if ( NULL != pInitialData )
     {
@@ -107,25 +109,33 @@ void GpuBuffer::Create(
             GpuBuffer *pUpload = new GpuBuffer;
 
             // 128MB max - I was getting upload resource creation failing at larger sizes
-            uint32_t size = width * height;
-            const uint32_t copySize = Math::Min( size, 128 * 1024 * 1024 ); 
+            uint32 size = width * height;
+            const uint32 copySize = Math::Min( size, 128 * 1024 * 1024 );
 
-            uint32_t blocks = size / copySize;
-            uint32_t remain = size % copySize;
+            uint32 blocks = size / copySize;
+            uint32 remain = size % copySize;
 
             pUpload->Create( Heap::Upload, GpuResource::State::GenericRead, GpuResource::Flags::None,
                 GpuResource::Format::Unknown, copySize, 1, 1, 0, 1, true, NULL, NULL );
+
             {
-                for ( uint32_t i = 0; i <= blocks; i++ )
+                // This should be a for loop - but there is a compiler bug for opt build w/ VS 2K17
+                // and if we do the "for ( uint32 i = 0; i <= blocks; i++ )" the 
+                // if ( i == blocks && remain == 0 ) isn't properly checked and always early exits
+                // from the diassem it looks like it's only testing for 'remain == 0'
+                // I know whoever reads this won't believe me - but it's true
+                uint32 i = 0;
+
+                while ( true )
                 {
                     if ( i == blocks && remain == 0 )
                         break;
 
                     // last iteration just copy remaining
-                    uint32_t num_bytes = i < blocks ? copySize : remain;
+                    uint32 num_bytes = i < blocks ? copySize : remain;
 
-                    void *pMappedData = pUpload->Map( );                    
-                        memcpy( pMappedData, (byte *) pInitialData + blocks * i, num_bytes );
+                    void *pMappedData = pUpload->Map( );
+                    memcpy( pMappedData, (byte *) pInitialData + blocks * i, num_bytes );
                     pUpload->Unmap( );
 
                     GpuDevice::CommandList *pCommandList = GpuDevice::Instance( ).AllocThreadCommandList( );
@@ -135,6 +145,8 @@ void GpuBuffer::Create(
                     this->TransitionTo( pCommandList, state );
 
                     GpuDevice::Instance( ).ExecuteCommandLists( &pCommandList, 1, true );
+
+                    ++i;
                 }
             }
             pUpload->Destroy( );
@@ -143,6 +155,8 @@ void GpuBuffer::Create(
         }
     }
 }
+
+
 
 GpuDevice::UnorderedAccessView *GpuBuffer::GetUav( void )
 {
@@ -249,7 +263,7 @@ void GpuBuffer::BuildSrvDesc(
 }
 
 void GpuBuffer::BuildUavDesc(
-    D3D12_UNORDERED_ACCESS_VIEW_DESC *pDesc 
+    D3D12_UNORDERED_ACCESS_VIEW_DESC *pDesc
 )
 {
     D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc = { };
@@ -303,23 +317,23 @@ void GpuBuffer::BuildDsvDesc(
     *pDesc = desc;
 }
 
- void GpuBuffer::Create(
-     ID3D12Resource *pResource,
-     State::Type state
- )
- {
-     GpuResource::Create( state );
+void GpuBuffer::Create(
+    ID3D12Resource *pResource,
+    State::Type state
+)
+{
+    GpuResource::Create( state );
 
-     m_pUAV = NULL;
-     m_pSRV = NULL;
-     m_pDSV = NULL;
-     m_pRTV = NULL;
+    m_pUAV = NULL;
+    m_pSRV = NULL;
+    m_pDSV = NULL;
+    m_pRTV = NULL;
 
-     m_pResource = pResource;
+    m_pResource = pResource;
 
-     if (m_pResource != NULL)
-         m_pResource->AddRef();
- }
+    if ( m_pResource != NULL )
+        m_pResource->AddRef( );
+}
 
 void GpuBuffer::SwapApiResource(
     ID3D12Resource *pResource,
