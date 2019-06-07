@@ -1,5 +1,5 @@
 # PBR Step 1 is based on a PBR write up located here:
-https://www.trapzz.com/wp-admin/post.php?post=558&action=edit
+http://www.trapzz.com/?page_id=558
 
 Anttrap PBR (for step 1)
 ![alt text](https://www.trapzz.com/wp-content/uploads/2019/06/pbr_anttrap_blog.png)
