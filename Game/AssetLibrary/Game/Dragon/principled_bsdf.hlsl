@@ -114,6 +114,7 @@ float cook_torrence_brdf(float roughness, float n_dot_h, float n_dot_v, float n_
 
 // blender users can input [0, 1+] for specular
 // disney has a modified formula to compute the fresnel approx
+// https://github.com/wdas/brdf/blob/master/src/brdfs/disney.brdf
 float modified_schlick_fresnel(float specular, float cu)
 {
     float theta = pow( 1 - cu, 5 );
