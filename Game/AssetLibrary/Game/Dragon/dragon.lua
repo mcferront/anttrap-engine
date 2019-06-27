@@ -19,7 +19,7 @@ function dragon:_Create()
    node = Node_Get("MainCamera");
    node:SetWorldTransform(Transform_Set(Vector_Set(102.5252685546875,102.11091613769531,-598.2654418945312), Quaternion_Set(0.0,0.0,0.0,1.0)));
    camera = node:GetComponent("CameraComponent");
-   camera:SetFov(0.8726646304130554);
+   camera:SetFov(0.8575560450553894);
    camera:SetNearClip(0.10000000149011612);
    camera:SetFarClip(1000.0);
    script = node:AddComponent(Id_Create(), "ScriptComponent");

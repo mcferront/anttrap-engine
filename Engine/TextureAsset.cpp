@@ -56,6 +56,9 @@ ISerializable *TextureSerializer::Deserialize(
     case MAKEFOURCC( 'D', 'X', 'T', '5' ):
         format = DXGI_FORMAT_BC3_UNORM;
         break;
+    case 116: //D3DFMT_A32B32G32R32F:
+        format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+        break;
 
     default:
         Debug::Assert( Condition( false ), "Unsupported texture format" );

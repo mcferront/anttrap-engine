@@ -3,6 +3,14 @@
 Pass=Forward
 Shader=36B48296-CF38-4FA1-8F5E-9B53AD69C75F
 
+envMap<sampler>=46E817C6-2BCA-4354-8CA6-C3E006A6309B
+envMap<filter>=Bilinear
+envMap<address>=Clamp
+
+brdfLut<sampler>=B3AB969F-DA7E-4C91-9B75-4B30FDE48ADC
+brdfLut<filter>=Bilinear
+brdfLut<address>=Clamp
+
 cb_world<float4x4>=$WORLD_MATRIX
 cb_view_proj<float4x4>=$VP_MATRIX
 cb_camera_world<float4x4>=$CAMERA_WORLD_MATRIX

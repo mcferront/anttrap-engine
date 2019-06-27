@@ -7,6 +7,8 @@ from math import radians
 
 g_pass = "Forward"
 g_shader_guid = "36B48296-CF38-4FA1-8F5E-9B53AD69C75F"
+g_envmap_guid = "46E817C6-2BCA-4354-8CA6-C3E006A6309B"
+g_brdf_lut_guid = "B3AB969F-DA7E-4C91-9B75-4B30FDE48ADC"
 
 g_scene_template_file = "E:\\git\\mcferront\\anttrap-engine\\Game\\AssetLibrary\\Game\\Dragon\\blender\\template.lua"
 g_material_template_file = "E:\\git\\mcferront\\anttrap-engine\\Game\\AssetLibrary\\Game\\Dragon\\blender\\template.material"
@@ -45,6 +47,8 @@ class AT_Material:
 		node = self.material.node_tree.nodes["Principled BSDF"]
 		template = template.replace("$PASS", g_pass)
 		template = template.replace("$SHADER", g_shader_guid)
+		template = template.replace("$ENVMAP", g_envmap_guid)
+		template = template.replace("$BRDF_LUT", g_brdf_lut_guid)
 		for input in node.inputs:
 			#print(input.name.upper().replace(" ", "_"));
 			macro_name = "$" + input.name.upper().replace(" ", "_") + "\n"
@@ -258,12 +262,16 @@ for k,m in at_materials.items():
 
 file.write(scene_guid + "," + g_scene_name + ".lua" + "," + g_scene_name + ".lua" + "\n")
 file.write(g_shader_guid + ",,principled_bsdf.shader" + "\n")
+file.write(g_envmap_guid + ",,rnl_probe.tif" + "\n")
+file.write(g_brdf_lut_guid + ",,ibl_brdf_lut.png" + "\n")
 file.close()
 
 print("writing packagedesc...")
 file = open(g_output_path + g_scene_name + ".packagedesc", "w")
 file.write(scene_guid + "\t#" + g_scene_name + ".lua" + "\n")
 file.write(g_shader_guid + "\t#principled_bsdf.shader" + "\n")
+file.write(g_envmap_guid + "\t#rnl_probe.tif" + "\n")
+file.write(g_brdf_lut_guid + "\t#ibl_brdf_lut.png" + "\n")
 
 for k,m in at_materials.items():
 	file.write(m.guid + "\t#" + k + "\n")
