@@ -4,18 +4,9 @@ RWTexture2D<float3> g_hdr : register(u0);
 
 SamplerState g_input_sampler : register(s0);
 
-cbuffer cb0 : register(b0)
-{
-   float4 g_params;
-};
-
 [numthreads(8, 8, 1)]
 void cs_composite(uint3 dispatch_thread_id : SV_DispatchThreadID )   
 {
-   const float focal_start = g_params.x;
-   const float focal_end = g_params.y;
-   const float near_pow = g_params.z;
-   const float coc_blend = g_params.w;
    
    int2 d_pixel = dispatch_thread_id.xy;
    
@@ -30,31 +21,17 @@ void cs_composite(uint3 dispatch_thread_id : SV_DispatchThreadID )
 
    float4 dof_near = g_dof_map.SampleLevel( g_input_sampler, near_uv, 0 );
    
-   float3 color;
+   float3 color = g_hdr[ d_pixel ];
    
    if ( coc > 0 )
    {
       float4 far_color = g_dof_map.SampleLevel( g_input_sampler, far_uv, 0 );
-      color = far_color.rgb;
-      
-      // lerp based on coc if a soft blend is needed
-      // but that will cause some haloing
-      if ( coc_blend > 0 )
-      {
-         color = g_hdr[ d_pixel ];
-         color = lerp( color, far_color.rgb, min(coc * coc_blend, 1) );
-      }
+      color = lerp( color, far_color.rgb, coc );
    }
-   else
-      color = g_hdr[ d_pixel ];
 
    {
 
-      // if there is any far coc, don't ramp our near alpha because it could cause
-      // focal pixels bleeding and 'haloing' around the far blur
-      float alpha = coc == 0 ? 1.0 - pow( (1.0 - dof_near.a), near_pow ) : dof_near.a;
-      
-      alpha = alpha * (1.0 - coc); // fade the more we're going into far blur territory
+      float alpha = dof_near.a * (1.0 - coc); // fade the more we're going into far blur territory
       color = lerp( color, dof_near.rgb, alpha );
    }
    

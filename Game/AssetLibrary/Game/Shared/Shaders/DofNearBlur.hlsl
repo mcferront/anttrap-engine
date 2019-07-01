@@ -77,7 +77,7 @@ float4 blur(float2 pixel, uint2 resolution, float kernel_size)
       }
    }
 
-   blur_color *= (1.0f / valid_count);
+   blur_color /= valid_count;
 
    return blur_color;
 }
@@ -145,17 +145,16 @@ void cs_blur(uint3 group_thread_id : SV_GroupThreadID, uint3 dispatch_thread_id 
    
    const float2 pixel = dispatch_thread_id.xy + .5;
    
-   const float2 blur_directions[3] = 
+   const float2 blur_directions[] = 
    {
-     float2(0, 0),
-     float2(1, 0),
-     float2(0, 1),
+       float2(1, 0),
+       float2(0, 1),
    };
 
    if ( type == 0 )
       g_output[ pixel ] = blur(pixel, resolution, near_kernel);
    else
-      g_output[ pixel ] = blur_gauss(pixel, resolution, blur_directions[type], 1);
+      g_output[ pixel ] = blur_gauss(pixel, resolution, blur_directions[type - 1], 1);
 }
 
 

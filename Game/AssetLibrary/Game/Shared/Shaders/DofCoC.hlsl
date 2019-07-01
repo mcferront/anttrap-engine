@@ -33,16 +33,19 @@ cbuffer cb0 : register(b0)
 #define THREADS_X    8
 #define THREADS_Y    8
 
-float2 compute_coc( float focal_start, float focal_end, float depth )
+float2 compute_coc( float focal_start, float focal_end, float near_transition, float far_transition, float depth )
 {
-   float2 coc;
+    float2 coc;
    
    const float eps = .0000001;
    
-   coc.x = max( 0.0, 1.0 - depth / (focal_start + eps) );    // bigger blur farther away from start plane
-   coc.y = max( 0.0, (depth - focal_end) / (depth + eps));
+    float local_near_depth = max( 0, focal_start - depth );
+    coc.x = local_near_depth / (near_transition + eps);
+    coc.x = min( coc.x, 1 );
    
-   coc.y = 1 - pow( 1 - coc.y, 2 );
+    float local_far_depth = max( 0, depth - focal_end );
+    coc.y = local_far_depth / (far_transition + eps);
+    coc.y = min( coc.y, 1 );
 
    return coc;
 }
@@ -52,6 +55,9 @@ void cs_coc(uint3 group_thread_id : SV_GroupThreadId, uint3 dispatch_thread_id :
 {
    const float focal_start = g_dof_params.x;
    const float focal_end = g_dof_params.y;
+   const float near_transition = g_dof_params.z;
+   const float far_transition = g_dof_params.w;
+
    const uint2 d_pixel = dispatch_thread_id.xy;
    
    int2 dispatch_res;
@@ -63,7 +69,7 @@ void cs_coc(uint3 group_thread_id : SV_GroupThreadId, uint3 dispatch_thread_id :
    float2 scale = linear_z_res / float2(dispatch_res);
 
    float depth = g_linear_z[ d_pixel * scale ];
-   float2 coc = compute_coc( focal_start, focal_end, depth );
+   float2 coc = compute_coc( focal_start, focal_end, near_transition, far_transition, depth );
    
    // write to full resolution coc
    g_coc[ d_pixel ] = coc.y;
@@ -80,13 +86,11 @@ void cs_coc(uint3 group_thread_id : SV_GroupThreadId, uint3 dispatch_thread_id :
       float2 dof_pixel = d_pixel * .5;
       
       // near coc
-      g_dof[ dof_pixel ] = float4( color, coc.x > 0 ? 1 : 0 );
+      g_dof[ dof_pixel ] = float4( color, coc.x );
       
       // far coc
-      g_dof[ dof_pixel + int2(dof_res.x * .5, 0) ] = float4( color, coc.y > 0 ? 1 : 0 );
+      g_dof[ dof_pixel + int2(dof_res.x * .5, 0) ] = float4( color, coc.y );
    }
-
-   g_coc[ d_pixel ] = coc.y;
 }
 
 

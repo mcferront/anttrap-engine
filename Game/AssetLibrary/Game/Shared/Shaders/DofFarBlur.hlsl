@@ -116,21 +116,23 @@ float4 blur(float coc, float2 pixel, uint2 resolution, float kernel_size)
    // this prevents haloing when bilinear samples take in a blur and non blur pixel
    float4 blur_color = color[ 0 ];
 
-   int valid_count = 1;
+    float valid_count = 2;
+
+    // a little extra wait for our center color
+    // helps prevents holes in the middle
+    blur_color *= valid_count;
    
    for ( i = 1; i < total_colors; i++ )
    {
-      if ( color[ i ].a == 1 )
-      {
-         blur_color += color[i];
-         valid_count++;
-      }
+      blur_color += (color[i] * color[i].a);
+      valid_count += color[i].a;
    }
 
    blur_color /= valid_count;
 
    // this pixel has blur
-   // so guarantee its alpha is maintained
+    // mark it as such (with the alpha) so the gauss blur passes
+    // will make sure to incorporate it
    blur_color.a = 1;
   
    return blur_color;
@@ -156,9 +158,10 @@ float4 blur_gauss(float coc, float2 pixel, uint2 resolution, float2 direction, f
    
    color[ 0 ] = g_input.SampleLevel( g_input_sampler, pixel / resolution, 0 );
    
-   if ( coc == 0 )
+   if ( color[ 0 ].a != 1 )
       return color[ 0 ];
 
+    dist *= coc;
    float2 off1 = float2(1.411764705882353, 1.411764705882353) * direction * dist;
    float2 off2 = float2(3.2941176470588234, 3.2941176470588234) * direction * dist;
    float2 off3 = float2(5.176470588235294, 5.176470588235294) * direction * dist;
@@ -188,7 +191,8 @@ float4 blur_gauss(float coc, float2 pixel, uint2 resolution, float2 direction, f
       blur_color += (color[ i ].a == 1 ? color[ i ] : float4(avg_color, color[i].a)) * weights[ i ];
 
    // this pixel has blur
-   // so guarantee its alpha is maintained
+    // mark it as such (with the alpha) so the gauss blur passes
+    // will make sure to incorporate it
    blur_color.a = 1;
 
    return blur_color;
@@ -214,7 +218,6 @@ void cs_blur(uint3 group_thread_id : SV_GroupThreadID, uint3 dispatch_thread_id 
    
    const float2 blur_directions[] = 
    {
-      float2(0, 0),
       float2(1, 0),
       float2(0, 1),
    };
@@ -223,7 +226,7 @@ void cs_blur(uint3 group_thread_id : SV_GroupThreadID, uint3 dispatch_thread_id 
    if ( type == 0 )
       g_output[ dof_pixel ] = blur(coc, dof_pixel, resolution, far_kernel);
    else //gaussian out bokeh
-      g_output[ dof_pixel ] = blur_gauss(coc, dof_pixel, resolution, blur_directions[type], 1);
+      g_output[ dof_pixel ] = blur_gauss(coc, dof_pixel, resolution, blur_directions[type - 1], 1);
 }
 
    

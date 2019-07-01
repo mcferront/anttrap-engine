@@ -266,18 +266,18 @@ void DofProc(
     static const char *pSource = StringRef( "$SOURCE" );
     static const char *pDest = StringRef( "$DEST" );
 
-    static RegistryFloat near_kernel( "dof.near_kernel", 5.0f );
+    static RegistryFloat near_kernel( "dof.near_kernel", 2.0f );
     static RegistryFloat far_kernel( "dof.far_kernel", 15.0f );
     static RegistryFloat focal_plane_start( "dof.focal_plane_start", 40.0f );
     static RegistryFloat focal_plane_end( "dof.focal_plane_end", 150.0f );
-    static RegistryFloat dof_near_pow( "dof.near_pow", 4.0f );
-    static RegistryFloat coc_near_blend( "dof.coc_blend", 0.0f );
+    static RegistryFloat near_transition( "dof.near_transition", 1.0f );
+    static RegistryFloat far_transition( "dof.far_transition", 15.0f );
 
     ComputeMaterialObject::Pass *pPass = pCompute->GetPass( renderContext );
 
     if ( pSplitPlanes == pPass->GetData( )->GetName( ) )
     {
-        Vector dof( focal_plane_start.GetValue( ), focal_plane_end.GetValue( ) );
+        Vector dof( focal_plane_start.GetValue( ), focal_plane_end.GetValue( ), near_transition.GetValue(), far_transition.GetValue() );
         pPass->GetData( )->SetMacro( pParams, &dof, 1 );
     }
     else if ( pDofFar == pPass->GetData( )->GetName( ) )
@@ -332,8 +332,6 @@ void DofProc(
     }
     else if ( pDofComposite == pPass->GetData( )->GetName( ) )
     {
-        Vector dof( focal_plane_start.GetValue( ), focal_plane_end.GetValue( ), dof_near_pow.GetValue( ), coc_near_blend.GetValue() );
-        pPass->GetData( )->SetMacro( pParams, &dof, 1 );
     }
 }
 
