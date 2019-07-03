@@ -92,6 +92,11 @@ void GpuBuffer::Create(
 
     m_Stride = stride;
     m_IsBuffer = isBuffer;
+    
+    m_UavFormat = format;
+    m_SrvFormat = format;
+    m_RtvFormat = format;
+    m_DsvFormat = format;
 
 
     if ( NULL != pInitialData )
@@ -241,11 +246,7 @@ void GpuBuffer::BuildSrvDesc(
     {
         srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
         srvDesc.Texture2D.MipLevels = m_ResourceDesc.MipLevels;
-
-        if ( m_ResourceDesc.Format == DXGI_FORMAT_R32_TYPELESS )
-            srvDesc.Format = DXGI_FORMAT_R32_FLOAT;
-        else
-            srvDesc.Format = m_ResourceDesc.Format;
+        srvDesc.Format = (DXGI_FORMAT) m_SrvFormat;
 
         if ( m_IsBuffer )
         {
@@ -270,7 +271,7 @@ void GpuBuffer::BuildUavDesc(
     {
         Debug::Assert( Condition( m_ResourceDesc.Flags & GpuResource::Flags::UnorderedAccess ), "UnorderedAccessView was not one of the flags" );
 
-        uavDesc.Format = m_ResourceDesc.Format;
+        uavDesc.Format = (DXGI_FORMAT) m_UavFormat;
 
         if ( m_IsBuffer )
         {
@@ -293,7 +294,7 @@ void GpuBuffer::BuildRtvDesc(
 {
     D3D12_RENDER_TARGET_VIEW_DESC desc = {};
     {
-        desc.Format = m_ResourceDesc.Format;
+        desc.Format = (DXGI_FORMAT) m_RtvFormat;
         desc.ViewDimension = m_ResourceDesc.SampleDesc.Count > 1 ? D3D12_RTV_DIMENSION_TEXTURE2DMS : D3D12_RTV_DIMENSION_TEXTURE2D;
     }
 
@@ -306,11 +307,7 @@ void GpuBuffer::BuildDsvDesc(
 {
     D3D12_DEPTH_STENCIL_VIEW_DESC desc = { };
     {
-        if ( m_ResourceDesc.Format == DXGI_FORMAT_R32_TYPELESS )
-            desc.Format = DXGI_FORMAT_D32_FLOAT;
-        else
-            desc.Format = m_ResourceDesc.Format;
-
+        desc.Format = (DXGI_FORMAT) m_DsvFormat;
         desc.ViewDimension = m_ResourceDesc.SampleDesc.Count > 1 ? D3D12_DSV_DIMENSION_TEXTURE2DMS : D3D12_DSV_DIMENSION_TEXTURE2D;
     }
 
@@ -389,11 +386,20 @@ ResourceHandle GpuBuffer::CreateTexture(
     size_t height,
     uint32 mipLevels, // = 1
     const Color *pClearColor, // = NULL
-    uint32 sampleCount // = 1
-)
+    uint32 sampleCount, // = 1,
+    GpuResource::Format::Type srvFormat, // = Unknown,
+    GpuResource::Format::Type uavFormat, // = Unknown,
+    GpuResource::Format::Type rtvFormat, // = Unknown,
+    GpuResource::Format::Type dsvFormat // = Unknown
+    )
 {
     GpuBuffer *pBuffer = new GpuBuffer;
     pBuffer->Create( GpuResource::Heap::Default, state, flags, format, width, height, sampleCount, -1, mipLevels, false, pClearColor );
+
+    pBuffer->m_UavFormat = uavFormat == Format::Unknown ? format : uavFormat;
+    pBuffer->m_SrvFormat = srvFormat == Format::Unknown ? format : srvFormat;
+    pBuffer->m_RtvFormat = rtvFormat == Format::Unknown ? format : rtvFormat;
+    pBuffer->m_DsvFormat = dsvFormat == Format::Unknown ? format : dsvFormat;
 
     ResourceHandle handle( id );
 

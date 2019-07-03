@@ -7,6 +7,10 @@ envMap<sampler>=46E817C6-2BCA-4354-8CA6-C3E006A6309B
 envMap<filter>=Bilinear
 envMap<address>=Clamp
 
+diffIBL<sampler>=8DDAFB8A-180F-4EB0-A6F8-B2720A4630DA
+diffIBL<filter>=Bilinear
+diffIBL<address>=Clamp
+
 brdfLut<sampler>=B3AB969F-DA7E-4C91-9B75-4B30FDE48ADC
 brdfLut<filter>=Bilinear
 brdfLut<address>=Clamp

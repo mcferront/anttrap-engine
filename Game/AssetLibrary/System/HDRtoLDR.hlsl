@@ -19,6 +19,20 @@ float3 Sigmoidal( float3 color )
    return (pow_color_b / (pow(lm / a, b) + pow_color_b));
 }
 
+// filip strugar for these conversion routines
+float LINEAR_to_SRGB( float val )
+{
+    if( val < 0.0031308 )
+        val *= float( 12.92 );
+    else
+        val = float( 1.055 ) * pow( abs( val ), float( 1.0 ) / float( 2.4 ) ) - float( 0.055 );
+    return val;
+}
+float3 LINEAR_to_SRGB( float3 val )
+{
+    return float3( LINEAR_to_SRGB( val.x ), LINEAR_to_SRGB( val.y ), LINEAR_to_SRGB( val.z ) );
+}
+
 [numthreads(8, 8, 1)]
 void cs_main(uint3 dispatchThreadId : SV_DispatchThreadID )   
 {
@@ -38,7 +52,9 @@ void cs_main(uint3 dispatchThreadId : SV_DispatchThreadID )
          output.rgb = Sigmoidal(output.rgb);
    }
    output.a = 1.0;
-   g_outTexture[ dispatchThreadId.xy ] =  pow(output, 1 / 2.2);
+   output.rgb = LINEAR_to_SRGB(output.rgb);
+   
+   g_outTexture[ dispatchThreadId.xy ] =  output;
 }
 
 

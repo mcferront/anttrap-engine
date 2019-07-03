@@ -100,13 +100,19 @@ private:
 private:
     D3D12_RESOURCE_DESC m_ResourceDesc;
 
+    Format::Type m_UavFormat;
+    Format::Type m_SrvFormat;
+    Format::Type m_RtvFormat;
+    Format::Type m_DsvFormat;
+
     uint32 m_Stride;
-    bool m_IsBuffer;
 
     GpuDevice::UnorderedAccessView *m_pUAV;
     GpuDevice::ShaderResourceView *m_pSRV;
     GpuDevice::DepthStencilView *m_pDSV;
     GpuDevice::RenderTargetView *m_pRTV;
+
+    bool m_IsBuffer;
 
 public:
     static ResourceHandle CreateBuffer(
@@ -127,7 +133,11 @@ public:
         size_t height,
         uint32 mipLevels = 1,
         const Color *pClearColor = NULL,
-        uint32 sampleCount = 1
+        uint32 sampleCount = 1,
+        Format::Type srvFormat = Format::Unknown,
+        Format::Type uavFormat = Format::Unknown,
+        Format::Type rtvFormat = Format::Unknown,
+        Format::Type dsvFormat = Format::Unknown
     );
 };
 

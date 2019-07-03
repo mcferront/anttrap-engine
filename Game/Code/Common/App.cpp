@@ -165,7 +165,7 @@ void TonemapProc(
     static const char *pTechnique = StringRef( "$TONEMAP" );
 
     static RegistryInt method( "tonemap.method" );
-    static RegistryFloat exposure( "tonemap.target_exposure", .1f );
+    static RegistryFloat exposure( "tonemap.target_exposure", 1.5f );
     static RegistryFloat filter( "tonemap.filter", .05f );
 
     Vector params( (float) method.GetValue( ), exposure.GetValue( ), filter.GetValue( ), 0.0f );
@@ -731,7 +731,8 @@ void App::Create(
 
     RegistryBool deferred( "Render/deferred", false, RebuildRenderer );
     RegistryBool depth_prepass( "Render/depth_prepass", true, RebuildRenderer );
-    RegistryInt method( "tonemap.method", 1 );
+    RegistryInt method( "tonemap.method" );
+    method.SetValue( 1 );
 
     RegistryInt hdr_width( "Render/hdr_width", 0, -INT_MAX, INT_MAX, RebuildRenderer );
     RegistryInt hdr_height( "Render/hdr_height", 0, -INT_MAX, INT_MAX, RebuildRenderer );
@@ -1511,13 +1512,13 @@ void App::SetupRenderers( void )
                                                                 GpuResource::State::RenderTarget, hdr_width.GetValue( ), hdr_height.GetValue( ), 1, &ClearColor  );
 
         ResourceHandle ldrTarget = GpuBuffer::CreateTexture( "LDRTarget", GpuResource::Format::LDR, (GpuResource::Flags::Type) (GpuResource::Flags::RenderTarget | GpuResource::Flags::UnorderedAccess), 
-                                                                GpuResource::State::RenderTarget, windowWidth, windowHeight, 1, &ClearColor );
+                                                                GpuResource::State::RenderTarget, windowWidth, windowHeight, 1, &ClearColor, 1, GpuBuffer::Format::LDR_SRGB, GpuBuffer::Format::LDR, GpuBuffer::Format::LDR_SRGB );
 
         ResourceHandle shadowMapTarget = GpuBuffer::CreateTexture( "MainShadowMap", GpuResource::Format::ShadowMap, GpuResource::Flags::RenderTarget, 
                                                                 GpuResource::State::RenderTarget, g_shadow_width, g_shadow_height, 1, &Color( INT_MAX, INT_MAX, INT_MAX, INT_MAX ) );
 
         ResourceHandle shadowMapDepthStencil = GpuBuffer::CreateTexture( "MainShadowMapDS", GpuResource::Format::Depth, GpuResource::Flags::DepthStencil,
-                                                                GpuResource::State::DepthWriteResource, g_shadow_width, g_shadow_height, 1, &Color(0, 0, 0, 0) );
+                                                                GpuResource::State::DepthWriteResource, g_shadow_width, g_shadow_height, 1, &Color(0, 0, 0, 0), 1, GpuBuffer::Format::Float, GpuBuffer::Format::Float, GpuBuffer::Format::Float, GpuBuffer::Format::DepthFloat );
         
         ResourceHandle hiZBuffer = GpuBuffer::CreateTexture( "HiZBuffer", GpuResource::Format::LinearZ, GpuResource::Flags::UnorderedAccess, 
                                                                 GpuResource::State::UnorderedAccess, HiZMipRes, HiZMipRes, HiZMipLevels );
@@ -1618,7 +1619,7 @@ void App::SetupDeferredRenderer( void )
     ResourceHandle hdrTarget = ResourceHandle( Id::Id( "MainHDRTarget" ) );
 
     m_DSBuffer = GpuBuffer::CreateTexture( "DSBuffer", GpuResource::Format::Depth, GpuResource::Flags::DepthStencil, 
-                                                GpuResource::State::DepthWriteResource, g_scene_buffer_width, g_scene_buffer_height, 1, &Color(0, 0, 0, 0) );
+                                                GpuResource::State::DepthWriteResource, g_scene_buffer_width, g_scene_buffer_height, 1, &Color(0, 0, 0, 0), 1, GpuBuffer::Format::Float, GpuBuffer::Format::Float, GpuBuffer::Format::Float, GpuBuffer::Format::DepthFloat  );
 
     ResourceHandle opaqueRt = GpuBuffer::CreateTexture( "OpaqueRT" , GpuResource::Format::OpaqueBuffer, GpuResource::Flags::RenderTarget, 
                                                             GpuResource::State::RenderTarget, g_scene_buffer_width, g_scene_buffer_height, 1, &ClearColor );
@@ -1880,7 +1881,7 @@ void App::SetupForwardRenderer( void )
                                                             GpuBuffer::State::RenderTarget, g_scene_buffer_width, g_scene_buffer_height, 1, &ClearColor );
 
     m_DSBuffer = GpuBuffer::CreateTexture( "DSBuffer", GpuBuffer::Format::Depth, GpuBuffer::Flags::DepthStencil, 
-                                            GpuResource::State::DepthWriteResource, g_scene_buffer_width, g_scene_buffer_height, 1, &Color(0, 0, 0, 0) );
+                                            GpuResource::State::DepthWriteResource, g_scene_buffer_width, g_scene_buffer_height, 1, &Color(0, 0, 0, 0), 1, GpuBuffer::Format::Float, GpuBuffer::Format::Float, GpuBuffer::Format::Float, GpuBuffer::Format::DepthFloat  );
 
     ResourceHandle hMainCamera = ResourceHandle::FromAlias( "MainCamera" );
 

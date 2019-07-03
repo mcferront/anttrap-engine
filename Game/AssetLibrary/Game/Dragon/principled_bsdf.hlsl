@@ -66,8 +66,11 @@ PS_INPUT vs_main(VS_INPUT input)
 Texture2D<float3> g_env_map : register(t0);
 SamplerState g_sampler : register(s0);
 
-Texture2D<float2> g_brdf_lut : register(t1);
-SamplerState g_lut_sampler : register(s1);
+Texture2D<float3> g_diff_ibl_map : register(t1);
+SamplerState g_placeholder : register(s1);
+
+Texture2D<float2> g_brdf_lut : register(t2);
+SamplerState g_lut_sampler : register(s2);
 
 float ggx_shadowing(float roughness, float v_dot_h, float v_dot_n)
 {
@@ -197,6 +200,9 @@ float3 light_pixel(PS_INPUT input)
 
     float fS = 0;
     float fD = 0;
+
+    //* .08 matches disney/blender's automatic ior conversion
+    float specular = lerp( cb_specular * .08, 1.0, metallic);
     
     // for each light - disabled as we just focus on IBL
     if (false)
@@ -208,9 +214,6 @@ float3 light_pixel(PS_INPUT input)
         float n_dot_l = dot(normal, light_vector);
         float n_dot_h = dot(normal, half_vector);
         float v_dot_h = dot(-view_vector, half_vector);
-        
-        //* .08 matches disney/blender's automatic ior conversion
-        float specular = lerp( cb_specular * .08, 1.0, metallic);
 
         float fresnel = modified_schlick_fresnel(specular, l_dot_h);
         float fD = custom_diffuse_brdf(roughness, n_dot_l);
@@ -238,7 +241,7 @@ float3 light_pixel(PS_INPUT input)
         }
     }
 
-    float3 base_color = cb_base_color.rgb;
+    float3 base_color = float(0).xxx;//float3(1,1,1);//cb_base_color.rgb;
     float3 specColor = lerp( float3(1, 1, 1), base_color, cb_specular_tint );
     
     float3 finalDiffuse = base_color * fD;
@@ -248,12 +251,12 @@ float3 light_pixel(PS_INPUT input)
     // IBL
     float3 iblDiffuse, iblSpec;
     {
-        float2 grad = lerp( .075, 0.1, roughness );
-        float3 imgDiffuse = g_env_map.SampleGrad( g_sampler, vector_to_uv(normal), grad, grad );
+        float2 grad = lerp( 0, 0.1, roughness );
+        float3 imgDiffuse = g_diff_ibl_map.SampleGrad( g_sampler, vector_to_uv(normal), grad, grad );
 
         iblDiffuse = imgDiffuse / PI * (1 - metallic) * base_color;
         
-        iblSpec = environment_spec( view_vector, normal, specColor * cb_specular, n_dot_v, roughness );
+        iblSpec = environment_spec( view_vector, normal, specular * specColor, n_dot_v, roughness );
     }
     
     return finalPunctualColor + iblSpec + iblDiffuse;

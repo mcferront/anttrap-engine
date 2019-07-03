@@ -50,20 +50,23 @@ public:
         enum Type
         {
             Unknown = DXGI_FORMAT_UNKNOWN,
-            OpaqueBuffer = DXGI_FORMAT_R11G11B10_FLOAT,
+            OpaqueBuffer = DXGI_FORMAT_R16G16B16A16_FLOAT,
             TransparentBuffer = DXGI_FORMAT_R16G16B16A16_FLOAT,
-            SpecularBuffer = DXGI_FORMAT_R11G11B10_FLOAT,
+            SpecularBuffer = DXGI_FORMAT_R16G16B16A16_FLOAT,
             MatProperties = DXGI_FORMAT_R16G16B16A16_FLOAT,
             NormalBuffer = DXGI_FORMAT_R16G16_FLOAT,
             LightMaskBuffer = DXGI_FORMAT_R32_UINT,
-            HDR = DXGI_FORMAT_R11G11B10_FLOAT,
+            HDR = DXGI_FORMAT_R16G16B16A16_FLOAT,
             ShadowMap = DXGI_FORMAT_R32_FLOAT,
             LDR = DXGI_FORMAT_R8G8B8A8_UNORM,
+            LDR_SRGB = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB,
             SSAO = DXGI_FORMAT_R16G16_FLOAT,
             SSR = DXGI_FORMAT_R16G16_UINT,
             COC = DXGI_FORMAT_R8_UNORM,
             LinearZ = DXGI_FORMAT_R16_FLOAT,
             Depth = DXGI_FORMAT_R32_TYPELESS,
+            Float = DXGI_FORMAT_R32_FLOAT,
+            DepthFloat = DXGI_FORMAT_D32_FLOAT,
         };
     };
 
