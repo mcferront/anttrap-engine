@@ -241,7 +241,7 @@ float3 light_pixel(PS_INPUT input)
         }
     }
 
-    float3 base_color = float(0).xxx;//float3(1,1,1);//cb_base_color.rgb;
+    float3 base_color = float(1).xxx;//cb_base_color.rgb;
     float3 specColor = lerp( float3(1, 1, 1), base_color, cb_specular_tint );
     
     float3 finalDiffuse = base_color * fD;

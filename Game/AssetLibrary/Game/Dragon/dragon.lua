@@ -14,6 +14,8 @@ end
 function dragon:_Create()
    print("dragon: HELLO WORLD!\n");
 
+   self.GameHandle = LoadResources("environment.resources");
+
    self._node:RemoveFromScene();
 
    node = Node_Get("MainCamera");
@@ -21,7 +23,7 @@ function dragon:_Create()
    camera = node:GetComponent("CameraComponent");
    camera:SetFov(0.8575560450553894);
    camera:SetNearClip(0.10000000149011612);
-   camera:SetFarClip(1000.0);
+   camera:SetFarClip(2000.0);
    script = node:AddComponent(Id_Create(), "ScriptComponent");
    script:Create("FirstPersonController.lua");
    node:SetParent(self._node);
@@ -40,7 +42,18 @@ function dragon:_Create()
    node:AddToScene();
    node:Bind();
 
+   node = Node_Create(Id_Create(), "Sky");
+   mesh = node:AddComponent(Id_Create(), "MeshRendererComponent");
+   mesh:Create("brdf_sphere.mesh","sky.material", "Geometry");
+   node:SetParent(self._node);
+   node:AddToScene();
+   node:Bind();
 
+   local t = Transform_Create();
+   node:GetWorldTransform(t);
+   t:SetTranslation(Vector_Set(75,75,50));
+   t:SetScale(Vector_Set(100,100,100));
+   node:SetWorldTransform(t);
 
    node = Node_Create(Id_Create(), "brdf_sphere.131");
    node:SetWorldTransform(Transform_Set(Vector_Set(83.97831726074219,-33.81973648071289,0.0), Quaternion_Set(0.0,0.0,0.0,1.0)));
